@@ -1,0 +1,26 @@
+{
+  "name": "test-server",
+  "version": "1.0.0",
+  "description": "A test server",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "nodemon -V -L -w .",
+    "test": "mocha"
+  },
+  "author": "Eric García de Ceca Elejoste",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "joi": "^17.4.0",
+    "mongoose": "^5.12.10"
+  },
+  "devDependencies": {
+    "eslint": "^7.27.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.3",
+    "eslint-plugin-prettier": "^3.4.0",
+    "nodemon": "^2.0.7",
+    "prettier": "^2.3.0"
+  }
+}

@@ -43,7 +43,7 @@ app.get('/event/:id(\\w+)', async (req, res) => {
 
     const event = await DB.Event.findById(id).exec();
 
-    console.info(event);
+    console.info('Event retieved:', event);
     if (event) res.status(200).send(event);
     else res.status(400).send({ error: 'Event not found' });
   } catch (error) {
@@ -64,16 +64,17 @@ app.put('/event/:id(\\w+)', async (req, res) => {
 
     const newEvent = await inputSchema.validateAsync(req.body);
 
-    const event = await DB.Event.findById(req.params.id).exec();
+    let event = await DB.Event.findById(req.params.id).exec();
 
     event.headline = newEvent.headline;
     event.description = newEvent.description;
     event.startDate = newEvent.startDate;
     event.location = newEvent.location;
+    event.state = newEvent.state;
 
-    console.log('Event:', event);
+    event = await event.save();
 
-    console.log('Params:', req.params);
+    console.log('Event updated:', event);
 
     console.info(event);
     if (event) res.status(200).send(event);

@@ -21,7 +21,9 @@ app.post('/event', async (req, res) => {
       state: Joi.valid('draft', 'public', 'private').default('draft'),
     });
 
-    const event = await inputSchema.validateAsync(req.body);
+    const event = await inputSchema
+      .validateAsync(req.body)
+      .catch((error) => error.message);
 
     console.log('Event:', event);
 
@@ -34,25 +36,35 @@ app.post('/event', async (req, res) => {
 });
 
 app.get('/event/:id(\\w+)', async (req, res) => {
-  const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-  console.log('Params:', req.params);
+    console.log('Params:', req.params);
 
-  const event = await DB.Event.findById(id).exec();
+    const event = await DB.Event.findById(id).exec();
 
-  console.info(event);
-  if (event) res.status(200).send(event);
-  else res.status(400).send({ error: 'Event not found' });
+    console.info(event);
+    if (event) res.status(200).send(event);
+    else res.status(400).send({ error: 'Event not found' });
+  } catch (error) {
+    console.error(error);
+    res.status(400).send({ error });
+  }
 });
 
 app.delete('/event/:id(\\w+)', async (req, res) => {
-  const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-  console.log('Params:', req.params);
+    console.log('Params:', req.params);
 
-  const recipe = await DB.Event.findByIdAndDelete(id).exec();
-  if (recipe) res.status(200).send(recipe);
-  else res.status(400).send({ error: 'Recipe not found' });
+    const recipe = await DB.Event.findByIdAndDelete(id).exec();
+    if (recipe) res.status(200).send(recipe);
+    else res.status(400).send({ error: 'Recipe not found' });
+  } catch (error) {
+    console.error(error);
+    res.status(400).send({ error });
+  }
 });
 
 // FINAL

@@ -1,13 +1,74 @@
+require('dotenv').config();
+
 const express = require('express');
-// const basicAuth = require('express-basic-auth');
+const auth = require('basic-auth');
 const Joi = require('joi');
 
 const DB = require('./db')();
+const { createToken, verifyToken } = require('./auth')(DB);
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Register / LOGIN
+
+app.post('/sign-up', async (req, res) => {
+  try {
+    const inputSchema = Joi.object({
+      name: Joi.string().required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+    });
+
+    const newUser = await inputSchema.validateAsync(req.body).catch((error) => {
+      throw error.message;
+    });
+
+    const user = await new DB.User(newUser).save();
+    console.info('User:', user);
+
+    const token = createToken(user);
+
+    user.sessionToken = token;
+    user.save();
+
+    console.info('User:', user);
+    res.status(200).send({ token, user });
+  } catch (error) {
+    console.error(error);
+    res.status(400).send({ error });
+  }
+});
+
+app.post('/sign-in', async (req, res) => {
+  try {
+    const credentials = auth(req);
+    const user = await DB.User.findOne({
+      email: credentials.name,
+      password: credentials.pass,
+    });
+
+    const token = createToken(user);
+
+    user.sessionToken = token;
+    user.save();
+
+    console.info('Auth:', credentials, '\nUser:', user);
+    res.status(200).send({ credentials, user, token });
+    res.status(200).send();
+  } catch (error) {
+    console.error(error);
+    res.status(400).send({ error });
+  }
+});
+
+app.post('/sign-out', verifyToken, async (req, res) => {
+  req.user.sessionToken = undefined;
+  await req.user.save();
+  res.status(200).send({ user: req.user });
+});
 
 // EVENTS
 

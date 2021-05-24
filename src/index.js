@@ -52,6 +52,38 @@ app.get('/event/:id(\\w+)', async (req, res) => {
   }
 });
 
+app.put('/event/:id(\\w+)', async (req, res) => {
+  try {
+    const inputSchema = Joi.object({
+      headline: Joi.string().min(10).max(100).required(),
+      description: Joi.string().max(500),
+      startDate: Joi.date().required(),
+      location: Joi.string().min(10).max(100).required(),
+      state: Joi.valid('draft', 'public', 'private').default('draft'),
+    });
+
+    const newEvent = await inputSchema.validateAsync(req.body);
+
+    const event = await DB.Event.findById(req.params.id).exec();
+
+    event.headline = newEvent.headline;
+    event.description = newEvent.description;
+    event.startDate = newEvent.startDate;
+    event.location = newEvent.location;
+
+    console.log('Event:', event);
+
+    console.log('Params:', req.params);
+
+    console.info(event);
+    if (event) res.status(200).send(event);
+    else res.status(400).send({ error: 'Event not found' });
+  } catch (error) {
+    console.error(error);
+    res.status(400).send({ error });
+  }
+});
+
 app.delete('/event/:id(\\w+)', async (req, res) => {
   try {
     const { id } = req.params;

@@ -1,17 +1,11 @@
 const mongoose = require('mongoose');
 
-const DOMAIN = process.env.DOMAIN || 'localhost';
-const PORT = process.env.PORT || '27017';
-const DB_NAME = process.env.DB_NAME || 'WhisbiEventManager';
+function DB() {
+  const DOMAIN = process.env.DOMAIN || 'localhost';
+  const PORT = process.env.PORT || '27017';
+  const DB_NAME = process.env.DB_NAME || 'WhisbiEventManager';
 
-module.exports = function DB(
-  { domain = DOMAIN, port = PORT, dbName = DB_NAME } = {
-    domain: DOMAIN,
-    port: PORT,
-    dbName: DB_NAME,
-  }
-) {
-  mongoose.connect(`mongodb://${domain}:${port}/${dbName}`, {
+  mongoose.connect(`mongodb://${DOMAIN}:${PORT}/${DB_NAME}`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
@@ -60,4 +54,16 @@ module.exports = function DB(
     Subscription,
     User,
   };
+}
+
+let instance;
+
+module.exports = function Singleton() {
+  console.info('Asking for instance:', instance);
+
+  if (!instance) {
+    instance = new DB();
+    delete instance.constructor;
+  }
+  return instance;
 };

@@ -106,6 +106,19 @@ app.post('/event', async (req, res) => {
   }
 });
 
+app.get('/event', async (req, res) => {
+  try {
+    const events = await DB.Event.find().exec();
+
+    console.info('Events retieved:', events);
+    if (events) res.status(200).send(events);
+    else res.status(400).send({ error: 'Event not found' });
+  } catch (error) {
+    console.error(error);
+    res.status(400).send({ error });
+  }
+});
+
 app.get('/event/:id(\\w+)', async (req, res) => {
   try {
     const { id } = req.params;

@@ -5,14 +5,14 @@ events. **DONE**
 3. Events can be edited or deleted after being published. **DONE**
 4. Users can only edit and delete their own events. **DONE**
 5. Users who are not logged in can only view some events but can
-not subscribe to an event.
-6. Only users who are logged in can subscribe to any event.
+not subscribe to an event. **DONE, susbcribe to be done**
+6. Only users who are logged in can subscribe to any event. **DONE, susbcribe to be done**
 7. Each event should have a headline, description, start date and
 location. **DONE, Location can be extended/replaced to lat-lon**
 8. Each event has three states: Draft, Public and Private. **DONE**
 9. Users can only have one published event at a time and can
-subscribe to a maximum of 3 events.
-10. Users should not be able to subscribe to their own events.
+subscribe to a maximum of 3 events. **Also check for double subscriptions**
+10. Users should not be able to subscribe to their own events. **DONE**
 11. A user subscribes to an event by sending their personal details
 (name, email and any other details you think should be
 necessary) to the service.

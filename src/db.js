@@ -44,8 +44,20 @@ module.exports = function DB(
     })
   );
 
+  const Subscription = mongoose.model(
+    'Subscription',
+    new mongoose.Schema({
+      eventId: mongoose.Types.ObjectId,
+      subscriberId: mongoose.Types.ObjectId,
+      name: String,
+      email: String,
+      comment: String,
+    })
+  );
+
   return {
     Event,
+    Subscription,
     User,
   };
 };

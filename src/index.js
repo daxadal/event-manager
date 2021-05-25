@@ -64,6 +64,11 @@ usersApp.post('/sign-in', async (req, res) => {
       password: credentials.pass,
     });
 
+    if (!user) {
+      res.status(400).send({ error: 'Invalid credentials' });
+      return;
+    }
+
     const token = createToken(user);
 
     user.sessionToken = token;
@@ -226,6 +231,58 @@ eventsApp
       res.status(400).send({ error });
     }
   });
+
+// SUBSCRIPTIONS
+
+eventsApp.route('/:id(\\w+)/subscribe').post(verifyToken, async (req, res) => {
+  try {
+    const inputSchema = Joi.object({
+      comment: Joi.string(),
+    }).optional();
+
+    const params = await inputSchema.validateAsync(req.body).catch((error) => {
+      throw error.message;
+    });
+
+    const event = await DB.Event.findById(req.params.id);
+    console.info('Event:', event);
+
+    if (!event) {
+      res.status(400).send({ error: 'Event not found' });
+      return;
+    }
+
+    if (String(event.creator) === req.user.id) {
+      res.status(400).send({ error: "You can't subscribe to your own events" });
+      return;
+    }
+
+    const oldSubscription = await DB.Subscription.findOne({
+      eventId: event.id,
+      subscriberId: req.user.id,
+    });
+
+    if (oldSubscription) {
+      res.status(200).send({
+        message: 'You already have subscribed to this event',
+        subscription: oldSubscription,
+      });
+    } else {
+      const subscription = await new DB.Subscription({
+        eventId: event.id,
+        subscriberId: req.user.id,
+        comment: params.comment,
+      }).save();
+
+      res
+        .status(200)
+        .send({ message: 'Subscribed successfully', subscription });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(400).send({ error });
+  }
+});
 
 // FINAL
 app.use('/events', eventsApp);

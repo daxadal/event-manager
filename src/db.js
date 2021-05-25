@@ -30,7 +30,7 @@ module.exports = function DB(
       startDate: Date,
       location: String,
       state: String,
-      creator: mongoose.Types.ObjectId,
+      creatorId: mongoose.Types.ObjectId,
     })
   );
 

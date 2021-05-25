@@ -115,7 +115,7 @@ eventsApp
 
       const eventDB = await new DB.Event({
         ...event,
-        creator: req.user.id,
+        creatorId: req.user.id,
       }).save();
 
       res.status(200).send(eventDB);
@@ -138,14 +138,14 @@ eventsApp
   });
 
 eventsApp
-  .route('/:id(\\w+)')
+  .route('/:eventId(\\w+)')
   .get(async (req, res) => {
     try {
-      const { id } = req.params;
+      const { eventId } = req.params;
 
       console.log('Params:', req.params);
 
-      const event = await DB.Event.findById(id).exec();
+      const event = await DB.Event.findById(eventId).exec();
 
       console.info('Event retieved:', event);
       if (event) res.status(200).send(event);
@@ -157,6 +157,8 @@ eventsApp
   })
   .put(verifyToken, async (req, res) => {
     try {
+      const { eventId } = req.params;
+
       const inputSchema = Joi.object({
         headline: Joi.string().min(10).max(100).required(),
         description: Joi.string().max(500),
@@ -171,14 +173,14 @@ eventsApp
           throw error.message;
         });
 
-      let event = await DB.Event.findById(req.params.id).exec();
+      let event = await DB.Event.findById(eventId).exec();
 
       if (!event) {
         res.status(400).send({ error: 'Event not found' });
         return;
       }
 
-      if (String(event.creator) !== req.user.id) {
+      if (String(event.creatorId) !== req.user.id) {
         res
           .status(400)
           .send({ error: 'Events can only be edited by their creator' });
@@ -205,17 +207,17 @@ eventsApp
   })
   .delete(verifyToken, async (req, res) => {
     try {
-      const { id } = req.params;
+      const { eventId } = req.params;
 
       console.log('Params:', req.params);
 
-      const event = await DB.Event.findById(id).exec();
+      const event = await DB.Event.findById(eventId).exec();
 
       if (!event) {
         res.status(400).send({ error: 'Event not found' });
         return;
       }
-      if (String(event.creator) !== req.user.id) {
+      if (String(event.creatorId) !== req.user.id) {
         res
           .status(400)
           .send({ error: 'Events can only be edited by their creator' });
@@ -234,55 +236,63 @@ eventsApp
 
 // SUBSCRIPTIONS
 
-eventsApp.route('/:id(\\w+)/subscribe').post(verifyToken, async (req, res) => {
-  try {
-    const inputSchema = Joi.object({
-      comment: Joi.string(),
-    }).optional();
+eventsApp
+  .route('/:eventId(\\w+)/subscribe')
+  .post(verifyToken, async (req, res) => {
+    try {
+      const { eventId } = req.params;
 
-    const params = await inputSchema.validateAsync(req.body).catch((error) => {
-      throw error.message;
-    });
+      const inputSchema = Joi.object({
+        comment: Joi.string(),
+      }).optional();
 
-    const event = await DB.Event.findById(req.params.id);
-    console.info('Event:', event);
+      const params = await inputSchema
+        .validateAsync(req.body)
+        .catch((error) => {
+          throw error.message;
+        });
 
-    if (!event) {
-      res.status(400).send({ error: 'Event not found' });
-      return;
-    }
+      const event = await DB.Event.findById(eventId);
+      console.info('Event:', event);
 
-    if (String(event.creator) === req.user.id) {
-      res.status(400).send({ error: "You can't subscribe to your own events" });
-      return;
-    }
+      if (!event) {
+        res.status(400).send({ error: 'Event not found' });
+        return;
+      }
 
-    const oldSubscription = await DB.Subscription.findOne({
-      eventId: event.id,
-      subscriberId: req.user.id,
-    });
+      if (String(event.creatorId) === req.user.id) {
+        res
+          .status(400)
+          .send({ error: "You can't subscribe to your own events" });
+        return;
+      }
 
-    if (oldSubscription) {
-      res.status(200).send({
-        message: 'You already have subscribed to this event',
-        subscription: oldSubscription,
-      });
-    } else {
-      const subscription = await new DB.Subscription({
+      const oldSubscription = await DB.Subscription.findOne({
         eventId: event.id,
         subscriberId: req.user.id,
-        comment: params.comment,
-      }).save();
+      });
 
-      res
-        .status(200)
-        .send({ message: 'Subscribed successfully', subscription });
+      if (oldSubscription) {
+        res.status(400).send({
+          message: 'You already have subscribed to this event',
+          subscription: oldSubscription,
+        });
+      } else {
+        const subscription = await new DB.Subscription({
+          eventId: event.id,
+          subscriberId: req.user.id,
+          comment: params.comment,
+        }).save();
+
+        res
+          .status(200)
+          .send({ message: 'Subscribed successfully', subscription });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(400).send({ error });
     }
-  } catch (error) {
-    console.error(error);
-    res.status(400).send({ error });
-  }
-});
+  });
 
 // FINAL
 app.use('/events', eventsApp);

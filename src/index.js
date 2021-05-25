@@ -98,7 +98,11 @@ app.post('/event', verifyToken, async (req, res) => {
 
     console.log('Event:', event);
 
-    const eventDB = await new DB.Event(event).save();
+    const eventDB = await new DB.Event({
+      ...event,
+      creator: req.user.id,
+    }).save();
+
     res.status(200).send(eventDB);
   } catch (error) {
     console.error(error);
@@ -154,6 +158,18 @@ app.put('/event/:id(\\w+)', verifyToken, async (req, res) => {
 
     let event = await DB.Event.findById(req.params.id).exec();
 
+    if (!event) {
+      res.status(400).send({ error: 'Event not found' });
+      return;
+    }
+
+    if (String(event.creator) !== req.user.id) {
+      res
+        .status(400)
+        .send({ error: 'Events can only be edited by their creator' });
+      return;
+    }
+
     event.headline = newEvent.headline;
     event.description = newEvent.description;
     event.startDate = newEvent.startDate;
@@ -179,7 +195,21 @@ app.delete('/event/:id(\\w+)', verifyToken, async (req, res) => {
 
     console.log('Params:', req.params);
 
-    const event = await DB.Event.findByIdAndDelete(id).exec();
+    const event = await DB.Event.findById(id).exec();
+
+    if (!event) {
+      res.status(400).send({ error: 'Event not found' });
+      return;
+    }
+    if (String(event.creator) !== req.user.id) {
+      res
+        .status(400)
+        .send({ error: 'Events can only be edited by their creator' });
+      return;
+    }
+
+    await event.delete();
+
     if (event) res.status(200).send(event);
     else res.status(400).send({ error: 'Event not found' });
   } catch (error) {

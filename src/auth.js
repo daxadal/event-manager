@@ -32,8 +32,7 @@ module.exports = (DB) => {
   }
 
   function createToken(user) {
-    // eslint-disable-next-line no-underscore-dangle
-    return jwt.sign({ id: String(user._id) }, process.env.TOKEN_SECRET, {
+    return jwt.sign({ id: String(user.id) }, process.env.TOKEN_SECRET, {
       expiresIn: '1800s',
     });
   }

@@ -26,6 +26,16 @@ app.post('/sign-up', async (req, res) => {
       throw error.message;
     });
 
+    const oldUser = await DB.User.findOne({
+      email: newUser.email,
+    });
+    console.info('Old User:', oldUser);
+
+    if (oldUser) {
+      res.status(400).send({ error: 'Email already in use' });
+      return;
+    }
+
     const user = await new DB.User(newUser).save();
     console.info('User:', user);
 

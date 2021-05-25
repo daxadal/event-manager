@@ -9,15 +9,21 @@ module.exports = (DB) => {
       if (match) {
         // eslint-disable-next-line prefer-destructuring
         req.token = match[1];
+        try {
+          const decoded = jwt.verify(match[1], process.env.TOKEN_SECRET);
+          console.info('Token', match[1], 'decoded', decoded);
 
-        const decoded = jwt.verify(match[1], process.env.TOKEN_SECRET);
-        console.info('Token', match[1], 'decoded', decoded);
-
-        req.user = await DB.User.findById(decoded.id);
-        console.info('Token verified. User:', decoded, req.user);
-        next();
+          req.user = await DB.User.findById(decoded.id);
+          if (req.user) {
+            console.info('Token verified. User:', decoded, req.user);
+            next();
+          } else res.status(403).send({ error: 'Invalid session token' });
+        } catch (error) {
+          console.error(error);
+          res.status(403).send({ error: 'Invalid session token' });
+        }
       } else {
-        res.status(403).send({ error: 'Unauthorized' });
+        res.status(401).send({ error: 'Unauthorized' });
       }
     } catch (error) {
       console.error(error);

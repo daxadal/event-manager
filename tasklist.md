@@ -3,13 +3,13 @@ Functional Requirements
 2. Only authenticated users should be able to post, edit or delete
 events. **DONE**
 3. Events can be edited or deleted after being published. **DONE**
-4. Users can only edit and delete their own events.
+4. Users can only edit and delete their own events. **DONE**
 5. Users who are not logged in can only view some events but can
 not subscribe to an event.
 6. Only users who are logged in can subscribe to any event.
 7. Each event should have a headline, description, start date and
-location.
-8. Each event has three states: Draft, Public and Private.
+location. **DONE, Location can be extended/replaced to lat-lon**
+8. Each event has three states: Draft, Public and Private. **DONE**
 9. Users can only have one published event at a time and can
 subscribe to a maximum of 3 events.
 10. Users should not be able to subscribe to their own events.
@@ -19,7 +19,7 @@ necessary) to the service.
 12. Users should receive a notification 24 hours before the start date
 of each event reminding them that it’s happening the next day.
 13. Users should see a list of all events (as much as the rules allow)
-in the home.
+in the home. **DONE, but just endpoint with no rules**
 14. Each event should have its own page to display all details and a
 subscribe functionality (as described in point #11) below the
 event details.

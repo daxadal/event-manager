@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
-const DOMAIN = 'localhost';
-const PORT = '27017';
-const DB_NAME = 'WhisbiEventManager';
+const DOMAIN = process.env.DOMAIN || 'localhost';
+const PORT = process.env.PORT || '27017';
+const DB_NAME = process.env.DB_NAME || 'WhisbiEventManager';
 
 module.exports = function DB(
   { domain = DOMAIN, port = PORT, dbName = DB_NAME } = {
@@ -42,9 +42,6 @@ module.exports = function DB(
       sessionToken: String,
     })
   );
-
-  User.schema.statics.findByCredentials = (email, password) =>
-    User.findOne({ email, password });
 
   return {
     Event,

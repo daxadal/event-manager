@@ -82,7 +82,7 @@ app.post('/sign-out', verifyToken, async (req, res) => {
 
 // EVENTS
 
-app.post('/event', async (req, res) => {
+app.post('/event', verifyToken, async (req, res) => {
   try {
     const inputSchema = Joi.object({
       headline: Joi.string().min(10).max(100).required(),
@@ -92,9 +92,9 @@ app.post('/event', async (req, res) => {
       state: Joi.valid('draft', 'public', 'private').default('draft'),
     });
 
-    const event = await inputSchema
-      .validateAsync(req.body)
-      .catch((error) => error.message);
+    const event = await inputSchema.validateAsync(req.body).catch((error) => {
+      throw error.message;
+    });
 
     console.log('Event:', event);
 
@@ -136,7 +136,7 @@ app.get('/event/:id(\\w+)', async (req, res) => {
   }
 });
 
-app.put('/event/:id(\\w+)', async (req, res) => {
+app.put('/event/:id(\\w+)', verifyToken, async (req, res) => {
   try {
     const inputSchema = Joi.object({
       headline: Joi.string().min(10).max(100).required(),
@@ -146,7 +146,11 @@ app.put('/event/:id(\\w+)', async (req, res) => {
       state: Joi.valid('draft', 'public', 'private').default('draft'),
     });
 
-    const newEvent = await inputSchema.validateAsync(req.body);
+    const newEvent = await inputSchema
+      .validateAsync(req.body)
+      .catch((error) => {
+        throw error.message;
+      });
 
     let event = await DB.Event.findById(req.params.id).exec();
 
@@ -169,15 +173,15 @@ app.put('/event/:id(\\w+)', async (req, res) => {
   }
 });
 
-app.delete('/event/:id(\\w+)', async (req, res) => {
+app.delete('/event/:id(\\w+)', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
 
     console.log('Params:', req.params);
 
-    const recipe = await DB.Event.findByIdAndDelete(id).exec();
-    if (recipe) res.status(200).send(recipe);
-    else res.status(400).send({ error: 'Recipe not found' });
+    const event = await DB.Event.findByIdAndDelete(id).exec();
+    if (event) res.status(200).send(event);
+    else res.status(400).send({ error: 'Event not found' });
   } catch (error) {
     console.error(error);
     res.status(400).send({ error });

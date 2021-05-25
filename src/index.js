@@ -14,7 +14,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // Register / LOGIN
 
-app.post('/sign-up', async (req, res) => {
+const usersApp = express.Router();
+
+usersApp.use(express.json());
+
+usersApp.post('/sign-up', async (req, res) => {
   try {
     const inputSchema = Joi.object({
       name: Joi.string().required(),
@@ -52,7 +56,7 @@ app.post('/sign-up', async (req, res) => {
   }
 });
 
-app.post('/sign-in', async (req, res) => {
+usersApp.post('/sign-in', async (req, res) => {
   try {
     const credentials = auth(req);
     const user = await DB.User.findOne({
@@ -74,151 +78,158 @@ app.post('/sign-in', async (req, res) => {
   }
 });
 
-app.post('/sign-out', verifyToken, async (req, res) => {
+usersApp.post('/sign-out', verifyToken, async (req, res) => {
   req.user.sessionToken = undefined;
   await req.user.save();
   res.status(200).send({ user: req.user });
 });
 
 // EVENTS
+const eventsApp = express.Router();
 
-app.post('/event', verifyToken, async (req, res) => {
-  try {
-    const inputSchema = Joi.object({
-      headline: Joi.string().min(10).max(100).required(),
-      description: Joi.string().max(500),
-      startDate: Joi.date().required(),
-      location: Joi.string().min(10).max(100).required(),
-      state: Joi.valid('draft', 'public', 'private').default('draft'),
-    });
+eventsApp.use(express.json());
+eventsApp.use(express.urlencoded({ extended: true }));
 
-    const event = await inputSchema.validateAsync(req.body).catch((error) => {
-      throw error.message;
-    });
+eventsApp
+  .route('/')
+  .post(verifyToken, async (req, res) => {
+    try {
+      const inputSchema = Joi.object({
+        headline: Joi.string().min(10).max(100).required(),
+        description: Joi.string().max(500),
+        startDate: Joi.date().required(),
+        location: Joi.string().min(10).max(100).required(),
+        state: Joi.valid('draft', 'public', 'private').default('draft'),
+      });
 
-    console.log('Event:', event);
-
-    const eventDB = await new DB.Event({
-      ...event,
-      creator: req.user.id,
-    }).save();
-
-    res.status(200).send(eventDB);
-  } catch (error) {
-    console.error(error);
-    res.status(400).send({ error });
-  }
-});
-
-app.get('/event', async (req, res) => {
-  try {
-    const events = await DB.Event.find().exec();
-
-    console.info('Events retieved:', events);
-    if (events) res.status(200).send(events);
-    else res.status(400).send({ error: 'Event not found' });
-  } catch (error) {
-    console.error(error);
-    res.status(400).send({ error });
-  }
-});
-
-app.get('/event/:id(\\w+)', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    console.log('Params:', req.params);
-
-    const event = await DB.Event.findById(id).exec();
-
-    console.info('Event retieved:', event);
-    if (event) res.status(200).send(event);
-    else res.status(400).send({ error: 'Event not found' });
-  } catch (error) {
-    console.error(error);
-    res.status(400).send({ error });
-  }
-});
-
-app.put('/event/:id(\\w+)', verifyToken, async (req, res) => {
-  try {
-    const inputSchema = Joi.object({
-      headline: Joi.string().min(10).max(100).required(),
-      description: Joi.string().max(500),
-      startDate: Joi.date().required(),
-      location: Joi.string().min(10).max(100).required(),
-      state: Joi.valid('draft', 'public', 'private').default('draft'),
-    });
-
-    const newEvent = await inputSchema
-      .validateAsync(req.body)
-      .catch((error) => {
+      const event = await inputSchema.validateAsync(req.body).catch((error) => {
         throw error.message;
       });
 
-    let event = await DB.Event.findById(req.params.id).exec();
+      console.log('Event:', event);
 
-    if (!event) {
-      res.status(400).send({ error: 'Event not found' });
-      return;
+      const eventDB = await new DB.Event({
+        ...event,
+        creator: req.user.id,
+      }).save();
+
+      res.status(200).send(eventDB);
+    } catch (error) {
+      console.error(error);
+      res.status(400).send({ error });
     }
+  })
+  .get(async (req, res) => {
+    try {
+      const events = await DB.Event.find().exec();
 
-    if (String(event.creator) !== req.user.id) {
-      res
-        .status(400)
-        .send({ error: 'Events can only be edited by their creator' });
-      return;
+      console.info('Events retieved:', events);
+      if (events) res.status(200).send(events);
+      else res.status(400).send({ error: 'Event not found' });
+    } catch (error) {
+      console.error(error);
+      res.status(400).send({ error });
     }
+  });
 
-    event.headline = newEvent.headline;
-    event.description = newEvent.description;
-    event.startDate = newEvent.startDate;
-    event.location = newEvent.location;
-    event.state = newEvent.state;
+eventsApp
+  .route('/:id(\\w+)')
+  .get(async (req, res) => {
+    try {
+      const { id } = req.params;
 
-    event = await event.save();
+      console.log('Params:', req.params);
 
-    console.log('Event updated:', event);
+      const event = await DB.Event.findById(id).exec();
 
-    console.info(event);
-    if (event) res.status(200).send(event);
-    else res.status(400).send({ error: 'Event not found' });
-  } catch (error) {
-    console.error(error);
-    res.status(400).send({ error });
-  }
-});
-
-app.delete('/event/:id(\\w+)', verifyToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    console.log('Params:', req.params);
-
-    const event = await DB.Event.findById(id).exec();
-
-    if (!event) {
-      res.status(400).send({ error: 'Event not found' });
-      return;
+      console.info('Event retieved:', event);
+      if (event) res.status(200).send(event);
+      else res.status(400).send({ error: 'Event not found' });
+    } catch (error) {
+      console.error(error);
+      res.status(400).send({ error });
     }
-    if (String(event.creator) !== req.user.id) {
-      res
-        .status(400)
-        .send({ error: 'Events can only be edited by their creator' });
-      return;
+  })
+  .put(verifyToken, async (req, res) => {
+    try {
+      const inputSchema = Joi.object({
+        headline: Joi.string().min(10).max(100).required(),
+        description: Joi.string().max(500),
+        startDate: Joi.date().required(),
+        location: Joi.string().min(10).max(100).required(),
+        state: Joi.valid('draft', 'public', 'private').default('draft'),
+      });
+
+      const newEvent = await inputSchema
+        .validateAsync(req.body)
+        .catch((error) => {
+          throw error.message;
+        });
+
+      let event = await DB.Event.findById(req.params.id).exec();
+
+      if (!event) {
+        res.status(400).send({ error: 'Event not found' });
+        return;
+      }
+
+      if (String(event.creator) !== req.user.id) {
+        res
+          .status(400)
+          .send({ error: 'Events can only be edited by their creator' });
+        return;
+      }
+
+      event.headline = newEvent.headline;
+      event.description = newEvent.description;
+      event.startDate = newEvent.startDate;
+      event.location = newEvent.location;
+      event.state = newEvent.state;
+
+      event = await event.save();
+
+      console.log('Event updated:', event);
+
+      console.info(event);
+      if (event) res.status(200).send(event);
+      else res.status(400).send({ error: 'Event not found' });
+    } catch (error) {
+      console.error(error);
+      res.status(400).send({ error });
     }
+  })
+  .delete(verifyToken, async (req, res) => {
+    try {
+      const { id } = req.params;
 
-    await event.delete();
+      console.log('Params:', req.params);
 
-    if (event) res.status(200).send(event);
-    else res.status(400).send({ error: 'Event not found' });
-  } catch (error) {
-    console.error(error);
-    res.status(400).send({ error });
-  }
-});
+      const event = await DB.Event.findById(id).exec();
+
+      if (!event) {
+        res.status(400).send({ error: 'Event not found' });
+        return;
+      }
+      if (String(event.creator) !== req.user.id) {
+        res
+          .status(400)
+          .send({ error: 'Events can only be edited by their creator' });
+        return;
+      }
+
+      await event.delete();
+
+      if (event) res.status(200).send(event);
+      else res.status(400).send({ error: 'Event not found' });
+    } catch (error) {
+      console.error(error);
+      res.status(400).send({ error });
+    }
+  });
 
 // FINAL
+app.use('/events', eventsApp);
+app.use('/users', usersApp);
 
 app.use((req, res) => {
   res.status(404).send({ error: 'Endpoint not found' });

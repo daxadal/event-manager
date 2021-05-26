@@ -3,7 +3,7 @@ const auth = require('basic-auth');
 const Joi = require('joi');
 
 const DB = require('./utils/db')();
-const { createToken, verifyToken } = require('./utils/auth');
+const { createToken, decodeToken, verifyToken } = require('./utils/auth');
 
 // Register / LOGIN
 const usersApp = express.Router();
@@ -50,7 +50,25 @@ usersApp.post('/sign-up', async (req, res) => {
 
 usersApp.post('/sign-in', async (req, res) => {
   try {
-    const credentials = auth(req);
+    const basicAuth = auth(req);
+
+    if (!basicAuth) {
+      res.status(400).send({
+        error: 'Credentials must be provided as Basic Auth (email:password)',
+      });
+      return;
+    }
+    const inputSchema = Joi.object({
+      name: Joi.string().email().required(),
+      pass: Joi.string().required(),
+    });
+
+    const credentials = await inputSchema
+      .validateAsync(basicAuth)
+      .catch((error) => {
+        throw error.message;
+      });
+
     const user = await DB.User.findOne({
       email: credentials.name,
       password: credentials.pass,
@@ -75,7 +93,7 @@ usersApp.post('/sign-in', async (req, res) => {
   }
 });
 
-usersApp.post('/sign-out', verifyToken, async (req, res) => {
+usersApp.post('/sign-out', decodeToken, verifyToken, async (req, res) => {
   req.user.sessionToken = undefined;
   await req.user.save();
   res.status(200).send({ user: req.user });

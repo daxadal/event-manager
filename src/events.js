@@ -2,7 +2,7 @@ const express = require('express');
 const Joi = require('joi');
 
 const DB = require('./utils/db')();
-const { verifyToken } = require('./utils/auth');
+const { verifyToken, decodeToken } = require('./utils/auth');
 
 // EVENTS
 const eventsApp = express.Router();
@@ -12,7 +12,7 @@ eventsApp.use(express.urlencoded({ extended: true }));
 
 eventsApp
   .route('/')
-  .post(verifyToken, async (req, res) => {
+  .post(decodeToken, verifyToken, async (req, res) => {
     try {
       const inputSchema = Joi.object({
         headline: Joi.string().min(10).max(100).required(),
@@ -39,9 +39,17 @@ eventsApp
       res.status(400).send({ error });
     }
   })
-  .get(async (req, res) => {
+  .get(decodeToken, async (req, res) => {
     try {
-      const events = await DB.Event.find().exec();
+      let query;
+      if (req.user)
+        query = DB.Event.find().or([
+          { state: 'public' },
+          { creatorId: req.user.id },
+        ]);
+      else query = DB.Event.find({ state: 'public' });
+
+      const events = await query.exec();
 
       console.info('Events retieved:', events);
       if (events) res.status(200).send(events);
@@ -70,7 +78,7 @@ eventsApp
       res.status(400).send({ error });
     }
   })
-  .put(verifyToken, async (req, res) => {
+  .put(decodeToken, verifyToken, async (req, res) => {
     try {
       const { eventId } = req.params;
 
@@ -120,7 +128,7 @@ eventsApp
       res.status(400).send({ error });
     }
   })
-  .delete(verifyToken, async (req, res) => {
+  .delete(decodeToken, verifyToken, async (req, res) => {
     try {
       const { eventId } = req.params;
 
@@ -152,7 +160,7 @@ eventsApp
 // SUBSCRIPTIONS
 eventsApp
   .route('/:eventId(\\w+)/subscribe')
-  .post(verifyToken, async (req, res) => {
+  .post(decodeToken, verifyToken, async (req, res) => {
     try {
       const { eventId } = req.params;
 
@@ -195,6 +203,7 @@ eventsApp
         const subscription = await new DB.Subscription({
           eventId: event.id,
           subscriberId: req.user.id,
+          subscriptionDate: Date.now(),
           comment: params.comment,
         }).save();
 

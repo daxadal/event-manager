@@ -45,6 +45,7 @@ function DB() {
       subscriberId: mongoose.Types.ObjectId,
       name: String,
       email: String,
+      subscriptionDate: Date,
       comment: String,
     })
   );
@@ -56,7 +57,7 @@ function DB() {
   };
 }
 
-let instance;
+let instance = DB();
 
 module.exports = function Singleton() {
   console.info('Asking for instance:', instance);

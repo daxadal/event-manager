@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const DB = require('./db')();
 
-async function verifyToken(req, res, next) {
+async function decodeToken(req, res, next) {
   try {
     const bearerHeader = req.get('Authorization');
     const match = /^[Bb]earer (.+)$/.exec(bearerHeader);
@@ -23,7 +23,7 @@ async function verifyToken(req, res, next) {
         res.status(403).send({ error: 'Invalid session token' });
       }
     } else {
-      res.status(401).send({ error: 'Unauthorized' });
+      next();
     }
   } catch (error) {
     console.error(error);
@@ -31,9 +31,14 @@ async function verifyToken(req, res, next) {
   }
 }
 
+async function verifyToken(req, res, next) {
+  if (!req.user) res.status(401).send({ error: 'Unauthorized' });
+  else next();
+}
+
 function createToken(user) {
   return jwt.sign({ id: String(user.id) }, process.env.TOKEN_SECRET, {
     expiresIn: '1800s',
   });
 }
-module.exports = { createToken, verifyToken };
+module.exports = { createToken, decodeToken, verifyToken };

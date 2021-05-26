@@ -8,30 +8,23 @@ Personal notes about requirements
 1. Specific methods to change state instad of updating
 1. Check current token equals DB token to check if it is still valid (logout or multimple logins)
 1. The app will handle past events? Or only upcoming events?
+1. Use `bree` for scheduling. `@ladjs/graceful` and `cabin` recommended [here](https://jobscheduler.net/#/?id=node)
 
 Functional Requirements
-1. Users can only have one published event at a time and can
-subscribe to a maximum of 3 events.
-1. Users should receive a notification 24 hours before the start date
-of each event reminding them that it’s happening the next day.
-1. Each event should have its own page to display all details and a
-subscribe functionality (as described in point #11) below the
-event details.
+1. Users can only have one published event at a time and can subscribe to a maximum of 3 events.
+1. Users should receive a notification 24 hours before the start date of each event reminding them that it’s happening the next day.
+1. Each event should have its own page to display all details and a subscribe functionality (as described in point #11) below the event details.
 
 Technical Requirements
-1. Implement the REST API for this application using Node.js,
-Express and an ORM of your choice.
-1. Implement proper security as you see fit for the application’s
-authentication.
+1. Implement the REST API for this application using Node.js, Express and an ORM of your choice.
+1. Implement proper security as you see fit for the application’s authentication.
 1. Use a middleware for the custom usability rules.
 1. Use SOLID principle, linting and a convention for your code.
 1. Add tests where / how you see fit.
 1. Protect the application against Denial of Service attacks.
 1. Send the reminders notifications using sockets.
-1. Comment your code where you see is fit and include a README
-file with your submission.
-1. Creating a bare UI to test the backend is not required but a nice
-to have.
+1. Comment your code where you see is fit and include a README file with your submission.
+1. Creating a bare UI to test the backend is not required but a nice to have.
 1. Containerize your application if you think it is necessary..
 
 # Done

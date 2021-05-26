@@ -10,7 +10,7 @@ module.exports = {
   },
   socket: {
     DOMAIN: process.env.SOCKET_DOMAIN || process.env.API_DOMAIN || 'localhost',
-    PORT: process.env.SOCKET_PORT || '27017',
+    PORT: process.env.SOCKET_PORT || '40718',
   },
   jwt: {
     TOKEN_SECRET: process.env.TOKEN_SECRET,

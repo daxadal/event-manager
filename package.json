@@ -4,8 +4,10 @@
   "description": "A test server",
   "main": "src/index.js",
   "scripts": {
-    "start": "nodemon -V -L -w .",
-    "test": "mocha"
+    "start": "nodemon -V -L -w ./src",
+    "reset": "node config/reset.js",
+    "test": "mocha",
+    "reset-test": "npm run reset && npm test"
   },
   "author": "Eric García de Ceca Elejoste",
   "license": "ISC",
@@ -18,11 +20,14 @@
     "mongoose": "^5.12.10"
   },
   "devDependencies": {
+    "assert": "^2.0.0",
+    "axios": "^0.21.1",
     "eslint": "^7.27.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.3",
     "eslint-plugin-prettier": "^3.4.0",
+    "mocha": "^8.4.0",
     "nodemon": "^2.0.7",
     "prettier": "^2.3.0"
   }

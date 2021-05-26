@@ -2,6 +2,8 @@ require('dotenv').config();
 
 const express = require('express');
 
+const config = require('../config');
+
 const eventsApp = require('./events');
 const usersApp = require('./users');
 
@@ -14,6 +16,6 @@ app.use((req, res) => {
   res.status(404).send({ error: 'Endpoint not found' });
 });
 
-app.listen(3000, () => {
-  console.info('Server listening on port 3000...');
+app.listen(config.api.PORT, () => {
+  console.info(`Server listening on port ${config.api.PORT}...`);
 });

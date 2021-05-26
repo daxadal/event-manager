@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const DB = require('./db')();
 
+const config = require('../../config');
+
 async function decodeToken(req, res, next) {
   try {
     const bearerHeader = req.get('Authorization');
@@ -10,7 +12,7 @@ async function decodeToken(req, res, next) {
       // eslint-disable-next-line prefer-destructuring
       req.token = match[1];
       try {
-        const decoded = jwt.verify(match[1], process.env.TOKEN_SECRET);
+        const decoded = jwt.verify(match[1], config.jwt.TOKEN_SECRET);
 
         req.user = await DB.User.findById(decoded.id);
         if (req.user) {
@@ -35,7 +37,7 @@ async function verifyToken(req, res, next) {
 }
 
 function createToken(user) {
-  return jwt.sign({ id: String(user.id) }, process.env.TOKEN_SECRET, {
+  return jwt.sign({ id: String(user.id) }, config.jwt.TOKEN_SECRET, {
     expiresIn: '1800s',
   });
 }

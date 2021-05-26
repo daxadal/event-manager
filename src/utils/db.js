@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
 
-function DB() {
-  const DOMAIN = process.env.DOMAIN || 'localhost';
-  const PORT = process.env.PORT || '27017';
-  const DB_NAME = process.env.DB_NAME || 'WhisbiEventManager';
+const config = require('../../config');
 
-  mongoose.connect(`mongodb://${DOMAIN}:${PORT}/${DB_NAME}`, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+function DB() {
+  mongoose.connect(
+    `mongodb://${config.db.DOMAIN}:${config.db.PORT}/${config.db.DB_NAME}`,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  );
 
   const db = mongoose.connection;
   db.on('error', console.error.bind(console, 'connection error:'));

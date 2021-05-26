@@ -1,6 +1,8 @@
 const { default: Axios } = require('axios');
 
-const config = ({ token, user, pass } = {}) => {
+const config = require('../config');
+
+const setAuth = ({ token, user, pass } = {}) => {
   if (token) return { headers: { Authorization: `Bearer ${token}` } };
   if (user && pass) return { auth: { username: user, password: pass } };
   return {};
@@ -21,25 +23,31 @@ const errorHandler = (error) => {
 module.exports = () => {
   let currentAuth;
 
-  const DOMAIN = process.env.DOMAIN || 'localhost';
-  const PORT = process.env.PORT || '3000';
-
   const get = (path, auth = currentAuth) =>
-    Axios.get(`http://${DOMAIN}:${PORT}/${path}`, config(auth)).catch(
-      errorHandler
-    );
+    Axios.get(
+      `http://${config.api.DOMAIN}:${config.api.PORT}/${path}`,
+      setAuth(auth)
+    ).catch(errorHandler);
+
   const post = (path, body, auth = currentAuth) =>
-    Axios.post(`http://${DOMAIN}:${PORT}/${path}`, body, config(auth)).catch(
-      errorHandler
-    );
+    Axios.post(
+      `http://${config.api.DOMAIN}:${config.api.PORT}/${path}`,
+      body,
+      setAuth(auth)
+    ).catch(errorHandler);
+
   const put = (path, body, auth = currentAuth) =>
-    Axios.put(`http://${DOMAIN}:${PORT}/${path}`, body, config(auth)).catch(
-      errorHandler
-    );
+    Axios.put(
+      `http://${config.api.DOMAIN}:${config.api.PORT}/${path}`,
+      body,
+      setAuth(auth)
+    ).catch(errorHandler);
+
   const destroy = (path, auth = currentAuth) =>
-    Axios.delete(`http://${DOMAIN}:${PORT}/${path}`, config(auth)).catch(
-      errorHandler
-    );
+    Axios.delete(
+      `http://${config.api.DOMAIN}:${config.api.PORT}/${path}`,
+      setAuth(auth)
+    ).catch(errorHandler);
 
   const Events = {
     getAll: () => get('events'),

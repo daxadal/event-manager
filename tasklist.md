@@ -1,12 +1,13 @@
 # To do
 
 Personal notes about requirements
-1. Add subscription date to subscription (always `Date.now()`)
 1. Event.Location can be extended/replaced to lat-lon
 1. Rework returned data
 1. Published event means just public or public and private? I asume never draft
 1. Only published (or own) events are visible. Revise visibility rules
 1. Specific methods to change state instad of updating
+1. Check current token equals DB token to check if it is still valid (logout or multimple logins)
+1. The app will handle past events? Or only upcoming events?
 
 Functional Requirements
 1. Users can only have one published event at a time and can
@@ -37,6 +38,7 @@ to have.
 
 Personal notes about requirements
 1. Also check for double subscriptions
+1. Add subscription date to subscription (always `Date.now()`)
 
 Functional Requirements
 1. Users should be able to sign-in and sign-out of the application.

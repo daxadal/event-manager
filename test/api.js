@@ -7,10 +7,8 @@ const config = ({ token, user, pass } = {}) => {
 };
 
 const errorHandler = (error) => {
-  console.log('Error config:', error.config);
-
   if (error.response) {
-    console.error('Response error: ', error.response.data);
+    // console.error('Response error: ', error.response.data);
     return error.response;
   }
 

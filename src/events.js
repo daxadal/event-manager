@@ -26,8 +26,6 @@ eventsApp
         throw error.message;
       });
 
-      console.log('Event:', event);
-
       const eventDB = await new DB.Event({
         ...event,
         creatorId: req.user.id,
@@ -51,7 +49,7 @@ eventsApp
 
       const events = await query.exec();
 
-      console.info('Events retieved:', events);
+      console.info('Events retieved:', events.length);
       if (events) res.status(200).send(events);
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
@@ -66,11 +64,8 @@ eventsApp
     try {
       const { eventId } = req.params;
 
-      console.log('Params:', req.params);
-
       const event = await DB.Event.findById(eventId).exec();
 
-      console.info('Event retieved:', event);
       if (event) res.status(200).send(event);
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
@@ -118,9 +113,6 @@ eventsApp
 
       event = await event.save();
 
-      console.log('Event updated:', event);
-
-      console.info(event);
       if (event) res.status(200).send(event);
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
@@ -175,7 +167,6 @@ eventsApp
         });
 
       const event = await DB.Event.findById(eventId);
-      console.info('Event:', event);
 
       if (!event) {
         res.status(400).send({ error: 'Event not found' });

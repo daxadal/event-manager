@@ -25,7 +25,6 @@ usersApp.post('/sign-up', async (req, res) => {
     const oldUser = await DB.User.findOne({
       email: newUser.email,
     });
-    console.info('Old User:', oldUser);
 
     if (oldUser) {
       res.status(400).send({ error: 'Email already in use' });
@@ -33,14 +32,12 @@ usersApp.post('/sign-up', async (req, res) => {
     }
 
     const user = await new DB.User(newUser).save();
-    console.info('User:', user);
 
     const token = createToken(user);
 
     user.sessionToken = token;
     user.save();
 
-    console.info('User:', user);
     res.status(200).send({ token, user });
   } catch (error) {
     console.error(error);

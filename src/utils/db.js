@@ -60,8 +60,6 @@ function DB() {
 let instance = DB();
 
 module.exports = function Singleton() {
-  console.info('Asking for instance:', instance);
-
   if (!instance) {
     instance = new DB();
     delete instance.constructor;

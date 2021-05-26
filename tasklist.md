@@ -9,6 +9,7 @@ Personal notes about requirements
 1. Check current token equals DB token to check if it is still valid (logout or multimple logins)
 1. The app will handle past events? Or only upcoming events?
 1. Use `bree` for scheduling. `@ladjs/graceful` and `cabin` recommended [here](https://jobscheduler.net/#/?id=node)
+1. Users cannot subscribe to draft events (they're not ready and also not visible, duh)
 
 Functional Requirements
 1. Users can only have one published event at a time and can subscribe to a maximum of 3 events.

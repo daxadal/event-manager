@@ -27,6 +27,7 @@ describe('Authentication', () => {
         password: 'pass',
       });
       assert.strictEqual(response.status, 200);
+      assert.ok(response.data.token);
     });
 
     it('FAIL - Duplicated registration', async () => {
@@ -58,6 +59,7 @@ describe('Authentication', () => {
       });
       const response = await API.Users.signin('user4@example.com', 'pass');
       assert.strictEqual(response.status, 200);
+      assert.ok(response.data.token);
     });
   });
   describe('Sign out - Logout', () => {

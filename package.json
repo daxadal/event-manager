@@ -6,8 +6,7 @@
   "scripts": {
     "start": "nodemon -V -L -w ./src",
     "reset": "node scripts/reset.js",
-    "test": "mocha",
-    "reset-test": "npm run reset && npm test"
+    "test": "npm run reset && mocha"
   },
   "author": "Eric García de Ceca Elejoste",
   "license": "ISC",

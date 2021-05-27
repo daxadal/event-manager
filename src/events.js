@@ -15,10 +15,10 @@ eventsApp
   .post(decodeToken, verifyToken, async (req, res) => {
     try {
       const inputSchema = Joi.object({
-        headline: Joi.string().min(10).max(100).required(),
+        headline: Joi.string().max(100).required(),
         description: Joi.string().max(500),
         startDate: Joi.date().required(),
-        location: Joi.string().min(10).max(100).required(),
+        location: Joi.string().max(100).required(),
         state: Joi.valid('draft', 'public', 'private').default('draft'),
       });
 

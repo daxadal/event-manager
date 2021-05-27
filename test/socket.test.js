@@ -1,6 +1,6 @@
 /* global describe it */
 
-// const assert = require('assert');
+const assert = require('assert');
 
 const API = require('./api')();
 const Socket = require('./socket');
@@ -25,6 +25,28 @@ describe('Socket', () => {
       await API.ping();
 
       sockets.map((socket) => socket.disconnect());
+    });
+  });
+
+  describe('Registration', () => {
+    it('New user - new socket', async () => {
+      const response = await API.Users.signup({
+        name: 'socket',
+        email: 'socket@example.com',
+        password: 'pass',
+      });
+      const { token } = response.data;
+
+      const socket = Socket.new();
+      socket.emit('sign-in', token);
+
+      socket.on('sign-in-ok', () => {
+        socket.disconnect();
+      });
+      socket.on('sign-in-error', () => {
+        socket.disconnect();
+        assert.fail('Socket sign in error');
+      });
     });
   });
 });

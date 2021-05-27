@@ -36,6 +36,7 @@ function DB() {
       email: String,
       password: String,
       sessionToken: String,
+      socketId: String,
     })
   );
 
@@ -44,8 +45,6 @@ function DB() {
     new mongoose.Schema({
       eventId: mongoose.Types.ObjectId,
       subscriberId: mongoose.Types.ObjectId,
-      name: String,
-      email: String,
       subscriptionDate: Date,
       comment: String,
     })

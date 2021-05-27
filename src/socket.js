@@ -24,7 +24,7 @@ io.on('connection', (socket) => {
     if (user) {
       user.socketId = socket.id;
       await user.save();
-      console.log('Server: sign-in', user);
+      console.log('Server: sign-in', socket.id, user);
       socket.emit('sign-in-ok');
     } else {
       console.log('Server: failed to sign-in', {
@@ -38,7 +38,7 @@ io.on('connection', (socket) => {
     const user = await DB.User.findOne({
       sessionToken,
     });
-    if (user) {
+    if (user && user.socketId === socket.id) {
       user.socketId = null;
       console.log('Server: sign-out', user);
       socket.emit('sign-out-ok');

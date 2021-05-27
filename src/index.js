@@ -10,12 +10,18 @@ const config = require('../config');
 const eventsApp = require('./events');
 const usersApp = require('./users');
 const { default: socketServer, pingAll } = require('./socket');
+const { sendReminders } = require('./reminders');
 
 app.use('/events', eventsApp);
 app.use('/users', usersApp);
 
 app.post('/ping', (req, res) => {
   pingAll();
+  res.status(200).send({ message: 'All sockets pinged' });
+});
+
+app.post('/remind', (req, res) => {
+  sendReminders();
   res.status(200).send({ message: 'All sockets pinged' });
 });
 

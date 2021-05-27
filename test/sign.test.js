@@ -1,6 +1,5 @@
 /* global describe it */
 
-const { default: Axios } = require('axios');
 const assert = require('assert');
 
 const API = require('./api')();

@@ -1,6 +1,8 @@
 const http = require('http');
 const { Server } = require('socket.io');
 
+const DB = require('./utils/db')();
+
 const httpServer = http.createServer();
 const io = new Server(httpServer);
 
@@ -13,6 +15,40 @@ io.on('connection', (socket) => {
 
   socket.on('PONG', () => {
     console.log('Server PONG', socket.id);
+  });
+
+  socket.on('sign-in', async (sessionToken) => {
+    const user = await DB.User.findOne({
+      sessionToken,
+    });
+    if (user) {
+      user.socketId = socket.id;
+      await user.save();
+      console.log('Server: sign-in', user);
+      socket.emit('sign-in-ok');
+    } else {
+      console.log('Server: failed to sign-in', {
+        socketId: socket.id,
+        sessionToken,
+      });
+      socket.emit('sign-in-error');
+    }
+  });
+  socket.on('sign-out', async (sessionToken) => {
+    const user = await DB.User.findOne({
+      sessionToken,
+    });
+    if (user) {
+      user.socketId = null;
+      console.log('Server: sign-out', user);
+      socket.emit('sign-out-ok');
+    } else {
+      console.log('Server: failed to sign-out', {
+        socketId: socket.id,
+        sessionToken,
+      });
+      socket.emit('sign-out-error');
+    }
   });
 
   socket.emit('PING', socket.id);

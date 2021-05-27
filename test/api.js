@@ -70,5 +70,6 @@ module.exports = () => {
     setToken: (token) => {
       currentAuth = { token };
     },
+    ping: () => post('ping'),
   };
 };

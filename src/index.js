@@ -1,18 +1,8 @@
 require('dotenv').config();
 
 const express = require('express');
-const rateLimit = require('express-rate-limit');
 
 const app = express();
-exports.app = app;
-app.use(express.json({ limit: '1kb' }));
-app.use(
-  rateLimit({
-    max: 100,
-    windowMs: 60 * 60 * 1000, // 1 Hour
-    message: 'Too many requests',
-  })
-);
 
 const config = require('../config');
 const eventsApp = require('./events');

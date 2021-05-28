@@ -1,4 +1,5 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const auth = require('basic-auth');
 const Joi = require('joi');
 
@@ -8,7 +9,14 @@ const { createToken, decodeToken, verifyToken } = require('./utils/auth');
 // Register / LOGIN
 const usersApp = express.Router();
 
-usersApp.use(express.json());
+usersApp.use(express.json({ limit: '512b' }));
+usersApp.use(
+  rateLimit({
+    max: 10,
+    windowMs: 60 * 1000, // 1 minute
+    message: 'Too many requests',
+  })
+);
 
 usersApp.post('/sign-up', async (req, res) => {
   try {

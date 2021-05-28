@@ -41,6 +41,15 @@ eventsApp
         throw error.message;
       });
 
+      const events = await DB.Event.find({
+        state: 'public',
+        creatorId: req.user.id,
+      });
+
+      if (events.length > 0) {
+        res.status(400).send({ error: 'Public events limit exceeded' });
+      }
+
       const eventDB = await new DB.Event({
         ...event,
         creatorId: req.user.id,
@@ -57,7 +66,7 @@ eventsApp
       let query;
       if (req.user)
         query = DB.Event.find().or([
-          { state: 'public' },
+          { state: { $in: ['public', 'private'] } },
           { creatorId: req.user.id },
         ]);
       else query = DB.Event.find({ state: 'public' });
@@ -127,6 +136,17 @@ eventsApp
         return;
       }
 
+      if (event.state !== 'public' && newEvent.state === 'public') {
+        const events = await DB.Event.find({
+          state: 'public',
+          creatorId: req.user.id,
+        });
+
+        if (events.length > 0) {
+          res.status(400).send({ error: 'Public events limit exceeded' });
+        }
+      }
+
       event.headline = newEvent.headline;
       event.description = newEvent.description;
       event.startDate = newEvent.startDate;
@@ -163,6 +183,8 @@ eventsApp
 
       await event.delete();
 
+      await DB.Subscription.deleteMany({ eventId: event.id }).exec();
+
       if (event) res.status(200).send(event);
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
@@ -189,7 +211,6 @@ eventsApp
         });
 
       const event = await DB.Event.findById(eventId);
-
       if (!event) {
         res.status(400).send({ error: 'Event not found' });
         return;
@@ -202,14 +223,22 @@ eventsApp
         return;
       }
 
-      const oldSubscription = await DB.Subscription.findOne({
-        eventId: event.id,
+      const subscriptions = await DB.Subscription.find({
         subscriberId: req.user.id,
       });
+
+      const oldSubscription = subscriptions.find(
+        (sub) => String(sub.eventId) === eventId
+      );
 
       if (oldSubscription) {
         res.status(400).send({
           message: 'You already have subscribed to this event',
+          subscription: oldSubscription,
+        });
+      } else if (subscriptions.length) {
+        res.status(400).send({
+          message: 'Subscribed events limit exceeded',
           subscription: oldSubscription,
         });
       } else {

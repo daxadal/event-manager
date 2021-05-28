@@ -34,7 +34,7 @@ function DB() {
     new mongoose.Schema({
       name: String,
       email: String,
-      password: String,
+      hashedPassword: String,
       sessionToken: String,
       socketId: String,
     })

@@ -1,5 +1,6 @@
 # Required
 TOKEN_SECRET=your-token-secret-here
+PASS_SECRET=your-password-hash-secret-here
 
 # Optional
 # DB_DOMAIN=...

@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const auth = require('basic-auth');
@@ -5,9 +6,13 @@ const Joi = require('joi');
 
 const DB = require('./utils/db')();
 const { createToken, decodeToken, verifyToken } = require('./utils/auth');
+const config = require('../config');
 
 // Register / LOGIN
 const usersApp = express.Router();
+
+const hash = (pass) =>
+  crypto.createHash('sha256', config.pass.SECRET).update(pass).digest('hex');
 
 usersApp.use(express.json({ limit: '512b' }));
 usersApp.use(
@@ -39,7 +44,11 @@ usersApp.post('/sign-up', async (req, res) => {
       return;
     }
 
-    const user = await new DB.User(newUser).save();
+    const user = await new DB.User({
+      name: newUser.name,
+      email: newUser.email,
+      hashedPassword: hash(newUser.password),
+    }).save();
 
     const token = createToken(user);
 
@@ -76,7 +85,7 @@ usersApp.post('/sign-in', async (req, res) => {
 
     const user = await DB.User.findOne({
       email: credentials.name,
-      password: credentials.pass,
+      hashedPassword: hash(credentials.pass),
     });
 
     if (!user) {

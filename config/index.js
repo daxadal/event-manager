@@ -21,4 +21,7 @@ module.exports = {
       ? parseInt(process.env.REMINDER_MINUTES_AHEAD, 10)
       : 1440, // 1440 minutes = 24 hours
   },
+  pass: {
+    SECRET: process.env.PASS_SECRET,
+  }
 };

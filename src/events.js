@@ -26,7 +26,14 @@ eventsApp
         headline: Joi.string().max(100).required(),
         description: Joi.string().max(500),
         startDate: Joi.date().required(),
-        location: Joi.string().max(100).required(),
+        location: Joi.object({
+          name: Joi.string().max(100),
+          lat: Joi.number().min(-90).max(90),
+          lon: Joi.number().min(-180).max(180),
+        })
+          .or('name', 'lat', 'lon')
+          .and('lat', 'lon')
+          .required(),
         state: Joi.valid('draft', 'public', 'private').default('draft'),
       });
 
@@ -89,7 +96,14 @@ eventsApp
         headline: Joi.string().min(10).max(100).required(),
         description: Joi.string().max(500),
         startDate: Joi.date().required(),
-        location: Joi.string().min(10).max(100).required(),
+        location: Joi.object({
+          name: Joi.string().max(100),
+          lat: Joi.number().min(-90).max(90),
+          lon: Joi.number().min(-180).max(180),
+        })
+          .or('name', 'lat', 'lon')
+          .and('lat', 'lon')
+          .required(),
         state: Joi.valid('draft', 'public', 'private').default('draft'),
       });
 

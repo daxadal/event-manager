@@ -23,7 +23,7 @@ function DB() {
       headline: String,
       description: String,
       startDate: Date,
-      location: String,
+      location: { name: String, lat: Number, lon: Number },
       state: String,
       creatorId: mongoose.Types.ObjectId,
     })

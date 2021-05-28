@@ -1,14 +1,13 @@
 # To do
 
 Personal notes about requirements
-1. Event.Location can be extended/replaced to lat-lon
 1. Rework returned data
 1. Published event means just public
 1. Only published events are visible if you're not logged in. Private events are visible to logged users. Draft events are visible to the creator. Revise visibility rules
 1. Check current token equals DB token to check if it is still valid (logout or multimple logins)
 1. Past Events handling is out of scope.
-1. Use `bree` for scheduling. `@ladjs/graceful` and `cabin` recommended [here](https://jobscheduler.net/#/?id=node)
 1. Users cannot subscribe to draft events (they're not ready and also not visible, duh)
+1. Check reminders are actually working
 
 Functional Requirements
 1. Users can only have one published event at a time and can subscribe to a maximum of 3 events.
@@ -16,13 +15,7 @@ Functional Requirements
 1. Each event should have its own page to display all details and a subscribe functionality (as described in point #11) below the event details.
 
 Technical Requirements
-1. Implement the REST API for this application using Node.js, Express and an ORM of your choice.
-1. Implement proper security as you see fit for the application’s authentication.
 1. Use a middleware for the custom usability rules.
-1. Use SOLID principle, linting and a convention for your code.
-1. Add tests where / how you see fit.
-1. Protect the application against Denial of Service attacks.
-1. Send the reminders notifications using sockets.
 1. Comment your code where you see is fit and include a README file with your submission.
 1. Creating a bare UI to test the backend is not required but a nice to have.
 1. Containerize your application if you think it is necessary..
@@ -33,6 +26,8 @@ Personal notes about requirements
 1. Also check for double subscriptions
 1. Add subscription date to subscription (always `Date.now()`)
 1. Specific methods to change state instad of updating  **NOPE**
+1. Use `bree` for scheduling. `@ladjs/graceful` and `cabin` recommended [here](https://jobscheduler.net/#/?id=node)
+1. Event.Location can be extended/replaced to lat-lon
 
 Functional Requirements
 1. Users should be able to sign-in and sign-out of the application.
@@ -54,3 +49,9 @@ necessary) to the service.
 in the home.
 
 Technical Requirements
+1. Implement the REST API for this application using Node.js, Express and an ORM of your choice.
+1. Implement proper security as you see fit for the application’s authentication.
+1. Use SOLID principle, linting and a convention for your code.
+1. Add tests where / how you see fit.
+1. Protect the application against Denial of Service attacks.
+1. Send the reminders notifications using sockets.

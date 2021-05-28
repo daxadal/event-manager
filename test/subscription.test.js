@@ -42,19 +42,19 @@ describe('Subscription & Reminders', () => {
     await API.Events.create({
       headline: 'New event 1',
       startDate: date,
-      location: 'Somewhere',
+      location: { name: 'Somewhere' },
       state: 'public',
     });
     await API.Events.create({
       headline: 'New event 2',
       startDate: date,
-      location: 'Somewhere',
+      location: { name: 'Somewhere' },
       state: 'public',
     });
     await API.Events.create({
       headline: 'New event 3',
       startDate: date,
-      location: 'Somewhere',
+      location: { name: 'Somewhere' },
       state: 'public',
     });
 

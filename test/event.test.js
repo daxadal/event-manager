@@ -41,7 +41,7 @@ describe('Events', () => {
       const response = await API.Events.create({
         headline: 'New event',
         startDate: Date.now(),
-        location: 'Somewhere',
+        location: { name: 'Somewhere' },
       });
       assert.strictEqual(response.status, 200);
     });

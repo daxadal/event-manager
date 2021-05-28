@@ -54,8 +54,7 @@ io.on('connection', (socket) => {
   socket.emit('PING', socket.id);
 });
 
-async function sendReminders() {
-  const events = await DB.Event.find();
+async function sendReminders(events) {
   const subscriptions = await DB.Subscription.find().in(
     'eventId',
     events.map((event) => event.id)

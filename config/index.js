@@ -15,4 +15,10 @@ module.exports = {
   jwt: {
     TOKEN_SECRET: process.env.TOKEN_SECRET,
   },
+  bree: {
+    INTERVAL: process.env.REMINDER_INTERVAL || '1m', // Every minute,
+    MINUTES_AHEAD: process.env.REMINDER_MINUTES_AHEAD
+      ? parseInt(process.env.REMINDER_MINUTES_AHEAD, 10)
+      : 1440, // 1440 minutes = 24 hours
+  },
 };

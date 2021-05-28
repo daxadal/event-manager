@@ -9,7 +9,7 @@ const bree = new Bree({
 
   jobs: [
     {
-      name: 'reminder',
+      name: 'fetchReminders',
       interval: config.bree.INTERVAL,
     },
   ],

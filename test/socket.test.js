@@ -24,7 +24,7 @@ describe('Socket', () => {
       );
       await API.ping();
 
-      sockets.map((socket) => socket.disconnect());
+      sockets.map((s) => s.disconnect());
     });
   });
 

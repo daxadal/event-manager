@@ -71,5 +71,6 @@ module.exports = () => {
       currentAuth = { token };
     },
     ping: () => post('ping'),
+    remind: () => post('remind'),
   };
 };

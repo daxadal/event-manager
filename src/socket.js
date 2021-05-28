@@ -54,13 +54,27 @@ io.on('connection', (socket) => {
   socket.emit('PING', socket.id);
 });
 
-async function sendReminder(socketIds) {
-  const sockets = await io.in(socketIds).fetchSockets();
-  sockets.map((socket) => socket.emit('reminder', socket.id));
+async function sendReminders() {
+  const events = await DB.Event.find();
+  const subscriptions = await DB.Subscription.find().in(
+    'eventId',
+    events.map((event) => event.id)
+  );
+  console.info('subscriptions.length', subscriptions.length);
+  const users = await DB.User.find().in(
+    '_id',
+    subscriptions.map((sub) => sub.subscriberId)
+  );
+  subscriptions.forEach(async (sub) => {
+    const event = events.find((e) => e.id === String(sub.eventId));
+    const user = users.find((u) => u.id === String(sub.subscriberId));
+    const sockets = await io.in(user.socketId).fetchSockets();
+    sockets.map((socket) => socket.emit('reminder', { event, user, sub }));
+  });
 }
 
 async function pingAll() {
   io.emit('PING');
 }
 
-module.exports = { default: httpServer, sendReminder, pingAll };
+module.exports = { default: httpServer, sendReminders, pingAll };

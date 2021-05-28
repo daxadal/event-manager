@@ -9,8 +9,7 @@ app.use(express.json());
 const config = require('../config');
 const eventsApp = require('./events');
 const usersApp = require('./users');
-const { default: socketServer, pingAll } = require('./socket');
-const { sendReminders } = require('./reminders');
+const { default: socketServer, sendReminders, pingAll } = require('./socket');
 
 app.use('/events', eventsApp);
 app.use('/users', usersApp);

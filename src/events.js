@@ -114,18 +114,17 @@ eventsApp
       const { eventId } = req.params;
 
       const inputSchema = Joi.object({
-        headline: Joi.string().min(10).max(100).required(),
+        headline: Joi.string().min(10).max(100),
         description: Joi.string().max(500),
-        startDate: Joi.date().required(),
+        startDate: Joi.date(),
         location: Joi.object({
           name: Joi.string().max(100),
           lat: Joi.number().min(-90).max(90),
           lon: Joi.number().min(-180).max(180),
         })
           .or('name', 'lat', 'lon')
-          .and('lat', 'lon')
-          .required(),
-        state: Joi.valid('draft', 'public', 'private').default('draft'),
+          .and('lat', 'lon'),
+        state: Joi.valid('draft', 'public', 'private'),
       });
 
       const newEvent = await inputSchema
@@ -159,11 +158,11 @@ eventsApp
         }
       }
 
-      event.headline = newEvent.headline;
-      event.description = newEvent.description;
-      event.startDate = newEvent.startDate;
-      event.location = newEvent.location;
-      event.state = newEvent.state;
+      if (newEvent.headline) event.headline = newEvent.headline;
+      if (newEvent.description) event.description = newEvent.description;
+      if (newEvent.startDate) event.startDate = newEvent.startDate;
+      if (newEvent.location) event.location = newEvent.location;
+      if (newEvent.state) event.state = newEvent.state;
 
       event = await event.save();
 

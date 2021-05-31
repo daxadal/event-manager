@@ -32,8 +32,9 @@ async function decodeToken(req, res, next) {
         return;
       }
 
-      if (req.user) next();
-      else res.status(403).send({ error: 'Invalid session token' });
+      if (!req.user || req.user.sessionToken !== req.token)
+        res.status(403).send({ error: 'Session token expired' });
+      else next();
     }
   } catch (error) {
     console.error(error);
@@ -43,8 +44,6 @@ async function decodeToken(req, res, next) {
 
 async function verifyToken(req, res, next) {
   if (!req.user) res.status(401).send({ error: 'Unauthorized' });
-  else if (req.user.sessionToken !== req.token)
-    res.status(401).send({ error: 'Unauthorized' });
   else next();
 }
 

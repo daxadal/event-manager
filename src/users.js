@@ -31,9 +31,11 @@ usersApp.post('/sign-up', async (req, res) => {
       password: Joi.string().required(),
     });
 
-    const newUser = await inputSchema.validateAsync(req.body).catch((error) => {
-      throw error.message;
-    });
+    const { value: newUser, error } = inputSchema.validate(req.body);
+    if (error) {
+      res.status(400).send({ error: error.message });
+      return;
+    }
 
     const oldUser = await DB.User.findOne({
       email: newUser.email,
@@ -77,11 +79,11 @@ usersApp.post('/sign-in', async (req, res) => {
       pass: Joi.string().required(),
     });
 
-    const credentials = await inputSchema
-      .validateAsync(basicAuth)
-      .catch((error) => {
-        throw error.message;
-      });
+    const { value: credentials, error } = inputSchema.validate(basicAuth);
+    if (error) {
+      res.status(400).send({ error: error.message });
+      return;
+    }
 
     const user = await DB.User.findOne({
       email: credentials.name,

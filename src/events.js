@@ -73,11 +73,11 @@ eventsApp
         state: Joi.valid('draft', 'public', 'private').default('draft'),
       });
 
-      const event = await newEventSchema
-        .validateAsync(req.body)
-        .catch((error) => {
-          throw error.message;
-        });
+      const { value: event, error } = newEventSchema.validate(req.body);
+      if (error) {
+        res.status(400).send({ error: error.message });
+        return;
+      }
 
       if (event.state === 'public') {
         const events = await DB.Event.find({
@@ -151,11 +151,11 @@ eventsApp
         state: Joi.valid('draft', 'public', 'private'),
       });
 
-      const newEvent = await updateEventSchema
-        .validateAsync(req.body)
-        .catch((error) => {
-          throw error.message;
-        });
+      const { value: newEvent, error } = updateEventSchema.validate(req.body);
+      if (error) {
+        res.status(400).send({ error: error.message });
+        return;
+      }
 
       if (String(req.event.creatorId) !== req.user.id) {
         res
@@ -223,11 +223,11 @@ eventsApp
         comment: Joi.string(),
       }).optional();
 
-      const params = await inputSchema
-        .validateAsync(req.body)
-        .catch((error) => {
-          throw error.message;
-        });
+      const { value: params, error } = inputSchema.validate(req.body);
+      if (error) {
+        res.status(400).send({ error: error.message });
+        return;
+      }
 
       if (String(req.event.creatorId) === req.user.id) {
         res

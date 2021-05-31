@@ -20,4 +20,4 @@ Server can be started using `npm start` script. Server can be executed through `
 
 Database can be purged using the `npm run reset`. Tests on the API (powered by `mocha`) can be performed executing `npm test`. (This script assumes the server is already up and running).
 
-_**Important notice:** `npm test` script will purge all data from the database before it\'s run. If that behavior is not desired, tests can be run using `mocha` command, if installed globally. If a global `mocha` command is not available, you can also use the `npm run mocha` script._
+_**Important notice:** `npm test` script will purge all data from the database before it\'s run. If that behavior is not desired, tests can be run using `mocha` command, if installed globally. If a global `mocha` command is not available, you can also use the `npm run mocha` script. Nevertheless, as `mocha` asumes the database is empty when the tests are performed, some test may fail if the database is not reseted._

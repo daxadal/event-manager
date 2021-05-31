@@ -4,7 +4,8 @@
   "description": "A test server",
   "main": "src/index.js",
   "scripts": {
-    "start": "nodemon -V -L -w ./src",
+    "start": "node src/index.js",
+    "watch": "nodemon -V -L -w ./src",
     "reset": "node scripts/reset.js",
     "test": "npm run reset && mocha",
     "mocha": "mocha"

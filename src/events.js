@@ -229,11 +229,6 @@ eventsApp
           throw error.message;
         });
 
-      if (!req.event) {
-        res.status(400).send({ error: 'Event not found' });
-        return;
-      }
-
       if (String(req.event.creatorId) === req.user.id) {
         res
           .status(400)

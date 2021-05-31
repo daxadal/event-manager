@@ -1,23 +1,16 @@
 # To do
 
 Personal notes about requirements
-1. Rework returned data
-1. Past Events handling is out of scope.
-1. Users cannot subscribe to draft events (they're not ready and also not visible, duh) / Event visibility in general
 1. Check reminders are actually working
-
-Functional Requirements
-1. Each event should have its own page to display all details and a subscribe functionality (as described in point #11) below the event details.
+1. Complete tests
 
 Technical Requirements
-1. Use a middleware for the custom usability rules.
 1. Comment your code where you see is fit and include a README file with your submission.
-1. Creating a bare UI to test the backend is not required but a nice to have.
-1. Containerize your application if you think it is necessary..
 
 # Done
 
 Personal notes about requirements
+1. Users cannot subscribe to draft events (they're not ready and also not visible, duh) / Event visibility in general
 1. Check current token equals DB token to check if it is still valid (logout or multimple logins)
 1. Cipher passwords
 1. Also check for double subscriptions
@@ -26,6 +19,8 @@ Personal notes about requirements
 1. Use `bree` for scheduling. `@ladjs/graceful` and `cabin` recommended [here](https://jobscheduler.net/#/?id=node)
 1. Event.Location can be extended/replaced to lat-lon
 1. Only published events are visible if you're not logged in. Private events are visible to logged users. Draft events are visible to the creator. Revise visibility rules
+1. Rework returned data
+1. Past Events handling is out of scope.
 
 
 Functional Requirements
@@ -48,12 +43,16 @@ necessary) to the service.
 1. Users should see a list of all events (as much as the rules allow)
 in the home.
 1. Users should receive a notification 24 hours before the start date of each event reminding them that it’s happening the next day.
+1. Each event should have its own page to display all details and a subscribe functionality (as described in point #11) below the event details. **NO UI IS GOING TO BE MADE**
 
 
 Technical Requirements
+1. Use a middleware for the custom usability rules.
 1. Implement the REST API for this application using Node.js, Express and an ORM of your choice.
 1. Implement proper security as you see fit for the application’s authentication.
 1. Use SOLID principle, linting and a convention for your code.
 1. Add tests where / how you see fit.
 1. Protect the application against Denial of Service attacks.
 1. Send the reminders notifications using sockets.
+1. Creating a bare UI to test the backend is not required but a nice to have. **NOPE**
+1. Containerize your application if you think it is necessary.. **NOPE**

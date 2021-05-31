@@ -27,28 +27,68 @@ function formatEvent(event) {
   return formatted;
 }
 
+const newEventSchema = Joi.object({
+  headline: Joi.string().max(100).required(),
+  description: Joi.string().max(500),
+  startDate: Joi.date().required(),
+  location: Joi.object({
+    name: Joi.string().max(100),
+    lat: Joi.number().min(-90).max(90),
+    lon: Joi.number().min(-180).max(180),
+  })
+    .or('name', 'lat', 'lon')
+    .and('lat', 'lon')
+    .required(),
+  state: Joi.valid('draft', 'public', 'private').default('draft'),
+});
+
+const updateEventSchema = Joi.object({
+  headline: Joi.string().min(10).max(100),
+  description: Joi.string().max(500),
+  startDate: Joi.date(),
+  location: Joi.object({
+    name: Joi.string().max(100),
+    lat: Joi.number().min(-90).max(90),
+    lon: Joi.number().min(-180).max(180),
+  })
+    .or('name', 'lat', 'lon')
+    .and('lat', 'lon'),
+  state: Joi.valid('draft', 'public', 'private'),
+});
+
+function isVisible(event, user) {
+  console.info('Visibility. State:', event.state, ', User:', user && user.id);
+  switch (event.state) {
+    case 'public':
+      return true;
+    case 'private':
+      return Boolean(user);
+    case 'draft':
+      return Boolean(user) && user.id === String(event.creatorId);
+    default:
+      throw new Error('Event has an unexpected state');
+  }
+}
+
+async function loadEvent(req, res, next) {
+  const { eventId } = req.params;
+
+  req.event = await DB.Event.findById(eventId).exec();
+
+  if (req.event && isVisible(req.event, req.user)) {
+    next();
+  } else res.status(400).send({ error: 'Event not found' });
+}
+
 eventsApp
   .route('/')
   .post(decodeToken, verifyToken, async (req, res) => {
     try {
-      const inputSchema = Joi.object({
-        headline: Joi.string().max(100).required(),
-        description: Joi.string().max(500),
-        startDate: Joi.date().required(),
-        location: Joi.object({
-          name: Joi.string().max(100),
-          lat: Joi.number().min(-90).max(90),
-          lon: Joi.number().min(-180).max(180),
-        })
-          .or('name', 'lat', 'lon')
-          .and('lat', 'lon')
-          .required(),
-        state: Joi.valid('draft', 'public', 'private').default('draft'),
-      });
-
-      const event = await inputSchema.validateAsync(req.body).catch((error) => {
-        throw error.message;
-      });
+      const event = await newEventSchema
+        .validateAsync(req.body)
+        .catch((error) => {
+          throw error.message;
+        });
 
       if (event.state === 'public') {
         const events = await DB.Event.find({
@@ -96,58 +136,30 @@ eventsApp
 
 eventsApp
   .route('/:eventId(\\w+)')
-  .get(async (req, res) => {
+  .get(decodeToken, loadEvent, async (req, res) => {
     try {
-      const { eventId } = req.params;
-
-      const event = await DB.Event.findById(eventId).exec();
-
-      if (event) res.status(200).send(formatEvent(event));
-      else res.status(400).send({ error: 'Event not found' });
+      res.status(200).send(formatEvent(req.event));
     } catch (error) {
       console.error(error);
       res.status(400).send({ error });
     }
   })
-  .put(decodeToken, verifyToken, async (req, res) => {
+  .put(decodeToken, verifyToken, loadEvent, async (req, res) => {
     try {
-      const { eventId } = req.params;
-
-      const inputSchema = Joi.object({
-        headline: Joi.string().min(10).max(100),
-        description: Joi.string().max(500),
-        startDate: Joi.date(),
-        location: Joi.object({
-          name: Joi.string().max(100),
-          lat: Joi.number().min(-90).max(90),
-          lon: Joi.number().min(-180).max(180),
-        })
-          .or('name', 'lat', 'lon')
-          .and('lat', 'lon'),
-        state: Joi.valid('draft', 'public', 'private'),
-      });
-
-      const newEvent = await inputSchema
+      const newEvent = await updateEventSchema
         .validateAsync(req.body)
         .catch((error) => {
           throw error.message;
         });
 
-      let event = await DB.Event.findById(eventId).exec();
-
-      if (!event) {
-        res.status(400).send({ error: 'Event not found' });
-        return;
-      }
-
-      if (String(event.creatorId) !== req.user.id) {
+      if (String(req.event.creatorId) !== req.user.id) {
         res
           .status(400)
           .send({ error: 'Events can only be edited by their creator' });
         return;
       }
 
-      if (event.state !== 'public' && newEvent.state === 'public') {
+      if (req.event.state !== 'public' && newEvent.state === 'public') {
         const events = await DB.Event.find({
           state: 'public',
           creatorId: req.user.id,
@@ -158,45 +170,35 @@ eventsApp
         }
       }
 
-      if (newEvent.headline) event.headline = newEvent.headline;
-      if (newEvent.description) event.description = newEvent.description;
-      if (newEvent.startDate) event.startDate = newEvent.startDate;
-      if (newEvent.location) event.location = newEvent.location;
-      if (newEvent.state) event.state = newEvent.state;
+      if (newEvent.headline) req.event.headline = newEvent.headline;
+      if (newEvent.description) req.event.description = newEvent.description;
+      if (newEvent.startDate) req.event.startDate = newEvent.startDate;
+      if (newEvent.location) req.event.location = newEvent.location;
+      if (newEvent.state) req.event.state = newEvent.state;
 
-      event = await event.save();
+      req.event = await req.event.save();
 
-      if (event) res.status(200).send(formatEvent(event));
+      if (req.event) res.status(200).send(formatEvent(req.event));
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
       res.status(400).send({ error });
     }
   })
-  .delete(decodeToken, verifyToken, async (req, res) => {
+  .delete(decodeToken, verifyToken, loadEvent, async (req, res) => {
     try {
-      const { eventId } = req.params;
-
-      console.log('Params:', req.params);
-
-      const event = await DB.Event.findById(eventId).exec();
-
-      if (!event) {
-        res.status(400).send({ error: 'Event not found' });
-        return;
-      }
-      if (String(event.creatorId) !== req.user.id) {
+      if (String(req.event.creatorId) !== req.user.id) {
         res
           .status(400)
-          .send({ error: 'Events can only be edited by their creator' });
+          .send({ error: 'Events can only be deleted by their creator' });
         return;
       }
 
-      await event.delete();
+      await req.event.delete();
 
-      await DB.Subscription.deleteMany({ eventId: event.id }).exec();
+      await DB.Subscription.deleteMany({ eventId: req.event.id }).exec();
 
-      if (event) res.status(200).send({ message: 'Event deleted' });
+      if (req.event) res.status(200).send({ message: 'Event deleted' });
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
@@ -207,10 +209,8 @@ eventsApp
 // SUBSCRIPTIONS
 eventsApp
   .route('/:eventId(\\w+)/subscribe')
-  .post(decodeToken, verifyToken, async (req, res) => {
+  .post(decodeToken, verifyToken, loadEvent, async (req, res) => {
     try {
-      const { eventId } = req.params;
-
       const inputSchema = Joi.object({
         comment: Joi.string(),
       }).optional();
@@ -221,13 +221,12 @@ eventsApp
           throw error.message;
         });
 
-      const event = await DB.Event.findById(eventId);
-      if (!event) {
+      if (!req.event) {
         res.status(400).send({ error: 'Event not found' });
         return;
       }
 
-      if (String(event.creatorId) === req.user.id) {
+      if (String(req.event.creatorId) === req.user.id) {
         res
           .status(400)
           .send({ error: "You can't subscribe to your own events" });
@@ -239,7 +238,7 @@ eventsApp
       });
 
       const oldSubscription = subscriptions.find(
-        (sub) => String(sub.eventId) === eventId
+        (sub) => String(sub.eventId) === req.event.id
       );
 
       if (oldSubscription) {
@@ -254,7 +253,7 @@ eventsApp
         });
       } else {
         const subscription = await new DB.Subscription({
-          eventId: event.id,
+          eventId: req.event.id,
           subscriberId: req.user.id,
           subscriptionDate: Date.now(),
           comment: params.comment,

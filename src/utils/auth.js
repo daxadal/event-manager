@@ -28,7 +28,7 @@ async function decodeToken(req, res, next) {
         req.user = await DB.User.findById(decoded.id);
       } catch (error) {
         console.error(error);
-        res.status(500).send({ error });
+        res.status(500).send({ error: 'Internal server error' });
         return;
       }
 
@@ -37,7 +37,7 @@ async function decodeToken(req, res, next) {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send({ error });
+    res.status(500).send({ error: 'Internal server error' });
   }
 }
 

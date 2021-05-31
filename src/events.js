@@ -43,12 +43,15 @@ function isVisible(event, user) {
 
 async function loadEvent(req, res, next) {
   const { eventId } = req.params;
+  try {
+    req.event = await DB.Event.findById(eventId).exec();
 
-  req.event = await DB.Event.findById(eventId).exec();
-
-  if (req.event && isVisible(req.event, req.user)) {
-    next();
-  } else res.status(400).send({ error: 'Event not found' });
+    if (req.event && isVisible(req.event, req.user)) next();
+    else res.status(400).send({ error: 'Event not found' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: 'Internal server error' });
+  }
 }
 
 eventsApp
@@ -98,7 +101,7 @@ eventsApp
         .send({ message: 'Event created', event: formatEvent(eventDB) });
     } catch (error) {
       console.error(error);
-      res.status(500).send({ error });
+      res.status(500).send({ error: 'Internal server error' });
     }
   })
   .get(decodeToken, async (req, res) => {
@@ -118,7 +121,7 @@ eventsApp
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
-      res.status(500).send({ error });
+      res.status(500).send({ error: 'Internal server error' });
     }
   });
 
@@ -129,7 +132,7 @@ eventsApp
       res.status(200).send({ event: formatEvent(req.event) });
     } catch (error) {
       console.error(error);
-      res.status(500).send({ error });
+      res.status(500).send({ error: 'Internal server error' });
     }
   })
   .put(decodeToken, verifyToken, loadEvent, async (req, res) => {
@@ -187,7 +190,7 @@ eventsApp
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
-      res.status(500).send({ error });
+      res.status(500).send({ error: 'Internal server error' });
     }
   })
   .delete(decodeToken, verifyToken, loadEvent, async (req, res) => {
@@ -207,7 +210,7 @@ eventsApp
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
-      res.status(500).send({ error });
+      res.status(500).send({ error: 'Internal server error' });
     }
   });
 
@@ -270,7 +273,7 @@ eventsApp
       }
     } catch (error) {
       console.error(error);
-      res.status(500).send({ error });
+      res.status(500).send({ error: 'Internal server error' });
     }
   });
 

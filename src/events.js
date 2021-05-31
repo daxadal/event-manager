@@ -18,6 +18,15 @@ eventsApp.use(
   })
 );
 
+/* eslint-disable no-underscore-dangle */
+function formatEvent(event) {
+  const formatted = JSON.parse(JSON.stringify(event));
+  formatted.id = formatted._id;
+  delete formatted._id;
+  delete formatted.__v;
+  return formatted;
+}
+
 eventsApp
   .route('/')
   .post(decodeToken, verifyToken, async (req, res) => {
@@ -41,13 +50,16 @@ eventsApp
         throw error.message;
       });
 
-      const events = await DB.Event.find({
-        state: 'public',
-        creatorId: req.user.id,
-      });
+      if (event.state === 'public') {
+        const events = await DB.Event.find({
+          state: 'public',
+          creatorId: req.user.id,
+        });
 
-      if (events.length > 0) {
-        res.status(400).send({ error: 'Public events limit exceeded' });
+        if (events.length > 0) {
+          res.status(400).send({ error: 'Public events limit exceeded' });
+          return;
+        }
       }
 
       const eventDB = await new DB.Event({
@@ -55,7 +67,7 @@ eventsApp
         creatorId: req.user.id,
       }).save();
 
-      res.status(200).send(eventDB);
+      res.status(200).send(formatEvent(eventDB));
     } catch (error) {
       console.error(error);
       res.status(400).send({ error });
@@ -74,7 +86,7 @@ eventsApp
       const events = await query.exec();
 
       console.info('Events retieved:', events.length);
-      if (events) res.status(200).send(events);
+      if (events) res.status(200).send(events.map(formatEvent));
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
@@ -90,7 +102,7 @@ eventsApp
 
       const event = await DB.Event.findById(eventId).exec();
 
-      if (event) res.status(200).send(event);
+      if (event) res.status(200).send(formatEvent(event));
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
@@ -155,7 +167,7 @@ eventsApp
 
       event = await event.save();
 
-      if (event) res.status(200).send(event);
+      if (event) res.status(200).send(formatEvent(event));
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
@@ -185,7 +197,7 @@ eventsApp
 
       await DB.Subscription.deleteMany({ eventId: event.id }).exec();
 
-      if (event) res.status(200).send(event);
+      if (event) res.status(200).send({ message: 'Event deleted' });
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);

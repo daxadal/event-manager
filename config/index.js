@@ -9,7 +9,8 @@ module.exports = {
     DB_NAME: process.env.DB_NAME || 'WhisbiEventManager',
   },
   socket: {
-    DOMAIN: process.env.SOCKET_DOMAIN || process.env.API_DOMAIN || 'http://localhost',
+    DOMAIN:
+      process.env.SOCKET_DOMAIN || process.env.API_DOMAIN || 'http://localhost',
     PORT: process.env.SOCKET_PORT || '40718',
   },
   jwt: {

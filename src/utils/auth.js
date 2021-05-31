@@ -40,7 +40,7 @@ async function verifyToken(req, res, next) {
 
 function createToken(user) {
   return jwt.sign({ id: String(user.id) }, config.jwt.TOKEN_SECRET, {
-    expiresIn: '1800s',
+    expiresIn: config.jwt.TOKEN_EXPIRATION,
   });
 }
 module.exports = { createToken, decodeToken, verifyToken };

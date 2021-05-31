@@ -14,6 +14,7 @@ module.exports = {
   },
   jwt: {
     TOKEN_SECRET: process.env.TOKEN_SECRET,
+    TOKEN_EXPIRATION: process.env.TOKEN_EXPIRATION || '8h',
   },
   bree: {
     INTERVAL: process.env.REMINDER_INTERVAL || '1m', // Every minute,
@@ -23,5 +24,5 @@ module.exports = {
   },
   pass: {
     SECRET: process.env.PASS_SECRET,
-  }
+  },
 };

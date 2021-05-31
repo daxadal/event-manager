@@ -55,7 +55,7 @@ usersApp.post('/sign-up', async (req, res) => {
     user.sessionToken = token;
     user.save();
 
-    res.status(200).send({ token, user });
+    res.status(200).send({ message: 'Signed up successfully', token });
   } catch (error) {
     console.error(error);
     res.status(400).send({ error });
@@ -99,8 +99,7 @@ usersApp.post('/sign-in', async (req, res) => {
     user.save();
 
     console.info('Auth:', credentials, '\nUser:', user);
-    res.status(200).send({ credentials, user, token });
-    res.status(200).send();
+    res.status(200).send({ message: 'Signed in successfully', token });
   } catch (error) {
     console.error(error);
     res.status(400).send({ error });
@@ -109,8 +108,9 @@ usersApp.post('/sign-in', async (req, res) => {
 
 usersApp.post('/sign-out', decodeToken, verifyToken, async (req, res) => {
   req.user.sessionToken = undefined;
+  req.user.socketId = undefined;
   await req.user.save();
-  res.status(200).send({ user: req.user });
+  res.status(200).send({ message: 'Signed out successfully' });
 });
 
 module.exports = usersApp;

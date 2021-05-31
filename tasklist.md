@@ -3,7 +3,7 @@
 Personal notes about requirements
 1. Rework returned data
 1. Past Events handling is out of scope.
-1. Users cannot subscribe to draft events (they're not ready and also not visible, duh)
+1. Users cannot subscribe to draft events (they're not ready and also not visible, duh) / Event visibility in general
 1. Check reminders are actually working
 
 Functional Requirements

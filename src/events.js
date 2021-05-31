@@ -112,7 +112,7 @@ eventsApp
         .send({ message: 'Event created', event: formatEvent(eventDB) });
     } catch (error) {
       console.error(error);
-      res.status(400).send({ error });
+      res.status(500).send({ error });
     }
   })
   .get(decodeToken, async (req, res) => {
@@ -132,7 +132,7 @@ eventsApp
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
-      res.status(400).send({ error });
+      res.status(500).send({ error });
     }
   });
 
@@ -143,7 +143,7 @@ eventsApp
       res.status(200).send({ event: formatEvent(req.event) });
     } catch (error) {
       console.error(error);
-      res.status(400).send({ error });
+      res.status(500).send({ error });
     }
   })
   .put(decodeToken, verifyToken, loadEvent, async (req, res) => {
@@ -187,7 +187,7 @@ eventsApp
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
-      res.status(400).send({ error });
+      res.status(500).send({ error });
     }
   })
   .delete(decodeToken, verifyToken, loadEvent, async (req, res) => {
@@ -207,7 +207,7 @@ eventsApp
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
-      res.status(400).send({ error });
+      res.status(500).send({ error });
     }
   });
 
@@ -270,7 +270,7 @@ eventsApp
       }
     } catch (error) {
       console.error(error);
-      res.status(400).send({ error });
+      res.status(500).send({ error });
     }
   });
 

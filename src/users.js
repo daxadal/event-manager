@@ -58,7 +58,7 @@ usersApp.post('/sign-up', async (req, res) => {
     res.status(200).send({ message: 'Signed up successfully', token });
   } catch (error) {
     console.error(error);
-    res.status(400).send({ error });
+    res.status(500).send({ error });
   }
 });
 
@@ -102,15 +102,20 @@ usersApp.post('/sign-in', async (req, res) => {
     res.status(200).send({ message: 'Signed in successfully', token });
   } catch (error) {
     console.error(error);
-    res.status(400).send({ error });
+    res.status(500).send({ error });
   }
 });
 
 usersApp.post('/sign-out', decodeToken, verifyToken, async (req, res) => {
-  req.user.sessionToken = undefined;
-  req.user.socketId = undefined;
-  await req.user.save();
-  res.status(200).send({ message: 'Signed out successfully' });
+  try {
+    req.user.sessionToken = undefined;
+    req.user.socketId = undefined;
+    await req.user.save();
+    res.status(200).send({ message: 'Signed out successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error });
+  }
 });
 
 module.exports = usersApp;

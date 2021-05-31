@@ -107,7 +107,9 @@ eventsApp
         creatorId: req.user.id,
       }).save();
 
-      res.status(200).send(formatEvent(eventDB));
+      res
+        .status(200)
+        .send({ message: 'Event created', event: formatEvent(eventDB) });
     } catch (error) {
       console.error(error);
       res.status(400).send({ error });
@@ -126,7 +128,7 @@ eventsApp
       const events = await query.exec();
 
       console.info('Events retieved:', events.length);
-      if (events) res.status(200).send(events.map(formatEvent));
+      if (events) res.status(200).send({ events: events.map(formatEvent) });
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
@@ -138,7 +140,7 @@ eventsApp
   .route('/:eventId(\\w+)')
   .get(decodeToken, loadEvent, async (req, res) => {
     try {
-      res.status(200).send(formatEvent(req.event));
+      res.status(200).send({ event: formatEvent(req.event) });
     } catch (error) {
       console.error(error);
       res.status(400).send({ error });
@@ -178,7 +180,10 @@ eventsApp
 
       req.event = await req.event.save();
 
-      if (req.event) res.status(200).send(formatEvent(req.event));
+      if (req.event)
+        res
+          .status(200)
+          .send({ message: 'Event updated', event: formatEvent(req.event) });
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);

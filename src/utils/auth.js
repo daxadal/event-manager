@@ -8,26 +8,36 @@ async function decodeToken(req, res, next) {
     const bearerHeader = req.get('Authorization');
     const match = /^[Bb]earer (.+)$/.exec(bearerHeader);
 
-    if (match) {
+    if (!match) {
+      // No Bearer token found. No decoding necessary
+      next();
+    } else {
       // eslint-disable-next-line prefer-destructuring
       req.token = match[1];
-      try {
-        const decoded = jwt.verify(match[1], config.jwt.TOKEN_SECRET);
 
-        req.user = await DB.User.findById(decoded.id);
-        if (req.user) {
-          next();
-        } else res.status(403).send({ error: 'Invalid session token' });
+      let decoded;
+      try {
+        decoded = jwt.verify(match[1], config.jwt.TOKEN_SECRET);
       } catch (error) {
         console.error(error);
         res.status(403).send({ error: 'Invalid session token' });
+        return;
       }
-    } else {
-      next();
+
+      try {
+        req.user = await DB.User.findById(decoded.id);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ error });
+        return;
+      }
+
+      if (req.user) next();
+      else res.status(403).send({ error: 'Invalid session token' });
     }
   } catch (error) {
     console.error(error);
-    res.status(400).send({ error });
+    res.status(500).send({ error });
   }
 }
 

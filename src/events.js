@@ -27,35 +27,6 @@ function formatEvent(event) {
   return formatted;
 }
 
-const newEventSchema = Joi.object({
-  headline: Joi.string().max(100).required(),
-  description: Joi.string().max(500),
-  startDate: Joi.date().required(),
-  location: Joi.object({
-    name: Joi.string().max(100),
-    lat: Joi.number().min(-90).max(90),
-    lon: Joi.number().min(-180).max(180),
-  })
-    .or('name', 'lat', 'lon')
-    .and('lat', 'lon')
-    .required(),
-  state: Joi.valid('draft', 'public', 'private').default('draft'),
-});
-
-const updateEventSchema = Joi.object({
-  headline: Joi.string().min(10).max(100),
-  description: Joi.string().max(500),
-  startDate: Joi.date(),
-  location: Joi.object({
-    name: Joi.string().max(100),
-    lat: Joi.number().min(-90).max(90),
-    lon: Joi.number().min(-180).max(180),
-  })
-    .or('name', 'lat', 'lon')
-    .and('lat', 'lon'),
-  state: Joi.valid('draft', 'public', 'private'),
-});
-
 function isVisible(event, user) {
   console.info('Visibility. State:', event.state, ', User:', user && user.id);
   switch (event.state) {
@@ -84,6 +55,21 @@ eventsApp
   .route('/')
   .post(decodeToken, verifyToken, async (req, res) => {
     try {
+      const newEventSchema = Joi.object({
+        headline: Joi.string().max(100).required(),
+        description: Joi.string().max(500),
+        startDate: Joi.date().required(),
+        location: Joi.object({
+          name: Joi.string().max(100),
+          lat: Joi.number().min(-90).max(90),
+          lon: Joi.number().min(-180).max(180),
+        })
+          .or('name', 'lat', 'lon')
+          .and('lat', 'lon')
+          .required(),
+        state: Joi.valid('draft', 'public', 'private').default('draft'),
+      });
+
       const event = await newEventSchema
         .validateAsync(req.body)
         .catch((error) => {
@@ -148,6 +134,20 @@ eventsApp
   })
   .put(decodeToken, verifyToken, loadEvent, async (req, res) => {
     try {
+      const updateEventSchema = Joi.object({
+        headline: Joi.string().min(10).max(100),
+        description: Joi.string().max(500),
+        startDate: Joi.date(),
+        location: Joi.object({
+          name: Joi.string().max(100),
+          lat: Joi.number().min(-90).max(90),
+          lon: Joi.number().min(-180).max(180),
+        })
+          .or('name', 'lat', 'lon')
+          .and('lat', 'lon'),
+        state: Joi.valid('draft', 'public', 'private'),
+      });
+
       const newEvent = await updateEventSchema
         .validateAsync(req.body)
         .catch((error) => {

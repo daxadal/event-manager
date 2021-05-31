@@ -1,15 +1,15 @@
 module.exports = {
   api: {
-    DOMAIN: process.env.API_DOMAIN || 'localhost',
+    DOMAIN: process.env.API_DOMAIN || 'http://localhost',
     PORT: process.env.API_PORT || '3000',
   },
   db: {
-    DOMAIN: process.env.DB_DOMAIN || process.env.API_DOMAIN || 'localhost',
+    DOMAIN: process.env.DB_DOMAIN || 'mongodb://localhost',
     PORT: process.env.DB_PORT || '27017',
     DB_NAME: process.env.DB_NAME || 'WhisbiEventManager',
   },
   socket: {
-    DOMAIN: process.env.SOCKET_DOMAIN || process.env.API_DOMAIN || 'localhost',
+    DOMAIN: process.env.SOCKET_DOMAIN || process.env.API_DOMAIN || 'http://localhost',
     PORT: process.env.SOCKET_PORT || '40718',
   },
   jwt: {

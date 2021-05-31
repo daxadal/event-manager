@@ -3,7 +3,7 @@ const { io } = require('socket.io-client');
 const config = require('../config');
 
 module.exports.new = () => {
-  const socket = io(`http://${config.socket.DOMAIN}:${config.socket.PORT}`);
+  const socket = io(`${config.socket.DOMAIN}:${config.socket.PORT}`);
 
   socket.on('connect', () => {
     console.log('Client: Connection made to server: ', socket.id);

@@ -4,7 +4,7 @@ const config = require('../../config');
 
 function DB() {
   mongoose.connect(
-    `mongodb://${config.db.DOMAIN}:${config.db.PORT}/${config.db.DB_NAME}`,
+    `${config.db.DOMAIN}:${config.db.PORT}/${config.db.DB_NAME}`,
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,

@@ -14,10 +14,10 @@ const usersApp = express.Router();
 const hash = (pass) =>
   crypto.createHash('sha256', config.pass.SECRET).update(pass).digest('hex');
 
-usersApp.use(express.json({ limit: '512b' }));
+usersApp.use(express.json({ limit: config.dos.USER_SIZE }));
 usersApp.use(
   rateLimit({
-    max: 10,
+    max: config.dos.USER_RPM,
     windowMs: 60 * 1000, // 1 minute
     message: 'Too many requests',
   })

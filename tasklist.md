@@ -3,6 +3,7 @@
 Personal notes about requirements
 1. Check reminders are actually working
 1. Complete tests
+1. Add indexes to Mongo
 
 Technical Requirements
 1. Comment your code where you see is fit and include a README file with your submission.

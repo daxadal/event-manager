@@ -14,16 +14,18 @@ const DB = require('./utils/db')();
 app.use('/events', eventsApp);
 app.use('/users', usersApp);
 
-app.post('/ping', (req, res) => {
-  pingAll();
-  res.status(200).send({ message: 'All sockets pinged' });
-});
+if (config.api.DEV) {
+  app.post('/ping', (req, res) => {
+    pingAll();
+    res.status(200).send({ message: 'All sockets pinged' });
+  });
 
-app.post('/remind', async (req, res) => {
-  const events = await DB.Event.find();
-  sendReminders(events);
-  res.status(200).send({ message: 'All sockets pinged' });
-});
+  app.post('/remind', async (req, res) => {
+    const events = await DB.Event.find();
+    sendReminders(events);
+    res.status(200).send({ message: 'All sockets pinged' });
+  });
+}
 
 app.use((req, res) => {
   res.status(404).send({ error: 'Endpoint not found' });
@@ -37,4 +39,6 @@ socketServer.listen(config.socket.PORT, () => {
   console.info(`Socket listening on port ${config.socket.PORT}...`);
 });
 
-bree.start();
+if (config.bree.START) {
+  bree.start();
+}

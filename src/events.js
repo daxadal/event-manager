@@ -20,13 +20,14 @@ eventsApp.use(
 );
 
 /* eslint-disable no-underscore-dangle */
-function formatEvent(event) {
+const formatEvent = (event) => {
   const formatted = JSON.parse(JSON.stringify(event));
   formatted.id = formatted._id;
   delete formatted._id;
   delete formatted.__v;
   return formatted;
-}
+};
+const formatSub = formatEvent;
 
 function isVisible(event, user) {
   console.info('Visibility. State:', event.state, ', User:', user && user.id);
@@ -221,7 +222,7 @@ eventsApp
   .post(decodeToken, verifyToken, loadEvent, async (req, res) => {
     try {
       const inputSchema = Joi.object({
-        comment: Joi.string(),
+        comment: Joi.string().max(100),
       }).optional();
 
       const { value: params, error } = inputSchema.validate(req.body);
@@ -247,13 +248,12 @@ eventsApp
 
       if (oldSubscription) {
         res.status(400).send({
-          message: 'You already have subscribed to this event',
-          subscription: oldSubscription,
+          error: 'You already have subscribed to this event',
+          subscription: formatSub(oldSubscription),
         });
-      } else if (subscriptions.length) {
+      } else if (subscriptions.length >= 3) {
         res.status(400).send({
-          message: 'Subscribed events limit exceeded',
-          subscription: oldSubscription,
+          error: 'Subscribed events limit exceeded',
         });
       } else {
         const subscription = await new DB.Subscription({
@@ -263,9 +263,10 @@ eventsApp
           comment: params.comment,
         }).save();
 
-        res
-          .status(200)
-          .send({ message: 'Subscribed successfully', subscription });
+        res.status(200).send({
+          message: 'Subscribed successfully',
+          subscription: formatSub(subscription),
+        });
       }
     } catch (error) {
       console.error(error);

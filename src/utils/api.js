@@ -1,6 +1,6 @@
 const { default: Axios } = require('axios');
 
-const config = require('../config');
+const config = require('../../config');
 
 const setAuth = ({ token, user, pass } = {}) => {
   if (token) return { headers: { Authorization: `Bearer ${token}` } };
@@ -71,8 +71,9 @@ module.exports = () => {
       currentAuth = { token };
     },
     ping: () => post('ping'),
-    remind: () => post('remind'),
-    remindAll: () => post('remind-all'),
+    remind: (body) => post('remind', body),
+    remindAll: (body) => post('remind-all', body),
     remindAllBree: () => post('remind-all-bree'),
+    remindBree: () => post('remind-bree'),
   };
 };

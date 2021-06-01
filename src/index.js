@@ -9,6 +9,8 @@ const { default: socketServer, sendReminders, pingAll } = require('./socket');
 const bree = require('./scheduler');
 const DB = require('./utils/db')();
 
+app.use(express.json());
+
 app.use('/events', eventsApp);
 app.use('/users', usersApp);
 
@@ -21,6 +23,8 @@ if (config.api.DEV) {
   });
 
   app.post('/remind', async (req, res) => {
+    const origin = (req.body && req.body.origin) || 'API';
+    console.info('Remind ', req.body, origin);
     const now = new Date();
 
     const startMinute = new Date(now);
@@ -38,19 +42,26 @@ if (config.api.DEV) {
     const events = await DB.Event.find({
       startDate: { $gte: startMinute, $lte: endMinute },
     });
-    sendReminders(events);
+    sendReminders(events, origin);
     res.status(200).send({ message: 'Reminders sent' });
   });
 
-  app.post('/remind-all-bree', async (req, res) => {
+  app.post('/remind-bree', async (req, res) => {
     bree.run('fetchReminders');
     res.status(200).send({ message: 'Reminders sent' });
   });
 
+  app.post('/remind-all-bree', async (req, res) => {
+    bree.run('fetchAllReminders');
+    res.status(200).send({ message: 'Reminders sent' });
+  });
+
   app.post('/remind-all', async (req, res) => {
+    const origin = (req.body && req.body.origin) || 'API';
+    console.info('Remind ', req.body, origin);
     const events = await DB.Event.find();
-    sendReminders(events);
-    res.status(200).send({ message: 'All sockets pinged' });
+    sendReminders(events, origin);
+    res.status(200).send({ message: 'Reminders sent' });
   });
 }
 

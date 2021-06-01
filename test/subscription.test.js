@@ -15,18 +15,18 @@ let socket;
 describe('Subscription & Reminders', () => {
   before(async () => {
     const responseA = await API.Users.signup({
-      name: 'userA',
-      email: 'userA@example.com',
+      name: 'subA',
+      email: 'subA@example.com',
       password: 'pass',
     });
     const responseB = await API.Users.signup({
-      name: 'userB',
-      email: 'userB@example.com',
+      name: 'subB',
+      email: 'subB@example.com',
       password: 'pass',
     });
     const responseC = await API.Users.signup({
-      name: 'userC',
-      email: 'userC@example.com',
+      name: 'subC',
+      email: 'subC@example.com',
       password: 'pass',
     });
 

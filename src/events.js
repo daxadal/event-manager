@@ -59,7 +59,7 @@ eventsApp
   .post(decodeToken, verifyToken, async (req, res) => {
     try {
       const newEventSchema = Joi.object({
-        headline: Joi.string().max(100).required(),
+        headline: Joi.string().min(5).max(100).required(),
         description: Joi.string().max(500),
         startDate: Joi.date().required(),
         location: Joi.object({
@@ -138,7 +138,7 @@ eventsApp
   .put(decodeToken, verifyToken, loadEvent, async (req, res) => {
     try {
       const updateEventSchema = Joi.object({
-        headline: Joi.string().min(10).max(100),
+        headline: Joi.string().min(5).max(100),
         description: Joi.string().max(500),
         startDate: Joi.date(),
         location: Joi.object({

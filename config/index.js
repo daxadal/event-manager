@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 module.exports = {
   api: {
     DOMAIN: process.env.API_DOMAIN || 'http://localhost',

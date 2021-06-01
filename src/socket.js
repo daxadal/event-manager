@@ -51,7 +51,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.emit('PING', socket.id);
+  // socket.emit('PING', socket.id);
 });
 
 async function sendReminders(events) {

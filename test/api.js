@@ -72,5 +72,7 @@ module.exports = () => {
     },
     ping: () => post('ping'),
     remind: () => post('remind'),
+    remindAll: () => post('remind-all'),
+    remindAllBree: () => post('remind-all-bree'),
   };
 };

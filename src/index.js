@@ -12,6 +12,8 @@ const DB = require('./utils/db')();
 app.use('/events', eventsApp);
 app.use('/users', usersApp);
 
+console.info('DEV API is', config.api.DEV ? 'active' : 'NOT available');
+
 if (config.api.DEV) {
   app.post('/ping', (req, res) => {
     pingAll();
@@ -19,6 +21,33 @@ if (config.api.DEV) {
   });
 
   app.post('/remind', async (req, res) => {
+    const now = new Date();
+
+    const startMinute = new Date(now);
+    startMinute.setSeconds(0, 0);
+    startMinute.setMinutes(
+      startMinute.getMinutes() + config.bree.MINUTES_AHEAD
+    );
+
+    const endMinute = new Date(now);
+    endMinute.setSeconds(0, 0);
+    endMinute.setMinutes(
+      endMinute.getMinutes() + config.bree.MINUTES_AHEAD + 1
+    );
+
+    const events = await DB.Event.find({
+      startDate: { $gte: startMinute, $lte: endMinute },
+    });
+    sendReminders(events);
+    res.status(200).send({ message: 'Reminders sent' });
+  });
+
+  app.post('/remind-all-bree', async (req, res) => {
+    bree.run('fetchReminders');
+    res.status(200).send({ message: 'Reminders sent' });
+  });
+
+  app.post('/remind-all', async (req, res) => {
     const events = await DB.Event.find();
     sendReminders(events);
     res.status(200).send({ message: 'All sockets pinged' });
@@ -36,6 +65,8 @@ app.listen(config.api.PORT, () => {
 socketServer.listen(config.socket.PORT, () => {
   console.info(`Socket listening on port ${config.socket.PORT}...`);
 });
+
+console.info('Bree job is', config.bree.START ? 'active' : 'NOT available');
 
 if (config.bree.START) {
   bree.start();

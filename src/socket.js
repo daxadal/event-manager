@@ -54,6 +54,16 @@ io.on('connection', (socket) => {
   // socket.emit('PING', socket.id);
 });
 
+function format(event, user, sub) {
+  return {
+    message: `Hi ${
+      user.name
+    }! You have an event at ${event.startDate.toLocaleString()}: "${
+      event.headline
+    }"`,
+  };
+}
+
 async function sendReminders(events) {
   const subscriptions = await DB.Subscription.find().in(
     'eventId',
@@ -68,7 +78,7 @@ async function sendReminders(events) {
     const event = events.find((e) => e.id === String(sub.eventId));
     const user = users.find((u) => u.id === String(sub.subscriberId));
     const sockets = await io.in(user.socketId).fetchSockets();
-    sockets.map((socket) => socket.emit('reminder', { event, user, sub }));
+    sockets.map((socket) => socket.emit('reminder', format(event, user, sub)));
   });
 }
 

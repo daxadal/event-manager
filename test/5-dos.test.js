@@ -3,7 +3,7 @@
 const assert = require('assert');
 const config = require('../config');
 
-const API = require('./api')();
+const API = require('../src/utils/api')();
 
 const tokens = {};
 

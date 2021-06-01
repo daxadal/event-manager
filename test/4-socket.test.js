@@ -2,7 +2,7 @@
 
 // const assert = require('assert');
 
-const API = require('./api')();
+const API = require('../src/utils/api')();
 const Socket = require('./socket');
 const config = require('../config');
 
@@ -160,8 +160,7 @@ describe('Sockets', () => {
       // await API.Events.subscribe(events[0].id);
       await API.Events.subscribe(events[2].id);
     });
-
-    it('Remind', async () => {
+    it('Remind (direct call)', async () => {
       await API.remind();
       const promises = [sockets.A, sockets.B, sockets.C].map(
         (socket) =>
@@ -171,8 +170,34 @@ describe('Sockets', () => {
           })
       );
 
+      console.info('Sockets connected', {
+        A: sockets.A.connected,
+        B: sockets.B.connected,
+        C: sockets.C.connected,
+      });
+
       await Promise.all(promises);
     });
+
+    it('Remind (using bree)', async () => {
+      await API.remindBree();
+      const promises = [sockets.A, sockets.B, sockets.C].map(
+        (socket) =>
+          new Promise((resolve, reject) => {
+            socket.on('reminder', resolve);
+            sleep(1000).then(reject);
+          })
+      );
+
+      console.info('Sockets connected', {
+        A: sockets.A.connected,
+        B: sockets.B.connected,
+        C: sockets.C.connected,
+      });
+
+      await Promise.all(promises);
+    });
+
     after(() => {
       sockets.A.disconnect();
       sockets.B.disconnect();

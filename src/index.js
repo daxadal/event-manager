@@ -47,12 +47,12 @@ if (config.api.DEV) {
   });
 
   app.post('/remind-bree', async (req, res) => {
-    bree.run('fetchReminders');
+    bree.run('remind');
     res.status(200).send({ message: 'Reminders sent' });
   });
 
   app.post('/remind-all-bree', async (req, res) => {
-    bree.run('fetchAllReminders');
+    bree.run('remind-all');
     res.status(200).send({ message: 'Reminders sent' });
   });
 

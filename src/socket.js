@@ -24,7 +24,7 @@ io.on('connection', (socket) => {
     if (user) {
       user.socketId = socket.id;
       await user.save();
-      console.log('Server: sign-in', socket.id, user);
+      console.log('Server: sign-in', socket.id, user.name, user.id);
       socket.emit('sign-in-ok');
     } else {
       console.log('Server: failed to sign-in', {
@@ -40,7 +40,7 @@ io.on('connection', (socket) => {
     });
     if (user && user.socketId === socket.id) {
       user.socketId = null;
-      console.log('Server: sign-out', user);
+      console.log('Server: sign-out', socket.id, user.name, user.id);
       socket.emit('sign-out-ok');
     } else {
       console.log('Server: failed to sign-out', {
@@ -54,6 +54,7 @@ io.on('connection', (socket) => {
   // socket.emit('PING', socket.id);
 });
 
+// eslint-disable-next-line no-unused-vars
 function format(event, user, sub) {
   return {
     message: `Hi ${
@@ -64,12 +65,18 @@ function format(event, user, sub) {
   };
 }
 
-async function sendReminders(events) {
+async function sendReminders(events, origin) {
+  const all = await io.fetchSockets();
+  console.info(
+    origin,
+    'All sockets:',
+    all.map((s) => s.id)
+  );
   const subscriptions = await DB.Subscription.find().in(
     'eventId',
     events.map((event) => event.id)
   );
-  console.info('subscriptions.length', subscriptions.length);
+  console.info(origin, 'subscriptions.length', subscriptions.length);
   const users = await DB.User.find().in(
     '_id',
     subscriptions.map((sub) => sub.subscriberId)

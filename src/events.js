@@ -30,7 +30,6 @@ const formatEvent = (event) => {
 const formatSub = formatEvent;
 
 function isVisible(event, user) {
-  console.info('Visibility. State:', event.state, ', User:', user && user.id);
   switch (event.state) {
     case 'public':
       return true;

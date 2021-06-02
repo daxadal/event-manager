@@ -23,6 +23,8 @@ module.exports = {
     TOKEN_EXPIRATION: process.env.TOKEN_EXPIRATION || '8h',
   },
   bree: {
+    BREE_SECRET: process.env.BREE_SECRET,
+    BREE_EXPIRATION: process.env.BREE_EXPIRATION || '30s',
     INTERVAL: process.env.REMINDER_INTERVAL || '1m', // Every minute,
     MINUTES_AHEAD: process.env.REMINDER_MINUTES_AHEAD
       ? parseInt(process.env.REMINDER_MINUTES_AHEAD, 10)

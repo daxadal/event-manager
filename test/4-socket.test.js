@@ -1,6 +1,6 @@
 /* global describe xdescribe it before beforeEach after afterEach */
 
-// const assert = require('assert');
+const assert = require('assert');
 
 const API = require('../src/utils/api')();
 const Socket = require('./socket');
@@ -11,7 +11,7 @@ const sleep = (millis) => new Promise((resolve) => setTimeout(resolve, millis));
 const mdescribe = config.api.DEV ? describe : xdescribe;
 
 describe('Sockets', () => {
-  mdescribe('Connection (DEV API required)', () => {
+  xdescribe('Connection (DEV API required)', () => {
     it('PING all', async () => {
       const sockets = Array(8).map(() => Socket.new());
 
@@ -27,12 +27,12 @@ describe('Sockets', () => {
             });
           })
       );
-      await API.ping();
+      await API.Dev.ping();
       await Promise.all(promises);
     });
   });
 
-  describe('Sign in & sign out', () => {
+  xdescribe('Sign in & sign out', () => {
     let socket;
     before(async () => {
       await API.Users.signup({
@@ -154,24 +154,25 @@ describe('Sockets', () => {
       API.setToken(tokens.A);
       await API.Events.subscribe(events[0].id);
       await API.Events.subscribe(events[1].id);
-      // await API.Events.subscribe(events[2].id);
-      // await API.Events.subscribe(events[3].id);
+      await API.Events.subscribe(events[2].id);
+      await API.Events.subscribe(events[3].id);
 
       API.setToken(tokens.B);
       await API.Events.subscribe(events[0].id);
-      // await API.Events.subscribe(events[1].id);
+      await API.Events.subscribe(events[1].id);
 
       API.setToken(tokens.C);
-      // await API.Events.subscribe(events[0].id);
+      await API.Events.subscribe(events[0].id);
       await API.Events.subscribe(events[2].id);
     });
     it('Remind (direct call)', async () => {
-      await API.remind();
+      const response = await API.Dev.remind();
+      assert.strictEqual(response.status, 200);
       const promises = [sockets.A, sockets.B, sockets.C].map(
         (socket) =>
           new Promise((resolve, reject) => {
             socket.on('reminder', resolve);
-            sleep(1000).then(reject);
+            sleep(2000).then(reject);
           })
       );
 
@@ -185,12 +186,13 @@ describe('Sockets', () => {
     });
 
     it('Remind (using bree)', async () => {
-      await API.remindBree();
+      const response = await API.Dev.remindBree();
+      assert.strictEqual(response.status, 200);
       const promises = [sockets.A, sockets.B, sockets.C].map(
         (socket) =>
           new Promise((resolve, reject) => {
             socket.on('reminder', resolve);
-            sleep(1000).then(reject);
+            sleep(2000).then(reject);
           })
       );
 

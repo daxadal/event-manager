@@ -1,9 +1,11 @@
+const { createBreeToken } = require('../src/utils/auth');
+
 const API = require('../src/utils/api')();
 
 async function callAPI() {
   try {
     console.info('Calling API...');
-    await API.remind({ origin: 'BREE' });
+    await API.Jobs.remind(createBreeToken());
     console.info('API returned successfully');
     process.exit(0);
   } catch (error) {

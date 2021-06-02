@@ -8,6 +8,8 @@ const eventsApp = require('./events');
 const usersApp = require('./users');
 const { default: socketServer, sendReminders, pingAll } = require('./socket');
 const bree = require('./scheduler');
+const { getMinuteInterval } = require('./utils/utils');
+const { checkBreeToken } = require('./utils/auth');
 const DB = require('./utils/db')();
 
 app.use('/events', eventsApp);
@@ -22,54 +24,68 @@ app.use(
   })
 );
 
+app.post('/jobs/remind', checkBreeToken, async (req, res) => {
+  try {
+    const { start, end } = req.dates;
+
+    const events = await DB.Event.find({
+      startDate: { $gte: start, $lte: end },
+    });
+    await sendReminders(events);
+    res.status(200).send({ message: 'Reminders sent' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: 'Internal server error' });
+  }
+});
+
 console.info('DEV API is', config.api.DEV ? 'active' : 'NOT available');
 
 if (config.api.DEV) {
-  app.post('/ping', (req, res) => {
-    pingAll();
-    res.status(200).send({ message: 'All sockets pinged' });
+  app.post('/dev/ping', async (req, res) => {
+    try {
+      await pingAll();
+      res.status(200).send({ message: 'All sockets pinged' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: 'Internal server error' });
+    }
   });
 
-  app.post('/remind', async (req, res) => {
-    const origin = (req.body && req.body.origin) || 'API';
-    console.info('Remind ', req.body, origin);
-    const now = new Date();
+  app.post('/dev/remind', async (req, res) => {
+    try {
+      const { start, end } = getMinuteInterval();
 
-    const startMinute = new Date(now);
-    startMinute.setSeconds(0, 0);
-    startMinute.setMinutes(
-      startMinute.getMinutes() + config.bree.MINUTES_AHEAD
-    );
-
-    const endMinute = new Date(now);
-    endMinute.setSeconds(0, 0);
-    endMinute.setMinutes(
-      endMinute.getMinutes() + config.bree.MINUTES_AHEAD + 1
-    );
-
-    const events = await DB.Event.find({
-      startDate: { $gte: startMinute, $lte: endMinute },
-    });
-    sendReminders(events, origin);
-    res.status(200).send({ message: 'Reminders sent' });
+      const events = await DB.Event.find({
+        startDate: { $gte: start, $lte: end },
+      });
+      sendReminders(events);
+      res.status(200).send({ message: 'Reminders sent' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: 'Internal server error' });
+    }
   });
 
-  app.post('/remind-bree', async (req, res) => {
+  app.post('/dev/remind-bree', async (req, res) => {
     bree.run('remind');
     res.status(200).send({ message: 'Reminders sent' });
   });
 
-  app.post('/remind-all-bree', async (req, res) => {
+  app.post('/dev/remind-all-bree', async (req, res) => {
     bree.run('remind-all');
     res.status(200).send({ message: 'Reminders sent' });
   });
 
-  app.post('/remind-all', async (req, res) => {
-    const origin = (req.body && req.body.origin) || 'API';
-    console.info('Remind ', req.body, origin);
-    const events = await DB.Event.find();
-    sendReminders(events, origin);
-    res.status(200).send({ message: 'Reminders sent' });
+  app.post('/dev/remind-all', async (req, res) => {
+    try {
+      const events = await DB.Event.find();
+      sendReminders(events);
+      res.status(200).send({ message: 'Reminders sent' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: 'Internal server error' });
+    }
   });
 }
 

@@ -18,8 +18,8 @@ module.exports.new = () => {
     socket.emit('PONG', socket.id);
   });
 
-  socket.on('reminder', (...params) => {
-    console.log('Client reminder', ...params);
+  socket.on('reminder', (reminder) => {
+    console.log('Client reminder: ', reminder.message);
   });
 
   socket.on('sign-in-ok', () => {

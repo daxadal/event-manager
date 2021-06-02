@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const config = require('../../config');
 
 function DB() {
+  mongoose.set('useCreateIndex', true);
   mongoose.connect(
     `${config.db.DOMAIN}:${config.db.PORT}/${config.db.DB_NAME}`,
     {

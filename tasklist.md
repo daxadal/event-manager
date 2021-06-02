@@ -1,8 +1,6 @@
 # To do
 
 Personal notes about requirements
-1. Format reminders
-1. Create internal endpoint for reminders
 
 Technical Requirements
 1. Comment your code where you see is fit and include a README file with your submission.
@@ -10,6 +8,8 @@ Technical Requirements
 # Done
 
 Personal notes about requirements
+1. Create internal endpoint for reminders
+1. Format reminders
 1. Check reminders are actually working
 1. Add indexes to Mongo
 1. Complete tests

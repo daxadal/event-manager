@@ -64,16 +64,25 @@ module.exports = () => {
     signout: () => post('users/sign-out'),
   };
 
+  const Dev = {
+    ping: () => post('dev/ping'),
+    remind: () => post('dev/remind'),
+    remindAll: () => post('dev/remind-all'),
+    remindAllBree: () => post('dev/remind-all-bree'),
+    remindBree: () => post('dev/remind-bree'),
+  };
+
+  const Jobs = {
+    remind: (token) => post('jobs/remind', null, { token }),
+  };
+
   return {
     Events,
     Users,
     setToken: (token) => {
       currentAuth = { token };
     },
-    ping: () => post('ping'),
-    remind: (body) => post('remind', body),
-    remindAll: (body) => post('remind-all', body),
-    remindAllBree: () => post('remind-all-bree'),
-    remindBree: () => post('remind-bree'),
+    Dev,
+    Jobs,
   };
 };

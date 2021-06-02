@@ -54,7 +54,6 @@ io.on('connection', (socket) => {
   // socket.emit('PING', socket.id);
 });
 
-// eslint-disable-next-line no-unused-vars
 function format(event, user, sub) {
   return {
     message: `Hi ${
@@ -62,13 +61,17 @@ function format(event, user, sub) {
     }! You have an event at ${event.startDate.toLocaleString()}: "${
       event.headline
     }"`,
+    event: DB.format(event),
+    subscription: {
+      subscriptionDate: sub.subscriptionDate,
+      comment: sub.comment,
+    },
   };
 }
 
-async function sendReminders(events, origin) {
+async function sendReminders(events) {
   const all = await io.fetchSockets();
   console.info(
-    origin,
     'All sockets:',
     all.map((s) => s.id)
   );
@@ -76,7 +79,7 @@ async function sendReminders(events, origin) {
     'eventId',
     events.map((event) => event.id)
   );
-  console.info(origin, 'subscriptions.length', subscriptions.length);
+  console.info( 'subscriptions.length', subscriptions.length);
   const users = await DB.User.find().in(
     '_id',
     subscriptions.map((sub) => sub.subscriberId)

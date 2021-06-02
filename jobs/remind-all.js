@@ -3,7 +3,7 @@ const API = require('../src/utils/api')();
 async function callAPI() {
   try {
     console.info('Calling API...');
-    await API.remindAll({ origin: 'BREE' });
+    await API.Dev.remindAll();
     console.info('API returned successfully');
     process.exit(0);
   } catch (error) {

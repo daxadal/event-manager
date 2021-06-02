@@ -107,7 +107,6 @@ eventsApp
 
       const events = await query.exec();
 
-      console.info('Events retieved:', events.length);
       if (events) res.status(200).send({ events: events.map(DB.format) });
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {

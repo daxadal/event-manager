@@ -28,6 +28,7 @@ app.use(
 
 app.post('/jobs/remind', checkBreeToken, async (req, res) => {
   try {
+    console.info('Remind:', req.dates);
     const { start, end } = req.dates;
 
     const events = await DB.Event.find({

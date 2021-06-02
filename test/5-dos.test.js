@@ -80,7 +80,7 @@ describe('Denial of service', () => {
   });
 
   describe('Request flooding', () => {
-    it('FAIL - DOS attack on events', async () => {
+    it('DOS attack on events', async () => {
       API.setToken(tokens.A);
       const promises = Array(config.dos.EVENT_RPM + 1)
         .fill()
@@ -105,7 +105,7 @@ describe('Denial of service', () => {
 
       assert.ok(rejectedResponses.length > 0);
     });
-    it('FAIL - DOS attack on login', async () => {
+    it('DOS attack on login', async () => {
       API.setToken();
       const promises = Array(config.dos.USER_RPM + 1)
         .fill()

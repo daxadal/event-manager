@@ -67,8 +67,6 @@ async function checkBreeToken(req, res, next) {
         return;
       }
 
-      console.info('req.dates', req.dates);
-
       if (!req.dates || !req.dates.start || !req.dates.end)
         res.status(403).send({ error: 'Invalid session token' });
       else next();

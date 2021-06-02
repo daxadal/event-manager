@@ -7,6 +7,7 @@ const bree = new Bree({
   jobs: [
     {
       name: 'remind-all',
+      timeout: false,
     },
     {
       name: 'remind',

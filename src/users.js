@@ -100,7 +100,6 @@ usersApp.post('/sign-in', async (req, res) => {
     user.sessionToken = token;
     user.save();
 
-    console.info('Auth:', credentials, '\nUser:', user);
     res.status(200).send({ message: 'Signed in successfully', token });
   } catch (error) {
     console.error(error);

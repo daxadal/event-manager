@@ -37,4 +37,5 @@ async function generateEvents({ length, startDate, state, token }) {
   const responses = await Promise.all(promises);
   return responses.map((response) => response.data.event);
 }
+
 module.exports = { generateTokens, generateEvents };

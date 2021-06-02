@@ -10,7 +10,6 @@ const setAuth = ({ token, user, pass } = {}) => {
 
 const errorHandler = (error) => {
   if (error.response) {
-    // console.error('Response error: ', error.response.data);
     return error.response;
   }
 

@@ -69,10 +69,10 @@ describe('Sockets', () => {
       });
     });
     it('FAIL - Token not valid on sign out', (done) => {
-      API.Users.signin('socket@example.com', 'pass').then((response) => {
-        socket.emit('sign-in', response.data.token);
-        socket.emit('sign-out', 'token.not.valid');
-      });
+      API.Users.signin('socket@example.com', 'pass')
+        .then((response) => socket.emit('sign-in', response.data.token))
+        .then(() => sleep(200))
+        .then(() => socket.emit('sign-out', 'token.not.valid'));
 
       socket.on('sign-out-ok', () => {
         done(new Error('Signed out successfully'));
@@ -84,7 +84,7 @@ describe('Sockets', () => {
     it('OK - Valid sign out', (done) => {
       API.Users.signin('socket@example.com', 'pass').then((response) => {
         socket.emit('sign-in', response.data.token);
-        socket.emit('sign-out', response.data.token);
+        sleep(200).then(() => socket.emit('sign-out', response.data.token));
       });
 
       socket.on('sign-out-ok', () => {
@@ -101,11 +101,13 @@ describe('Sockets', () => {
   });
 
   mdescribe('Reminder (DEV API required)', () => {
-    const sockets = { A: Socket.new(), B: Socket.new(), C: Socket.new() };
+    let sockets;
     let tokens;
     let events;
 
     before(async () => {
+      sockets = { A: Socket.new(), B: Socket.new(), C: Socket.new() };
+
       tokens = await generateTokens('socket', ['O', 'A', 'B', 'C']);
 
       const date = new Date();
@@ -117,8 +119,6 @@ describe('Sockets', () => {
         state: 'private',
         token: tokens.O,
       });
-
-      console.info(events);
 
       sockets.A.emit('sign-in', tokens.A);
       sockets.B.emit('sign-in', tokens.B);
@@ -148,13 +148,6 @@ describe('Sockets', () => {
             sleep(2000).then(reject);
           })
       );
-
-      console.info('Sockets connected', {
-        A: sockets.A.connected,
-        B: sockets.B.connected,
-        C: sockets.C.connected,
-      });
-
       await Promise.all(promises);
     });
 
@@ -168,12 +161,6 @@ describe('Sockets', () => {
             sleep(2000).then(reject);
           })
       );
-
-      console.info('Sockets connected', {
-        A: sockets.A.connected,
-        B: sockets.B.connected,
-        C: sockets.C.connected,
-      });
 
       await Promise.all(promises);
     });

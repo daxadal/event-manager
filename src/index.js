@@ -1,4 +1,5 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 
@@ -9,10 +10,17 @@ const { default: socketServer, sendReminders, pingAll } = require('./socket');
 const bree = require('./scheduler');
 const DB = require('./utils/db')();
 
-app.use(express.json());
-
 app.use('/events', eventsApp);
 app.use('/users', usersApp);
+
+app.use(express.json({ limit: config.dos.MAIN_SIZE }));
+app.use(
+  rateLimit({
+    max: config.dos.MAIN_RPM,
+    windowMs: 60 * 1000, // 1 minute
+    message: 'Too many requests',
+  })
+);
 
 console.info('DEV API is', config.api.DEV ? 'active' : 'NOT available');
 

@@ -41,5 +41,7 @@ module.exports = {
       : 100,
     USER_SIZE: process.env.USER_SIZE || '512b',
     USER_RPM: process.env.USER_RPM ? parseInt(process.env.USER_RPM, 10) : 30,
+    MAIN_SIZE: process.env.MAIN_SIZE || '128b',
+    MAIN_RPM: process.env.MAIN_RPM ? parseInt(process.env.MAIN_RPM, 10) : 10,
   },
 };

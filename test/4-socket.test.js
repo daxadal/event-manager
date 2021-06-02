@@ -34,14 +34,12 @@ describe('Sockets', () => {
 
   describe('Sign in & sign out', () => {
     let socket;
-    let token;
     before(async () => {
-      const response = await API.Users.signup({
+      await API.Users.signup({
         name: 'socket',
         email: 'socket@example.com',
         password: 'pass',
       });
-      token = response.data.token;
     });
     beforeEach(() => {
       socket = Socket.new();
@@ -58,7 +56,9 @@ describe('Sockets', () => {
       });
     });
     it('OK - Valid sign in', (done) => {
-      socket.emit('sign-in', token);
+      API.Users.signin('socket@example.com', 'pass').then((response) =>
+        socket.emit('sign-in', response.data.token)
+      );
 
       socket.on('sign-in-ok', () => {
         done();
@@ -68,7 +68,10 @@ describe('Sockets', () => {
       });
     });
     it('FAIL - Token not valid on sign out', (done) => {
-      socket.emit('sign-out', 'token.not.valid');
+      API.Users.signin('socket@example.com', 'pass').then((response) => {
+        socket.emit('sign-in', response.data.token);
+        socket.emit('sign-out', 'token.not.valid');
+      });
 
       socket.on('sign-out-ok', () => {
         done(new Error('Signed out successfully'));
@@ -78,8 +81,10 @@ describe('Sockets', () => {
       });
     });
     it('OK - Valid sign out', (done) => {
-      socket.emit('sign-in', token);
-      socket.emit('sign-out', token);
+      API.Users.signin('socket@example.com', 'pass').then((response) => {
+        socket.emit('sign-in', response.data.token);
+        socket.emit('sign-out', response.data.token);
+      });
 
       socket.on('sign-out-ok', () => {
         done();

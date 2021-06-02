@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const mongoose = require('mongoose');
 
 const config = require('../../config');
@@ -17,43 +18,51 @@ function DB() {
     console.info('DB connected');
   });
 
-  const Event = mongoose.model(
-    'Event',
-    new mongoose.Schema({
-      headline: String,
-      description: String,
-      startDate: Date,
-      location: { name: String, lat: Number, lon: Number },
-      state: String,
-      creatorId: mongoose.Types.ObjectId,
-    })
-  );
+  const eventSchema = new mongoose.Schema({
+    headline: String,
+    description: String,
+    startDate: Date,
+    location: { name: String, lat: Number, lon: Number },
+    state: String,
+    creatorId: mongoose.Types.ObjectId,
+  });
 
-  const User = mongoose.model(
-    'User',
-    new mongoose.Schema({
-      name: String,
-      email: String,
-      hashedPassword: String,
-      sessionToken: String,
-      socketId: String,
-    })
-  );
+  eventSchema.index({ creatorId: 1, state: 1 });
+  eventSchema.index({ state: 1 });
+  eventSchema.index({ startDate: -1 });
 
-  const Subscription = mongoose.model(
-    'Subscription',
-    new mongoose.Schema({
-      eventId: mongoose.Types.ObjectId,
-      subscriberId: mongoose.Types.ObjectId,
-      subscriptionDate: Date,
-      comment: String,
-    })
-  );
+  const userSchema = new mongoose.Schema({
+    name: String,
+    email: String,
+    hashedPassword: String,
+    sessionToken: String,
+    socketId: String,
+  });
+  userSchema.index({ email: 1 });
+  userSchema.index({ sessionToken: 1 });
+
+  const subscriptionSchema = new mongoose.Schema({
+    eventId: mongoose.Types.ObjectId,
+    subscriberId: mongoose.Types.ObjectId,
+    subscriptionDate: Date,
+    comment: String,
+  });
+  subscriptionSchema.index({ subscriberId: 1 });
+  subscriptionSchema.index({ eventId: 1 });
+
+  const format = (object) => {
+    const formatted = JSON.parse(JSON.stringify(object));
+    formatted.id = formatted._id;
+    delete formatted._id;
+    delete formatted.__v;
+    return formatted;
+  };
 
   return {
-    Event,
-    Subscription,
-    User,
+    Event: mongoose.model('Event', eventSchema),
+    Subscription: mongoose.model('Subscription', subscriptionSchema),
+    User: mongoose.model('User', userSchema),
+    format,
   };
 }
 

@@ -19,16 +19,6 @@ eventsApp.use(
   })
 );
 
-/* eslint-disable no-underscore-dangle */
-const formatEvent = (event) => {
-  const formatted = JSON.parse(JSON.stringify(event));
-  formatted.id = formatted._id;
-  delete formatted._id;
-  delete formatted.__v;
-  return formatted;
-};
-const formatSub = formatEvent;
-
 function isVisible(event, user) {
   switch (event.state) {
     case 'public':
@@ -99,7 +89,7 @@ eventsApp
 
       res
         .status(200)
-        .send({ message: 'Event created', event: formatEvent(eventDB) });
+        .send({ message: 'Event created', event: DB.format(eventDB) });
     } catch (error) {
       console.error(error);
       res.status(500).send({ error: 'Internal server error' });
@@ -118,7 +108,7 @@ eventsApp
       const events = await query.exec();
 
       console.info('Events retieved:', events.length);
-      if (events) res.status(200).send({ events: events.map(formatEvent) });
+      if (events) res.status(200).send({ events: events.map(DB.format) });
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
@@ -130,7 +120,7 @@ eventsApp
   .route('/:eventId(\\w+)')
   .get(decodeToken, loadEvent, async (req, res) => {
     try {
-      res.status(200).send({ event: formatEvent(req.event) });
+      res.status(200).send({ event: DB.format(req.event) });
     } catch (error) {
       console.error(error);
       res.status(500).send({ error: 'Internal server error' });
@@ -187,7 +177,7 @@ eventsApp
       if (req.event)
         res
           .status(200)
-          .send({ message: 'Event updated', event: formatEvent(req.event) });
+          .send({ message: 'Event updated', event: DB.format(req.event) });
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
       console.error(error);
@@ -248,7 +238,7 @@ eventsApp
       if (oldSubscription) {
         res.status(400).send({
           error: 'You already have subscribed to this event',
-          subscription: formatSub(oldSubscription),
+          subscription: DB.format(oldSubscription),
         });
       } else if (subscriptions.length >= 3) {
         res.status(400).send({
@@ -264,7 +254,7 @@ eventsApp
 
         res.status(200).send({
           message: 'Subscribed successfully',
-          subscription: formatSub(subscription),
+          subscription: DB.format(subscription),
         });
       }
     } catch (error) {

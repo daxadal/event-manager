@@ -79,7 +79,7 @@ async function sendReminders(events) {
     'eventId',
     events.map((event) => event.id)
   );
-  console.info( 'subscriptions.length', subscriptions.length);
+  console.info('subscriptions.length', subscriptions.length);
   const users = await DB.User.find().in(
     '_id',
     subscriptions.map((sub) => sub.subscriberId)

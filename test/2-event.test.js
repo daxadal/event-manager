@@ -1,36 +1,19 @@
 /* global describe it before */
 
 const assert = require('assert');
+const { generateTokens } = require('./utils');
 
 const API = require('../src/utils/api')();
 
-const tokens = {};
+let tokens;
 
 describe('Events', () => {
   before(async () => {
-    const responseA = await API.Users.signup({
-      name: 'userA',
-      email: 'userA@example.com',
-      password: 'pass',
-    });
-    const responseB = await API.Users.signup({
-      name: 'userB',
-      email: 'userB@example.com',
-      password: 'pass',
-    });
-    const responseC = await API.Users.signup({
-      name: 'userC',
-      email: 'userC@example.com',
-      password: 'pass',
-    });
-
-    tokens.A = responseA.data.token;
-    tokens.B = responseB.data.token;
-    tokens.C = responseC.data.token;
+    tokens = await generateTokens('event', ['creator', 'other']);
   });
   describe('Create Event', () => {
     before(() => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
     });
     it('FAIL - No body', async () => {
       const response = await API.Events.create();
@@ -106,7 +89,7 @@ describe('Events', () => {
       lengths.noToken = response.data.events.length;
     });
     it('OK - Get all events (other user)', async () => {
-      API.setToken(tokens.B);
+      API.setToken(tokens.other);
       const response = await API.Events.getAll();
       assert.strictEqual(response.status, 200);
       assert.ok(response.data.events);
@@ -116,7 +99,7 @@ describe('Events', () => {
       lengths.tokenB = response.data.events.length;
     });
     it('OK - Get all events (creator)', async () => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
       const response = await API.Events.getAll();
       assert.strictEqual(response.status, 200);
       assert.ok(response.data.events);
@@ -130,7 +113,7 @@ describe('Events', () => {
     const eventIds = {};
 
     before(async () => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
       const response = await API.Events.getAll();
 
       eventIds.draft = response.data.events.find((e) => e.state === 'draft').id;
@@ -142,27 +125,27 @@ describe('Events', () => {
       ).id;
     });
     it('FAIL - Get non-existant event', async () => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
       const response = await API.Events.get('123456789b7e91080da94660');
       assert.strictEqual(response.status, 400);
       assert.ok(response.data.error);
       assert.strictEqual(response.data.error, 'Event not found');
     });
     it('OK - Get event (draft as creator)', async () => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
       const response = await API.Events.get(eventIds.draft);
       assert.strictEqual(response.status, 200);
       assert.ok(response.data.event);
     });
     it('FAIL - Get event (draft as non-creator)', async () => {
-      API.setToken(tokens.B);
+      API.setToken(tokens.other);
       const response = await API.Events.get(eventIds.draft);
       assert.strictEqual(response.status, 400);
       assert.ok(response.data.error);
       assert.strictEqual(response.data.error, 'Event not found');
     });
     it('OK - Get event (private as non-creator)', async () => {
-      API.setToken(tokens.B);
+      API.setToken(tokens.other);
       const response = await API.Events.get(eventIds.private);
       assert.strictEqual(response.status, 200);
       assert.ok(response.data.event);
@@ -185,7 +168,7 @@ describe('Events', () => {
     const eventIds = {};
 
     before(async () => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
       const response = await API.Events.getAll();
 
       eventIds.draft = response.data.events.find((e) => e.state === 'draft').id;
@@ -197,14 +180,14 @@ describe('Events', () => {
       ).id;
     });
     it('FAIL - Update non-existant event', async () => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
       const response = await API.Events.update('123456789b7e91080da94660', {});
       assert.strictEqual(response.status, 400);
       assert.ok(response.data.error);
       assert.strictEqual(response.data.error, 'Event not found');
     });
     it('FAIL - Bad location', async () => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
       const response = await API.Events.update(eventIds.draft, {
         headline: 'New event',
         startDate: Date.now(),
@@ -215,13 +198,13 @@ describe('Events', () => {
       assert.ok(/location/.test(response.data.error));
     });
     it('OK - Update event, no body', async () => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
       const response = await API.Events.update(eventIds.draft, {});
       assert.strictEqual(response.status, 200);
       assert.ok(response.data.event);
     });
     it('OK - Update event, full body', async () => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
       const response = await API.Events.update(eventIds.private, {
         headline:
           '1Ot3HAS2r LSxtVk2kC DSgBJicUl l7JsXbHul XzHbL2yR3 AXNKwWTTG wsx7UXz8i O9yryfVBV 669mCkjsH p6gijqSQG ',
@@ -239,14 +222,14 @@ describe('Events', () => {
       assert.ok(response.data.event);
     });
     it('FAIL - Update non-visible event (as non-creator)', async () => {
-      API.setToken(tokens.B);
+      API.setToken(tokens.other);
       const response = await API.Events.update(eventIds.draft, {});
       assert.strictEqual(response.status, 400);
       assert.ok(response.data.error);
       assert.strictEqual(response.data.error, 'Event not found');
     });
     it('FAIL - Update visible event (as non-creator)', async () => {
-      API.setToken(tokens.B);
+      API.setToken(tokens.other);
       const response = await API.Events.update(eventIds.public, {});
       assert.strictEqual(response.status, 400);
       assert.ok(response.data.error);
@@ -264,7 +247,7 @@ describe('Events', () => {
   describe('Delete event', () => {
     const eventIds = {};
     before(async () => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
 
       const responsePrivate = await API.Events.create({
         headline: 'New event',
@@ -282,21 +265,21 @@ describe('Events', () => {
       eventIds.private = responsePrivate.data.event.id;
     });
     it('FAIL - Delete non-existant event', async () => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
       const response = await API.Events.destroy('123456789b7e91080da94660');
       assert.strictEqual(response.status, 400);
       assert.ok(response.data.error);
       assert.strictEqual(response.data.error, 'Event not found');
     });
     it('FAIL - Delete non-visible event', async () => {
-      API.setToken(tokens.B);
+      API.setToken(tokens.other);
       const response = await API.Events.destroy(eventIds.draft);
       assert.strictEqual(response.status, 400);
       assert.ok(response.data.error);
       assert.strictEqual(response.data.error, 'Event not found');
     });
     it('FAIL - Delete non-owned event', async () => {
-      API.setToken(tokens.B);
+      API.setToken(tokens.other);
       const response = await API.Events.destroy(eventIds.private);
       assert.strictEqual(response.status, 400);
       assert.ok(response.data.error);
@@ -306,7 +289,7 @@ describe('Events', () => {
       );
     });
     it('OK - Delete non-existant event', async () => {
-      API.setToken(tokens.A);
+      API.setToken(tokens.creator);
       const response = await API.Events.destroy(eventIds.private);
       assert.strictEqual(response.status, 200);
     });

@@ -5,13 +5,14 @@ const assert = require('assert');
 const API = require('../src/utils/api')();
 const Socket = require('./socket');
 const config = require('../config');
+const { generateTokens, generateEvents } = require('./utils');
 
 const sleep = (millis) => new Promise((resolve) => setTimeout(resolve, millis));
 
 const mdescribe = config.api.DEV ? describe : xdescribe;
 
 describe('Sockets', () => {
-  xdescribe('Connection (DEV API required)', () => {
+  mdescribe('Connection (DEV API required)', () => {
     it('PING all', async () => {
       const sockets = Array(8).map(() => Socket.new());
 
@@ -32,7 +33,7 @@ describe('Sockets', () => {
     });
   });
 
-  xdescribe('Sign in & sign out', () => {
+  describe('Sign in & sign out', () => {
     let socket;
     before(async () => {
       await API.Users.signup({
@@ -101,51 +102,23 @@ describe('Sockets', () => {
 
   mdescribe('Reminder (DEV API required)', () => {
     const sockets = { A: Socket.new(), B: Socket.new(), C: Socket.new() };
-    const tokens = {};
+    let tokens;
     let events;
 
     before(async () => {
-      const responseO = await API.Users.signup({
-        name: 'socketO',
-        email: 'socketO@example.com',
-        password: 'pass',
-      });
-      const responseA = await API.Users.signup({
-        name: 'socketA',
-        email: 'socketA@example.com',
-        password: 'pass',
-      });
-      const responseB = await API.Users.signup({
-        name: 'socketB',
-        email: 'socketB@example.com',
-        password: 'pass',
-      });
-      const responseC = await API.Users.signup({
-        name: 'socketC',
-        email: 'socketC@example.com',
-        password: 'pass',
-      });
-
-      tokens.O = responseO.data.token;
-      tokens.A = responseA.data.token;
-      tokens.B = responseB.data.token;
-      tokens.C = responseC.data.token;
+      tokens = await generateTokens('socket', ['O', 'A', 'B', 'C']);
 
       const date = new Date();
       date.setMinutes(date.getMinutes() + config.bree.MINUTES_AHEAD);
 
-      API.setToken(tokens.O);
+      events = await generateEvents({
+        length: 4,
+        startDate: date,
+        state: 'private',
+        token: tokens.O,
+      });
 
-      const promises = [...Array(4).keys()].map((i) =>
-        API.Events.create({
-          headline: `New event ${i}`,
-          startDate: date,
-          location: { name: 'Somewhere' },
-          state: 'private',
-        })
-      );
-      const responses = await Promise.all(promises);
-      events = responses.map((response) => response.data.event);
+      console.info(events);
 
       sockets.A.emit('sign-in', tokens.A);
       sockets.B.emit('sign-in', tokens.B);

@@ -59,17 +59,17 @@ This API is called by the own server, since background processes does not have a
 
 ### Dev
 This API is only mounted if `DEVELOPMENT_API=true` in the environment variables, and provides some extra methods to test the sockets. These methods are not expected to be deployed to production (and **shouldn't be**), so no Auth or body is required
-* `/dev/ping`: Pings all connected sockets.
-* `/dev/remind`: Finds all the events that will occur in exactly 24 hours, or another time lapse if configured in the environment variables, and sends a reminder to subscribed users through sockets.
-* `/dev/remind-bree`: Same as above but using background jobs.
-* `/dev/remind-all`: Gets all events in the database and sends a reminder to subscribed users through sockets.
-* `/dev/remind-all-bree`: Same as above but using background jobs.
+* `POST /dev/ping`: Pings all connected sockets.
+* `POST /dev/remind`: Finds all the events that will occur in exactly 24 hours, or another time lapse if configured in the environment variables, and sends a reminder to subscribed users through sockets.
+* `POST /dev/remind-bree`: Same as above but using background jobs.
+* `POST /dev/remind-all`: Gets all events in the database and sends a reminder to subscribed users through sockets.
+* `POST /dev/remind-all-bree`: Same as above but using background jobs.
 
 ## Socket events summary
 
 ### Client to server
-* `sign-in`: After signing in or signing up through API, sends the session token to the socket server to bind this socket to the user.
-* `sign-out`: **Before** signing out through API, sends the session token to the socket server to **unbind** this socket from the user.
+* `sign-in`: Sends the session token to the socket server to **bind** this socket to the user. This event should be sent **after** signing in or signing up through API and/or **after** creating a new socket for the user.
+* `sign-out`: Sends the session token to the socket server to **unbind** this socket from the user. This event should be sent **before** signing out through API and/or **before** disconnecting the user's socket.
 * `PONG`: response to server's `PING`.
 
 ### Server to client

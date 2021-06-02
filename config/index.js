@@ -46,4 +46,9 @@ module.exports = {
     MAIN_SIZE: process.env.MAIN_SIZE || '128b',
     MAIN_RPM: process.env.MAIN_RPM ? parseInt(process.env.MAIN_RPM, 10) : 10,
   },
+  mocha: {
+    SOCKET_VERBOSE: process.env.MOCHA_SOCKET_VERBOSE
+      ? process.env.MOCHA_SOCKET_VERBOSE === 'true'
+      : false,
+  },
 };

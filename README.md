@@ -20,6 +20,8 @@ The server can be started using `npm start` script. The server also can be execu
 
 The database can be purged using the `npm run reset`. Tests on the API (powered by `mocha`) can be performed by executing `npm test`. (This script assumes the server is already up and running).
 
+A Postman collection is also provided to test the API manually.
+
 ### Important notices
 
 #### Purges

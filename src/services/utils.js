@@ -1,4 +1,4 @@
-const config = require('../../config');
+const config = require('../config');
 
 function getMinuteInterval(now = new Date()) {
   const start = new Date(now);

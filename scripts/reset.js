@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const config = require('../config');
+const config = require('../src/config');
 
 console.info('Preparing to drop database...');
 

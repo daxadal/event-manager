@@ -7,7 +7,7 @@ const eventsApp = require('./routes/events');
 const usersApp = require('./routes/users');
 const devApp = require('./routes/dev');
 
-const config = require('../config');
+const config = require('./config');
 const bree = require('./scheduler');
 const DB = require('./services/db')();
 

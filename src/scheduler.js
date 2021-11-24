@@ -1,7 +1,7 @@
 const Graceful = require('@ladjs/graceful');
 const Bree = require('bree');
 
-const config = require('../config');
+const config = require('./config');
 
 const bree = new Bree({
   jobs: [

@@ -2,7 +2,7 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const Joi = require('joi');
 
-const config = require('../../config');
+const config = require('../config');
 const DB = require('../services/db')();
 const { verifyToken, decodeToken } = require('../services/auth');
 

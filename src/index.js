@@ -3,9 +3,9 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
-const eventsApp = require('./events');
-const usersApp = require('./users');
-const devApp = require('./dev');
+const eventsApp = require('./routes/events');
+const usersApp = require('./routes/users');
+const devApp = require('./routes/dev');
 
 const config = require('../config');
 const bree = require('./scheduler');

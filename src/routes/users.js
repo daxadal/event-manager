@@ -4,9 +4,9 @@ const rateLimit = require('express-rate-limit');
 const auth = require('basic-auth');
 const Joi = require('joi');
 
-const DB = require('./services/db')();
-const { createToken, decodeToken, verifyToken } = require('./services/auth');
-const config = require('../config');
+const DB = require('../services/db')();
+const { createToken, decodeToken, verifyToken } = require('../services/auth');
+const config = require('../../config');
 
 // Register / LOGIN
 const usersApp = express.Router();

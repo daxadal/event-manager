@@ -1,4 +1,4 @@
-const API = require('../src/utils/api')();
+const API = require('../src/services/api')();
 /**
  * Generate a bunch of users for testing and returns an object containing
  * @param {String} common A common name for all the users. It's better if it's different each time you

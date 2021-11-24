@@ -3,8 +3,8 @@ const rateLimit = require('express-rate-limit');
 const Joi = require('joi');
 
 const config = require('../config');
-const DB = require('./utils/db')();
-const { verifyToken, decodeToken } = require('./utils/auth');
+const DB = require('./services/db')();
+const { verifyToken, decodeToken } = require('./services/auth');
 
 // EVENTS
 const eventsApp = express.Router();

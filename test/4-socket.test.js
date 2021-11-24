@@ -2,10 +2,10 @@
 
 const assert = require('assert');
 
-const API = require('../src/utils/api')();
+const API = require('../src/services/api')();
 const Socket = require('./socket');
 const config = require('../config');
-const { generateTokens, generateEvents } = require('./utils');
+const { generateTokens, generateEvents } = require('./services');
 
 const sleep = (millis) => new Promise((resolve) => setTimeout(resolve, millis));
 

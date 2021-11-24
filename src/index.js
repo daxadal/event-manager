@@ -9,10 +9,10 @@ const devApp = require('./dev');
 
 const config = require('../config');
 const bree = require('./scheduler');
-const DB = require('./utils/db')();
+const DB = require('./services/db')();
 
 const { default: socketServer, sendReminders } = require('./socket');
-const { checkBreeToken } = require('./utils/auth');
+const { checkBreeToken } = require('./services/auth');
 
 if (config.api.DEV) app.use('/dev', devApp);
 app.use('/events', eventsApp);

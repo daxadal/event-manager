@@ -8,6 +8,7 @@
     "watch": "nodemon -V -L -w ./src",
     "reset": "node scripts/reset.js",
     "test": "npm run reset && mocha",
+    "tsc": "rm -rf dist && tsc --project tsconfig.compile.json",
     "mocha": "mocha"
   },
   "author": "Eric García de Ceca Elejoste",
@@ -26,6 +27,8 @@
     "socket.io": "^4.1.2"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
     "assert": "^2.0.0",
     "eslint": "^7.27.0",
     "eslint-config-airbnb": "^18.2.1",
@@ -35,6 +38,7 @@
     "mocha": "^8.4.0",
     "nodemon": "^2.0.7",
     "prettier": "^2.3.0",
-    "socket.io-client": "^4.1.2"
+    "socket.io-client": "^4.1.2",
+    "typescript": "^4.5.2"
   }
 }

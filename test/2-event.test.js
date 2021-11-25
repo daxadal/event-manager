@@ -1,7 +1,7 @@
 /* global describe it before */
 
 const assert = require('assert');
-const { generateTokens } = require('./services');
+const { generateTokens } = require('./utils');
 
 const API = require('../src/services/api')();
 

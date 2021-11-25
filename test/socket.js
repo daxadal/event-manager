@@ -1,6 +1,6 @@
 const { io } = require('socket.io-client');
 
-const config = require('../config');
+const config = require('../src/config');
 
 module.exports.new = () => {
   const socket = io(`${config.socket.DOMAIN}:${config.socket.PORT}`);

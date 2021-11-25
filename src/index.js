@@ -3,16 +3,16 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
-const eventsApp = require('./events');
-const usersApp = require('./users');
-const devApp = require('./dev');
+const eventsApp = require('./routes/events');
+const usersApp = require('./routes/users');
+const devApp = require('./routes/dev');
 
-const config = require('../config');
+const config = require('./config');
 const bree = require('./scheduler');
-const DB = require('./utils/db')();
+const DB = require('./services/db')();
 
 const { default: socketServer, sendReminders } = require('./socket');
-const { checkBreeToken } = require('./utils/auth');
+const { checkBreeToken } = require('./services/auth');
 
 if (config.api.DEV) app.use('/dev', devApp);
 app.use('/events', eventsApp);

@@ -1,9 +1,9 @@
 /* global describe it before */
 
 const assert = require('assert');
-const config = require('../config');
+const config = require('../src/config');
 
-const API = require('../src/utils/api')();
+const API = require('../src/services/api')();
 
 const tokens = {};
 

@@ -1,6 +1,6 @@
-const { createBreeToken } = require('../src/utils/auth');
+const { createBreeToken } = require('../src/services/auth');
 
-const API = require('../src/utils/api')();
+const API = require('../src/services/api')();
 
 async function callAPI() {
   try {

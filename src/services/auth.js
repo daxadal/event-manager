@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const DB = require('./db')();
 
-const config = require('../../config');
+const config = require('../config');
 const { getMinuteInterval } = require('./utils');
 
 async function decodeToken(req, res, next) {

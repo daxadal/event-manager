@@ -2,10 +2,10 @@ const express = require('express');
 
 const app = express.Router();
 
-const { sendReminders, pingAll } = require('./socket');
-const { getMinuteInterval } = require('./utils/utils');
-const bree = require('./scheduler');
-const DB = require('./utils/db')();
+const { sendReminders, pingAll } = require('../socket');
+const { getMinuteInterval } = require('../services/utils');
+const bree = require('../scheduler');
+const DB = require('../services/db')();
 
 app.post('/ping', async (req, res) => {
   try {

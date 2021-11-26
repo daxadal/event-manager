@@ -1,10 +1,11 @@
-const jwt = require('jsonwebtoken');
+import {RequestHandler} from 'express';
+import jwt from 'jsonwebtoken';
 const DB = require('./db')();
 
-const config = require('../config');
-const { getMinuteInterval } = require('./utils');
+import config from '../config';
+import { getMinuteInterval } from './utils';
 
-async function decodeToken(req, res, next) {
+export const decodeToken : RequestHandler = async (req, res, next) => {
   try {
     const bearerHeader = req.get('Authorization');
     const match = /^[Bb]earer (.+)$/.exec(bearerHeader);
@@ -43,12 +44,12 @@ async function decodeToken(req, res, next) {
   }
 }
 
-async function verifyToken(req, res, next) {
+export const verifyToken : RequestHandler = async (req, res, next) => {
   if (!req.user) res.status(401).send({ error: 'Unauthorized' });
   else next();
 }
 
-async function checkBreeToken(req, res, next) {
+export const checkBreeToken : RequestHandler = async (req, res, next) => {
   try {
     const bearerHeader = req.get('Authorization');
     const match = /^[Bb]earer (.+)$/.exec(bearerHeader);
@@ -77,23 +78,16 @@ async function checkBreeToken(req, res, next) {
   }
 }
 
-function createBreeToken() {
+export function createBreeToken() {
   const { start, end, now } = getMinuteInterval();
   return jwt.sign({ start, end, now }, config.bree.BREE_SECRET, {
     expiresIn: config.bree.BREE_EXPIRATION,
   });
 }
 
-function createToken(user) {
+export function createToken(user) {
   return jwt.sign({ id: String(user.id) }, config.jwt.TOKEN_SECRET, {
     expiresIn: config.jwt.TOKEN_EXPIRATION,
   });
 }
 
-module.exports = {
-  createToken,
-  decodeToken,
-  verifyToken,
-  createBreeToken,
-  checkBreeToken,
-};

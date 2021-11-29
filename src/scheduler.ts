@@ -20,4 +20,4 @@ const bree = new Bree({
 const graceful = new Graceful({ brees: [bree] });
 graceful.listen();
 
-module.exports = bree;
+export default bree;

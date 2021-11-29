@@ -69,7 +69,7 @@ function format(event, user, sub) {
   };
 }
 
-async function sendReminders(events) {
+export async function sendReminders(events) {
   const all = await io.fetchSockets();
   console.info(
     'All sockets:',
@@ -92,8 +92,8 @@ async function sendReminders(events) {
   });
 }
 
-async function pingAll() {
+export async function pingAll() {
   io.emit('PING');
 }
 
-module.exports = { default: httpServer, sendReminders, pingAll };
+export default httpServer;

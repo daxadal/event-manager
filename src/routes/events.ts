@@ -1,10 +1,10 @@
-const express = require('express');
-const rateLimit = require('express-rate-limit');
-const Joi = require('joi');
+import express from 'express';
+import rateLimit from 'express-rate-limit';
+import Joi from 'joi';
 
-const config = require('../config');
-import * as DB from './services/db';
-const { verifyToken, decodeToken } = require('../services/auth');
+import config from '../config';
+import * as DB from '../services/db';
+import { verifyToken, decodeToken } from '../services/auth';
 
 // EVENTS
 const eventsApp = express.Router();
@@ -47,7 +47,7 @@ async function loadEvent(req, res, next) {
 
 eventsApp
   .route('/')
-  .post(decodeToken, verifyToken, async (req, res) => {
+  .post(decodeToken, verifyToken, async (req: any, res) => {
     try {
       const newEventSchema = Joi.object({
         headline: Joi.string().min(5).max(100).required(),
@@ -95,7 +95,7 @@ eventsApp
       res.status(500).send({ error: 'Internal server error' });
     }
   })
-  .get(decodeToken, async (req, res) => {
+  .get(decodeToken, async (req: any, res) => {
     try {
       let query;
       if (req.user)
@@ -117,7 +117,7 @@ eventsApp
 
 eventsApp
   .route('/:eventId(\\w+)')
-  .get(decodeToken, loadEvent, async (req, res) => {
+  .get(decodeToken, loadEvent, async (req: any, res) => {
     try {
       res.status(200).send({ event: DB.format(req.event) });
     } catch (error) {
@@ -125,7 +125,7 @@ eventsApp
       res.status(500).send({ error: 'Internal server error' });
     }
   })
-  .put(decodeToken, verifyToken, loadEvent, async (req, res) => {
+  .put(decodeToken, verifyToken, loadEvent, async (req: any, res) => {
     try {
       const updateEventSchema = Joi.object({
         headline: Joi.string().min(5).max(100),
@@ -183,7 +183,7 @@ eventsApp
       res.status(500).send({ error: 'Internal server error' });
     }
   })
-  .delete(decodeToken, verifyToken, loadEvent, async (req, res) => {
+  .delete(decodeToken, verifyToken, loadEvent, async (req: any, res) => {
     try {
       if (String(req.event.creatorId) !== req.user.id) {
         res
@@ -207,7 +207,7 @@ eventsApp
 // SUBSCRIPTIONS
 eventsApp
   .route('/:eventId(\\w+)/subscribe')
-  .post(decodeToken, verifyToken, loadEvent, async (req, res) => {
+  .post(decodeToken, verifyToken, loadEvent, async (req: any, res) => {
     try {
       const inputSchema = Joi.object({
         comment: Joi.string().max(100),

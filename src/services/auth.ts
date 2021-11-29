@@ -1,11 +1,11 @@
-import {RequestHandler} from 'express';
+import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import * as DB from './db';
 
 import config from '../config';
 import { getMinuteInterval } from './utils';
 
-export const decodeToken : RequestHandler = async (req, res, next) => {
+export const decodeToken: RequestHandler = async (req: any, res, next) => {
   try {
     const bearerHeader = req.get('Authorization');
     const match = /^[Bb]earer (.+)$/.exec(bearerHeader);
@@ -42,14 +42,14 @@ export const decodeToken : RequestHandler = async (req, res, next) => {
     console.error(error);
     res.status(500).send({ error: 'Internal server error' });
   }
-}
+};
 
-export const verifyToken : RequestHandler = async (req, res, next) => {
+export const verifyToken: RequestHandler = async (req: any, res, next) => {
   if (!req.user) res.status(401).send({ error: 'Unauthorized' });
   else next();
-}
+};
 
-export const checkBreeToken : RequestHandler = async (req, res, next) => {
+export const checkBreeToken: RequestHandler = async (req: any, res, next) => {
   try {
     const bearerHeader = req.get('Authorization');
     const match = /^[Bb]earer (.+)$/.exec(bearerHeader);
@@ -76,7 +76,7 @@ export const checkBreeToken : RequestHandler = async (req, res, next) => {
     console.error(error);
     res.status(500).send({ error: 'Internal server error' });
   }
-}
+};
 
 export function createBreeToken() {
   const { start, end, now } = getMinuteInterval();
@@ -90,4 +90,3 @@ export function createToken(user) {
     expiresIn: config.jwt.TOKEN_EXPIRATION,
   });
 }
-

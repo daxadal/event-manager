@@ -1,18 +1,18 @@
-const crypto = require('crypto');
-const express = require('express');
-const rateLimit = require('express-rate-limit');
-const auth = require('basic-auth');
-const Joi = require('joi');
+import crypto from 'crypto';
+import express from 'express';
+import rateLimit from 'express-rate-limit';
+import auth from 'basic-auth';
+import Joi from 'joi';
 
-import * as DB from './services/db';
-const { createToken, decodeToken, verifyToken } = require('../services/auth');
-const config = require('../config');
+import * as DB from '../services/db';
+import { createToken, decodeToken, verifyToken } from '../services/auth';
+import config from '../config';
 
 // Register / LOGIN
 const usersApp = express.Router();
 
 const hash = (pass) =>
-  crypto.createHash('sha256', config.pass.SECRET).update(pass).digest('hex');
+  crypto.createHmac('sha256', config.pass.SECRET).update(pass).digest('hex');
 
 usersApp.use(express.json({ limit: config.dos.USER_SIZE }));
 usersApp.use(
@@ -107,7 +107,7 @@ usersApp.post('/sign-in', async (req, res) => {
   }
 });
 
-usersApp.post('/sign-out', decodeToken, verifyToken, async (req, res) => {
+usersApp.post('/sign-out', decodeToken, verifyToken, async (req: any, res) => {
   try {
     req.user.sessionToken = undefined;
     req.user.socketId = undefined;

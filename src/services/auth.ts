@@ -1,6 +1,6 @@
 import {RequestHandler} from 'express';
 import jwt from 'jsonwebtoken';
-const DB = require('./db')();
+import * as DB from './db';
 
 import config from '../config';
 import { getMinuteInterval } from './utils';

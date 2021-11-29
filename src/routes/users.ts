@@ -4,7 +4,7 @@ const rateLimit = require('express-rate-limit');
 const auth = require('basic-auth');
 const Joi = require('joi');
 
-const DB = require('../services/db')();
+import * as DB from './services/db';
 const { createToken, decodeToken, verifyToken } = require('../services/auth');
 const config = require('../config');
 

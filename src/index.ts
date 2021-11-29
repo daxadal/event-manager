@@ -9,7 +9,9 @@ const devApp = require('./routes/dev');
 
 const config = require('./config');
 const bree = require('./scheduler');
-const DB = require('./services/db')();
+import * as DB from './services/db';
+
+DB.setup();
 
 const { default: socketServer, sendReminders } = require('./socket');
 const { checkBreeToken } = require('./services/auth');

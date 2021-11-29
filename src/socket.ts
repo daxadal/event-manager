@@ -1,7 +1,7 @@
 const http = require('http');
 const { Server } = require('socket.io');
 
-const DB = require('./services/db')();
+import * as DB from './services/db';
 
 const httpServer = http.createServer();
 const io = new Server(httpServer);

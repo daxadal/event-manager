@@ -1,20 +1,20 @@
-const express = require('express');
-const rateLimit = require('express-rate-limit');
+import express from 'express';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
 
-const eventsApp = require('./routes/events');
-const usersApp = require('./routes/users');
-const devApp = require('./routes/dev');
+import eventsApp from './routes/events';
+import usersApp from './routes/users';
+import devApp from './routes/dev';
 
-const config = require('./config');
-const bree = require('./scheduler');
+import config from './config';
+import bree from './scheduler';
 import * as DB from './services/db';
 
 DB.setup();
 
-const { default: socketServer, sendReminders } = require('./socket');
-const { checkBreeToken } = require('./services/auth');
+import socketServer, { sendReminders } from './socket';
+import { checkBreeToken } from './services/auth';
 
 if (config.api.DEV) app.use('/dev', devApp);
 app.use('/events', eventsApp);
@@ -28,7 +28,7 @@ app.use(
   })
 );
 
-app.post('/jobs/remind', checkBreeToken, async (req, res) => {
+app.post('/jobs/remind', checkBreeToken, async (req: any, res) => {
   try {
     console.info('Remind:', req.dates);
     const { start, end } = req.dates;

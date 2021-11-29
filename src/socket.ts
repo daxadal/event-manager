@@ -1,5 +1,5 @@
-const http = require('http');
-const { Server } = require('socket.io');
+import http from 'http';
+import { Server } from 'socket.io';
 
 import * as DB from './services/db';
 

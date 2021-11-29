@@ -119,4 +119,4 @@ usersApp.post('/sign-out', decodeToken, verifyToken, async (req: any, res) => {
   }
 });
 
-module.exports = usersApp;
+export default usersApp;

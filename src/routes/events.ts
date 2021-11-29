@@ -262,4 +262,4 @@ eventsApp
     }
   });
 
-module.exports = eventsApp;
+export default eventsApp;

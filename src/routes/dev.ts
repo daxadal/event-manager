@@ -1,11 +1,11 @@
-const express = require('express');
+import express from 'express';
 
 const app = express.Router();
 
-const { sendReminders, pingAll } = require('../socket');
-const { getMinuteInterval } = require('../services/utils');
-const bree = require('../scheduler');
-import * as DB from './services/db';
+import { sendReminders, pingAll } from '../socket';
+import { getMinuteInterval } from '../services/utils';
+import bree from '../scheduler';
+import * as DB from '../services/db';
 
 app.post('/ping', async (req, res) => {
   try {
@@ -53,4 +53,4 @@ app.post('/remind-all', async (req, res) => {
   }
 });
 
-module.exports = app;
+export default app;

@@ -20,6 +20,15 @@ export function setup() {
   });
 }
 
+export interface EventType {
+  headline: string;
+  description?: string;
+  startDate: Date;
+  location?: { name?: String; lat?: number; lon?: number };
+  state: string;
+  creatorId: mongoose.Types.ObjectId;
+}
+
 const eventSchema = new mongoose.Schema({
   headline: String,
   description: String,
@@ -33,6 +42,14 @@ eventSchema.index({ creatorId: 1, state: 1 });
 eventSchema.index({ state: 1 });
 eventSchema.index({ startDate: -1 });
 
+export interface UserType {
+  name?: string;
+  email?: string;
+  hashedPassword?: string;
+  sessionToken: string;
+  socketId: string;
+}
+
 const userSchema = new mongoose.Schema({
   name: String,
   email: String,
@@ -42,6 +59,13 @@ const userSchema = new mongoose.Schema({
 });
 userSchema.index({ email: 1 });
 userSchema.index({ sessionToken: 1 });
+
+export interface SubscriptionType {
+  eventId: mongoose.Types.ObjectId;
+  subscriberId: mongoose.Types.ObjectId;
+  subscriptionDate: Date;
+  comment?: string;
+}
 
 const subscriptionSchema = new mongoose.Schema({
   eventId: mongoose.Types.ObjectId,
@@ -60,6 +84,9 @@ export const format = (object: unknown) => {
   return formatted;
 };
 
-export const Event = mongoose.model('Event', eventSchema);
-export const Subscription = mongoose.model('Subscription', subscriptionSchema);
-export const User = mongoose.model('User', userSchema);
+export const Event = mongoose.model<EventType>('Event', eventSchema);
+export const Subscription = mongoose.model<SubscriptionType>(
+  'Subscription',
+  subscriptionSchema
+);
+export const User = mongoose.model<UserType>('User', userSchema);

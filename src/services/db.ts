@@ -29,7 +29,7 @@ export interface EventType {
   creatorId: mongoose.Types.ObjectId;
 }
 
-const eventSchema = new mongoose.Schema({
+const eventSchema = new mongoose.Schema<EventType>({
   headline: String,
   description: String,
   startDate: Date,
@@ -50,7 +50,7 @@ export interface UserType {
   socketId: string;
 }
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema<UserType>({
   name: String,
   email: String,
   hashedPassword: String,
@@ -67,7 +67,7 @@ export interface SubscriptionType {
   comment?: string;
 }
 
-const subscriptionSchema = new mongoose.Schema({
+const subscriptionSchema = new mongoose.Schema<SubscriptionType>({
   eventId: mongoose.Types.ObjectId,
   subscriberId: mongoose.Types.ObjectId,
   subscriptionDate: Date,

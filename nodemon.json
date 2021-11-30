@@ -1,0 +1,13 @@
+{
+  "verbose": true,
+  "execMap": {
+    "js": "npm start",
+    "ts": "npm start"
+  },
+  "watch": ["src"],
+  "ignore": [
+    "*.openapi.json",
+    "*.postman_collection.json"
+  ],
+  "ext": "js,json,ts"
+}

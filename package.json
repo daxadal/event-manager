@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "npm run tsc && node dist/index.js",
-    "watch": "nodemon -V -L -w ./src",
+    "watch": "nodemon",
     "reset": "node scripts/reset.js",
     "test": "npm run reset && mocha",
     "tsc": "rm -rf dist && tsc --project tsconfig.compile.json",

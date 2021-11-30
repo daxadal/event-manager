@@ -3,9 +3,9 @@ import express from 'express';
 const app = express.Router();
 
 import { sendReminders, pingAll } from '../socket';
-import { getMinuteInterval } from '../services/utils';
+import { getMinuteInterval } from '@/services/utils';
 import bree from '../scheduler';
-import * as DB from '../services/db';
+import * as DB from '@/services/db';
 
 app.post('/ping', async (req, res) => {
   try {

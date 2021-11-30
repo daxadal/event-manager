@@ -2,9 +2,9 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import Joi from 'joi';
 
-import config from '../config';
-import * as DB from '../services/db';
-import { verifyToken, decodeToken } from '../services/auth';
+import config from '@/config';
+import * as DB from '@/services/db';
+import { verifyToken, decodeToken } from '@/services/auth';
 
 // EVENTS
 const eventsApp = express.Router();

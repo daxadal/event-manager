@@ -3,7 +3,7 @@
 const assert = require('assert');
 const { generateTokens } = require('./utils');
 
-const API = require('../src/services/api')();
+const API = require('@/services/api')();
 
 let tokens;
 let events = [];

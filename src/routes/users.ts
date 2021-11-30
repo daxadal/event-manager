@@ -4,9 +4,9 @@ import rateLimit from 'express-rate-limit';
 import auth from 'basic-auth';
 import Joi from 'joi';
 
-import * as DB from '../services/db';
-import { createToken, decodeToken, verifyToken } from '../services/auth';
-import config from '../config';
+import * as DB from '@/services/db';
+import { createToken, decodeToken, verifyToken } from '@/services/auth';
+import config from '@/config';
 
 // Register / LOGIN
 const usersApp = express.Router();

@@ -1,7 +1,7 @@
 import Graceful from '@ladjs/graceful';
 import Bree from 'bree';
 
-import config from './config';
+import config from '@/config';
 
 const bree = new Bree({
   jobs: [

@@ -1,6 +1,6 @@
-const config = require('../config');
+import config from '../config';
 
-function getMinuteInterval(now = new Date()) {
+export function getMinuteInterval(now = new Date()) {
   const start = new Date(now);
   start.setSeconds(0, 0);
   start.setMinutes(start.getMinutes() + config.bree.MINUTES_AHEAD);
@@ -10,5 +10,3 @@ function getMinuteInterval(now = new Date()) {
   end.setMinutes(end.getMinutes() + config.bree.MINUTES_AHEAD + 1);
   return { start, end, now };
 }
-
-module.exports = { getMinuteInterval };

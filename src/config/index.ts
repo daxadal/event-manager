@@ -1,6 +1,8 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
 
-module.exports = {
+dotenv.config();
+
+export default {
   api: {
     DOMAIN: process.env.API_DOMAIN || 'http://localhost',
     PORT: process.env.API_PORT || '3000',
@@ -19,11 +21,11 @@ module.exports = {
     PORT: process.env.SOCKET_PORT || '40718',
   },
   jwt: {
-    TOKEN_SECRET: process.env.TOKEN_SECRET,
+    TOKEN_SECRET: process.env.TOKEN_SECRET as string,
     TOKEN_EXPIRATION: process.env.TOKEN_EXPIRATION || '8h',
   },
   bree: {
-    BREE_SECRET: process.env.BREE_SECRET,
+    BREE_SECRET: process.env.BREE_SECRET as string,
     BREE_EXPIRATION: process.env.BREE_EXPIRATION || '30s',
     INTERVAL: process.env.REMINDER_INTERVAL || '1m', // Every minute,
     MINUTES_AHEAD: process.env.REMINDER_MINUTES_AHEAD

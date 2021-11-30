@@ -1,7 +1,7 @@
-const http = require('http');
-const { Server } = require('socket.io');
+import http from 'http';
+import { Server } from 'socket.io';
 
-const DB = require('./services/db')();
+import * as DB from './services/db';
 
 const httpServer = http.createServer();
 const io = new Server(httpServer);
@@ -69,7 +69,7 @@ function format(event, user, sub) {
   };
 }
 
-async function sendReminders(events) {
+export async function sendReminders(events) {
   const all = await io.fetchSockets();
   console.info(
     'All sockets:',
@@ -92,8 +92,8 @@ async function sendReminders(events) {
   });
 }
 
-async function pingAll() {
+export async function pingAll() {
   io.emit('PING');
 }
 
-module.exports = { default: httpServer, sendReminders, pingAll };
+export default httpServer;

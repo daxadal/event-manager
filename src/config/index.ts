@@ -11,9 +11,7 @@ export default {
       : false,
   },
   db: {
-    DOMAIN: process.env.DB_DOMAIN || 'mongodb://localhost',
-    PORT: process.env.DB_PORT || '27017',
-    DB_NAME: process.env.DB_NAME || 'WhisbiEventManager',
+    URL: process.env.MONGO_URL || 'mongodb://localhost:27017/WhisbiEventManager',
   },
   socket: {
     DOMAIN:

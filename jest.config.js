@@ -2,6 +2,7 @@ const { pathsToModuleNameMapper } = require('ts-jest/utils');
 const { compilerOptions } = require('./tsconfig');
 
 module.exports = {
+  preset: '@shelf/jest-mongodb',
   reporters: ['default', 'jest-junit'],
 
   roots: ['./test'],

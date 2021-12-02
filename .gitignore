@@ -116,3 +116,6 @@ dist
 .yarn/install-state.g
 .pnp.*
 
+
+# Reportes de Jest
+junit.xml

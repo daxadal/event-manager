@@ -2,18 +2,20 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import Joi from 'joi';
 
-import config from '@/config';
 import * as DB from '@/services/db';
 import { verifyToken, decodeToken } from '@/services/auth';
+
+const EVENT_SIZE = '1kb';
+const EVENT_RPM = 100;
 
 // EVENTS
 const eventsApp = express.Router();
 
-eventsApp.use(express.json({ limit: config.dos.EVENT_SIZE }));
+eventsApp.use(express.json({ limit: EVENT_SIZE }));
 eventsApp.use(express.urlencoded({ extended: true }));
 eventsApp.use(
   rateLimit({
-    max: config.dos.EVENT_RPM,
+    max: EVENT_RPM,
     windowMs: 60 * 1000, // 1 minute
     message: 'Too many requests',
   })

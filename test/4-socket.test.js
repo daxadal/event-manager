@@ -5,6 +5,7 @@ const assert = require('assert');
 const API = require('@/services/api')();
 const Socket = require('./socket');
 const config = require('@/config');
+const { MINUTES_AHEAD } = require('@/services/utils');
 const { generateTokens, generateEvents } = require('./utils');
 
 const sleep = (millis) => new Promise((resolve) => setTimeout(resolve, millis));
@@ -111,7 +112,7 @@ describe('Sockets', () => {
       tokens = await generateTokens('socket', ['O', 'A', 'B', 'C']);
 
       const date = new Date();
-      date.setMinutes(date.getMinutes() + config.bree.MINUTES_AHEAD);
+      date.setMinutes(date.getMinutes() + MINUTES_AHEAD);
 
       events = await generateEvents({
         length: 4,

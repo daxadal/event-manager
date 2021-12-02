@@ -6,7 +6,7 @@ import config from '@/config';
 export function setup() {
   mongoose.set('useCreateIndex', true);
   mongoose.connect(
-    `${config.db.DOMAIN}:${config.db.PORT}/${config.db.DB_NAME}`,
+    config.db.URL,
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,

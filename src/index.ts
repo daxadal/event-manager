@@ -22,9 +22,11 @@ if (config.api.DEV) app.use('/dev', devApp);
 app.use('/events', eventsApp);
 app.use('/users', usersApp);
 
+const MAIN_RPM = 10;
+
 app.use(
   rateLimit({
-    max: config.dos.MAIN_RPM,
+    max: MAIN_RPM,
     windowMs: 60 * 1000, // 1 minute
     message: 'Too many requests',
   })

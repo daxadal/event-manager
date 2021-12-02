@@ -5,6 +5,9 @@ import * as DB from './db';
 import config from '@/config';
 import { getMinuteInterval } from '@/services/utils';
 
+const TOKEN_EXPIRATION = '8h';
+const BREE_EXPIRATION = '30s';
+
 export const decodeToken: RequestHandler = async (req: any, res, next) => {
   try {
     const bearerHeader = req.get('Authorization');
@@ -81,12 +84,12 @@ export const checkBreeToken: RequestHandler = async (req: any, res, next) => {
 export function createBreeToken() {
   const { start, end, now } = getMinuteInterval();
   return jwt.sign({ start, end, now }, config.bree.BREE_SECRET, {
-    expiresIn: config.bree.BREE_EXPIRATION,
+    expiresIn: BREE_EXPIRATION,
   });
 }
 
 export function createToken(user) {
   return jwt.sign({ id: String(user.id) }, config.jwt.TOKEN_SECRET, {
-    expiresIn: config.jwt.TOKEN_EXPIRATION,
+    expiresIn: TOKEN_EXPIRATION,
   });
 }

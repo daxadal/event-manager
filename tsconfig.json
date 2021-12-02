@@ -12,6 +12,9 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+    },
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },

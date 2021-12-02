@@ -1,4 +1,4 @@
-import config from '../config';
+import config from '@/config';
 
 export function getMinuteInterval(now = new Date()) {
   const start = new Date(now);

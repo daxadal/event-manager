@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 
-const API = require('../src/services/api')();
+const API = require('@/services/api')();
 
 describe('Authentication', () => {
   describe('Sign up - Register', () => {

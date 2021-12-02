@@ -1,20 +1,22 @@
+import 'module-alias/register';
+
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 
 const app = express();
 
-import eventsApp from './routes/events';
-import usersApp from './routes/users';
-import devApp from './routes/dev';
+import eventsApp from '@/routes/events';
+import usersApp from '@/routes/users';
+import devApp from '@/routes/dev';
 
-import config from './config';
-import bree from './scheduler';
-import * as DB from './services/db';
+import config from '@/config';
+import bree from '@/scheduler';
+import * as DB from '@/services/db';
 
 DB.setup();
 
-import socketServer, { sendReminders } from './socket';
-import { checkBreeToken } from './services/auth';
+import socketServer, { sendReminders } from '@/socket';
+import { checkBreeToken } from '@/services/auth';
 
 if (config.api.DEV) app.use('/dev', devApp);
 app.use('/events', eventsApp);

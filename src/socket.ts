@@ -1,7 +1,7 @@
 import http from 'http';
 import { Server } from 'socket.io';
 
-import * as DB from './services/db';
+import * as DB from '@/services/db';
 
 const httpServer = http.createServer();
 const io = new Server(httpServer);

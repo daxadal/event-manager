@@ -2,8 +2,8 @@ import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import * as DB from './db';
 
-import config from '../config';
-import { getMinuteInterval } from './utils';
+import config from '@/config';
+import { getMinuteInterval } from '@/services/utils';
 
 export const decodeToken: RequestHandler = async (req: any, res, next) => {
   try {

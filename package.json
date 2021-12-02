@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "npm run tsc && node dist/index.js",
-    "watch": "nodemon -V -L -w ./src",
+    "watch": "nodemon",
     "reset": "node scripts/reset.js",
     "test": "npm run reset && mocha",
     "tsc": "rm -rf dist && tsc --project tsconfig.compile.json",
@@ -13,6 +13,9 @@
   },
   "author": "Eric García de Ceca Elejoste",
   "license": "ISC",
+  "_moduleAliases": {
+    "@": "dist"
+  },
   "dependencies": {
     "@ladjs/graceful": "^1.0.5",
     "axios": "^0.21.1",
@@ -23,6 +26,7 @@
     "express-rate-limit": "^5.2.6",
     "joi": "^17.4.0",
     "jsonwebtoken": "^8.5.1",
+    "module-alias": "^2.2.2",
     "mongoose": "^5.12.10",
     "socket.io": "^4.1.2"
   },

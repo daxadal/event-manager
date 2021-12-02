@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import mongoose from 'mongoose';
 
-import config from '../config';
+import config from '@/config';
 
 export function setup() {
   mongoose.set('useCreateIndex', true);

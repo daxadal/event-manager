@@ -1,6 +1,6 @@
 const { default: Axios } = require('axios');
 
-const config = require('../config');
+const config = require('@/config');
 
 const setAuth = ({ token, user, pass } = {}) => {
   if (token) return { headers: { Authorization: `Bearer ${token}` } };

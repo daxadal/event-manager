@@ -1,4 +1,4 @@
-const API = require('../src/services/api')();
+const API = require('@/services/api')();
 
 async function callAPI() {
   try {

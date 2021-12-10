@@ -2,8 +2,11 @@ import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import * as DB from './db';
 
-import config from '@/config';
+import { bree as breeConfig, jwt as jwtConfig } from '@/config';
 import { getMinuteInterval } from '@/services/utils';
+
+const TOKEN_EXPIRATION = '8h';
+const BREE_EXPIRATION = '30s';
 
 export const decodeToken: RequestHandler = async (req: any, res, next) => {
   try {
@@ -19,7 +22,7 @@ export const decodeToken: RequestHandler = async (req: any, res, next) => {
 
       let decoded;
       try {
-        decoded = jwt.verify(match[1], config.jwt.TOKEN_SECRET);
+        decoded = jwt.verify(match[1], jwtConfig.TOKEN_SECRET);
       } catch (error) {
         console.error(error);
         res.status(403).send({ error: 'Invalid session token' });
@@ -61,7 +64,7 @@ export const checkBreeToken: RequestHandler = async (req: any, res, next) => {
       req.token = match[1];
 
       try {
-        req.dates = jwt.verify(match[1], config.bree.BREE_SECRET);
+        req.dates = jwt.verify(match[1], breeConfig.BREE_SECRET);
       } catch (error) {
         console.error(error);
         res.status(403).send({ error: 'Invalid session token' });
@@ -80,13 +83,13 @@ export const checkBreeToken: RequestHandler = async (req: any, res, next) => {
 
 export function createBreeToken() {
   const { start, end, now } = getMinuteInterval();
-  return jwt.sign({ start, end, now }, config.bree.BREE_SECRET, {
-    expiresIn: config.bree.BREE_EXPIRATION,
+  return jwt.sign({ start, end, now }, breeConfig.BREE_SECRET, {
+    expiresIn: BREE_EXPIRATION,
   });
 }
 
 export function createToken(user) {
-  return jwt.sign({ id: String(user.id) }, config.jwt.TOKEN_SECRET, {
-    expiresIn: config.jwt.TOKEN_EXPIRATION,
+  return jwt.sign({ id: String(user.id) }, jwtConfig.TOKEN_SECRET, {
+    expiresIn: TOKEN_EXPIRATION,
   });
 }

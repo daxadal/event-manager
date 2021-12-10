@@ -4,7 +4,7 @@ const config = require('@/config');
 
 console.info('Preparing to drop database...');
 
-mongoose.connect(`${config.db.DOMAIN}:${config.db.PORT}/${config.db.DB_NAME}`, {
+mongoose.connect(config.db.URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });

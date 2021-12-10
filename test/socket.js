@@ -3,7 +3,7 @@ const { io } = require('socket.io-client');
 const config = require('@/config');
 
 module.exports.new = () => {
-  const socket = io(`${config.socket.DOMAIN}:${config.socket.PORT}`);
+  const socket = io(`http://localhost:${config.socket.PORT}`);
 
   if (config.mocha.SOCKET_VERBOSE) {
     socket.on('connect', () => {

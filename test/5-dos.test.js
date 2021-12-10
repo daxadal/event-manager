@@ -7,6 +7,9 @@ const API = require('@/services/api')();
 
 const tokens = {};
 
+const EVENT_RPM = 100;
+const USER_RPM = 30;
+
 describe('Denial of service', () => {
   before(async () => {
     const responseA = await API.Users.signup({
@@ -82,7 +85,7 @@ describe('Denial of service', () => {
   describe('Request flooding', () => {
     it('DOS attack on events', async () => {
       API.setToken(tokens.A);
-      const promises = Array(config.dos.EVENT_RPM + 1)
+      const promises = Array(EVENT_RPM + 1)
         .fill()
         .map(() =>
           API.Events.create({
@@ -107,7 +110,7 @@ describe('Denial of service', () => {
     });
     it('DOS attack on login', async () => {
       API.setToken();
-      const promises = Array(config.dos.USER_RPM + 1)
+      const promises = Array(USER_RPM + 1)
         .fill()
         .map(() => API.Users.signin('dos@example.com', 'pass'));
 

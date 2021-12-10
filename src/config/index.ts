@@ -1,56 +1,39 @@
 import dotenv from 'dotenv';
 
-dotenv.config();
+import { parseBoolean, parseEnvString } from './types-helpers';
 
-export default {
-  api: {
-    DOMAIN: process.env.API_DOMAIN || 'http://localhost',
-    PORT: process.env.API_PORT || '3000',
-    DEV: process.env.DEVELOPMENT_API
-      ? process.env.DEVELOPMENT_API === 'true'
-      : false,
-  },
-  db: {
-    DOMAIN: process.env.DB_DOMAIN || 'mongodb://localhost',
-    PORT: process.env.DB_PORT || '27017',
-    DB_NAME: process.env.DB_NAME || 'WhisbiEventManager',
-  },
-  socket: {
-    DOMAIN:
-      process.env.SOCKET_DOMAIN || process.env.API_DOMAIN || 'http://localhost',
-    PORT: process.env.SOCKET_PORT || '40718',
-  },
-  jwt: {
-    TOKEN_SECRET: process.env.TOKEN_SECRET as string,
-    TOKEN_EXPIRATION: process.env.TOKEN_EXPIRATION || '8h',
-  },
-  bree: {
-    BREE_SECRET: process.env.BREE_SECRET as string,
-    BREE_EXPIRATION: process.env.BREE_EXPIRATION || '30s',
-    INTERVAL: process.env.REMINDER_INTERVAL || '1m', // Every minute,
-    MINUTES_AHEAD: process.env.REMINDER_MINUTES_AHEAD
-      ? parseInt(process.env.REMINDER_MINUTES_AHEAD, 10)
-      : 1440, // 1440 minutes = 24 hours
-    START: process.env.START_REMINDERS
-      ? process.env.START_REMINDERS !== 'false'
-      : true,
-  },
-  pass: {
-    SECRET: process.env.PASS_SECRET,
-  },
-  dos: {
-    EVENT_SIZE: process.env.EVENT_SIZE || '1kb',
-    EVENT_RPM: process.env.EVENT_RPM
-      ? parseInt(process.env.EVENT_RPM, 10)
-      : 100,
-    USER_SIZE: process.env.USER_SIZE || '512b',
-    USER_RPM: process.env.USER_RPM ? parseInt(process.env.USER_RPM, 10) : 30,
-    MAIN_SIZE: process.env.MAIN_SIZE || '128b',
-    MAIN_RPM: process.env.MAIN_RPM ? parseInt(process.env.MAIN_RPM, 10) : 10,
-  },
-  mocha: {
-    SOCKET_VERBOSE: process.env.MOCHA_SOCKET_VERBOSE
-      ? process.env.MOCHA_SOCKET_VERBOSE === 'true'
-      : false,
-  },
+const { error, parsed } = dotenv.config();
+
+const parsingErrors: string[] = [];
+
+export const api = {
+  PORT: '3000',
+  DEV: parseBoolean('DEVELOPMENT_API', parsingErrors),
 };
+
+export const db = {
+  URL: parseEnvString('MONGO_URL', parsingErrors),
+};
+
+export const socket = {
+  PORT: '40718',
+};
+
+export const jwt = {
+  TOKEN_SECRET: parseEnvString('TOKEN_SECRET', parsingErrors),
+};
+
+export const bree = {
+  BREE_SECRET: parseEnvString('BREE_SECRET', parsingErrors),
+  START: parseBoolean('START_REMINDERS', parsingErrors),
+};
+
+export const pass = {
+  SECRET: parseEnvString('PASS_SECRET', parsingErrors),
+};
+
+export const mocha = {
+  SOCKET_VERBOSE: parseBoolean('MOCHA_SOCKET_VERBOSE', parsingErrors),
+};
+
+export const configDebug = { dotenv: { error, parsed }, parsingErrors };

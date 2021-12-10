@@ -1,17 +1,14 @@
 /* eslint-disable no-underscore-dangle */
 import mongoose from 'mongoose';
 
-import config from '@/config';
+import { db as dbConfig } from '@/config';
 
 export function setup() {
   mongoose.set('useCreateIndex', true);
-  mongoose.connect(
-    config.db.URL,
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  );
+  mongoose.connect(dbConfig.URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
 
   const db = mongoose.connection;
   db.on('error', console.error.bind(console, 'connection error:'));

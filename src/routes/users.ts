@@ -6,7 +6,7 @@ import Joi from 'joi';
 
 import * as DB from '@/services/db';
 import { createToken, decodeToken, verifyToken } from '@/services/auth';
-import config from '@/config';
+import { pass } from '@/config';
 
 const USER_SIZE = '512b';
 const USER_RPM = 30;
@@ -15,7 +15,7 @@ const USER_RPM = 30;
 const usersApp = express.Router();
 
 const hash = (pass) =>
-  crypto.createHmac('sha256', config.pass.SECRET).update(pass).digest('hex');
+  crypto.createHmac('sha256', pass.SECRET).update(pass).digest('hex');
 
 usersApp.use(express.json({ limit: USER_SIZE }));
 usersApp.use(

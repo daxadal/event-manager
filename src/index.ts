@@ -9,7 +9,7 @@ import eventsApp from '@/routes/events';
 import usersApp from '@/routes/users';
 import devApp from '@/routes/dev';
 
-import config from '@/config';
+import { api, bree as breeConfig, socket } from '@/config';
 import bree from '@/scheduler';
 import * as DB from '@/services/db';
 
@@ -18,7 +18,7 @@ DB.setup();
 import socketServer, { sendReminders } from '@/socket';
 import { checkBreeToken } from '@/services/auth';
 
-if (config.api.DEV) app.use('/dev', devApp);
+if (api.DEV) app.use('/dev', devApp);
 app.use('/events', eventsApp);
 app.use('/users', usersApp);
 
@@ -52,17 +52,17 @@ app.use((req, res) => {
   res.status(404).send({ error: 'Endpoint not found' });
 });
 
-app.listen(config.api.PORT, () => {
-  console.info(`Server listening on port ${config.api.PORT}...`);
+app.listen(api.PORT, () => {
+  console.info(`Server listening on port ${api.PORT}...`);
 });
 
-socketServer.listen(config.socket.PORT, () => {
-  console.info(`Socket listening on port ${config.socket.PORT}...`);
+socketServer.listen(socket.PORT, () => {
+  console.info(`Socket listening on port ${socket.PORT}...`);
 });
 
-console.info('DEV API is', config.api.DEV ? 'active' : 'NOT available');
-console.info('Bree job is', config.bree.START ? 'active' : 'NOT available');
+console.info('DEV API is', api.DEV ? 'active' : 'NOT available');
+console.info('Bree job is', breeConfig.START ? 'active' : 'NOT available');
 
-if (config.bree.START) {
+if (breeConfig.START) {
   bree.start();
 }

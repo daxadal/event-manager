@@ -1,16 +1,18 @@
 import dotenv from 'dotenv';
 
-dotenv.config();
+import { parseBoolean, parseEnvString } from './types-helpers';
+
+const { error, parsed } = dotenv.config();
+
+const parsingErrors: string[] = [];
 
 export const api = {
   PORT: '3000',
-  DEV: process.env.DEVELOPMENT_API
-    ? process.env.DEVELOPMENT_API === 'true'
-    : false,
+  DEV: parseBoolean('DEVELOPMENT_API', parsingErrors),
 };
 
 export const db = {
-  URL: process.env.MONGO_URL as string,
+  URL: parseEnvString('MONGO_URL', parsingErrors),
 };
 
 export const socket = {
@@ -18,22 +20,20 @@ export const socket = {
 };
 
 export const jwt = {
-  TOKEN_SECRET: process.env.TOKEN_SECRET as string,
+  TOKEN_SECRET: parseEnvString('TOKEN_SECRET', parsingErrors),
 };
 
 export const bree = {
-  BREE_SECRET: process.env.BREE_SECRET as string,
-  START: process.env.START_REMINDERS
-    ? process.env.START_REMINDERS !== 'false'
-    : true,
+  BREE_SECRET: parseEnvString('BREE_SECRET', parsingErrors),
+  START: parseBoolean('START_REMINDERS', parsingErrors),
 };
 
 export const pass = {
-  SECRET: process.env.PASS_SECRET as string,
+  SECRET: parseEnvString('PASS_SECRET', parsingErrors),
 };
 
 export const mocha = {
-  SOCKET_VERBOSE: process.env.MOCHA_SOCKET_VERBOSE
-    ? process.env.MOCHA_SOCKET_VERBOSE === 'true'
-    : false,
+  SOCKET_VERBOSE: parseBoolean('MOCHA_SOCKET_VERBOSE', parsingErrors),
 };
+
+export const configDebug = { dotenv: { error, parsed }, parsingErrors };

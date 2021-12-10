@@ -9,9 +9,30 @@ import eventsApp from '@/routes/events';
 import usersApp from '@/routes/users';
 import devApp from '@/routes/dev';
 
-import { api, bree as breeConfig, socket } from '@/config';
+import { api, bree as breeConfig, configDebug, socket } from '@/config';
 import bree from '@/scheduler';
 import * as DB from '@/services/db';
+
+console.info('=== SERVER STARTUP ===');
+
+if (configDebug.dotenv.error)
+  console.warn(`Could NOT parse .env, Error:`, configDebug.dotenv.error);
+else if (!configDebug.dotenv.parsed)
+  console.info(`Parsing .env produced no result`);
+else
+  console.info(
+    `.env parsed. ${
+      Object.keys(configDebug.dotenv.parsed).length
+    } variables found.`
+  );
+
+if (configDebug.parsingErrors.length > 0) {
+  console.error(`@config initialization failed`, {
+    errors: configDebug.parsingErrors,
+  });
+  console.info('Exiting on error...\n');
+  process.exit(1);
+}
 
 DB.setup();
 

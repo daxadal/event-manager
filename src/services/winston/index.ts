@@ -84,12 +84,12 @@ export function getLogger(service = "api"): Logger {
   });
 }
 
-export const initLogger =
+export const getLoggerMiddleware =
   (service= "api"): RequestHandler =>
   (req: any, res, next) => {
     req.logger = getLogger(service);
     req.logger.info(
-      `==== Starting execution of endpoint ${req.originalUrl} ====`
+      `==== Starting execution of ${req.method} ${req.originalUrl} ====`
     );
     next();
   };

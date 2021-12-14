@@ -1,6 +1,7 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import Joi from 'joi';
+import { Logger } from 'winston';
 
 import * as DB from '@/services/db';
 import { verifyToken, decodeToken } from '@/services/auth';
@@ -35,6 +36,7 @@ function isVisible(event, user) {
 }
 
 async function loadEvent(req, res, next) {
+  const logger: Logger | Console = (req as any).logger || console;
   const { eventId } = req.params;
   try {
     req.event = await DB.Event.findById(eventId).exec();
@@ -42,7 +44,7 @@ async function loadEvent(req, res, next) {
     if (req.event && isVisible(req.event, req.user)) next();
     else res.status(400).send({ error: 'Event not found' });
   } catch (error) {
-    console.error(error);
+    logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
     res.status(500).send({ error: 'Internal server error' });
   }
 }
@@ -50,6 +52,7 @@ async function loadEvent(req, res, next) {
 eventsApp
   .route('/')
   .post(decodeToken, verifyToken, async (req: any, res) => {
+    const logger: Logger | Console = (req as any).logger || console;
     try {
       const newEventSchema = Joi.object({
         headline: Joi.string().min(5).max(100).required(),
@@ -93,11 +96,12 @@ eventsApp
         .status(200)
         .send({ message: 'Event created', event: DB.format(eventDB) });
     } catch (error) {
-      console.error(error);
+      logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
       res.status(500).send({ error: 'Internal server error' });
     }
   })
   .get(decodeToken, async (req: any, res) => {
+    const logger: Logger | Console = (req as any).logger || console;
     try {
       let query;
       if (req.user)
@@ -112,7 +116,7 @@ eventsApp
       if (events) res.status(200).send({ events: events.map(DB.format) });
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
-      console.error(error);
+      logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
       res.status(500).send({ error: 'Internal server error' });
     }
   });
@@ -120,14 +124,16 @@ eventsApp
 eventsApp
   .route('/:eventId(\\w+)')
   .get(decodeToken, loadEvent, async (req: any, res) => {
+    const logger: Logger | Console = (req as any).logger || console;
     try {
       res.status(200).send({ event: DB.format(req.event) });
     } catch (error) {
-      console.error(error);
+      logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
       res.status(500).send({ error: 'Internal server error' });
     }
   })
   .put(decodeToken, verifyToken, loadEvent, async (req: any, res) => {
+    const logger: Logger | Console = (req as any).logger || console;
     try {
       const updateEventSchema = Joi.object({
         headline: Joi.string().min(5).max(100),
@@ -181,11 +187,12 @@ eventsApp
           .send({ message: 'Event updated', event: DB.format(req.event) });
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
-      console.error(error);
+      logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
       res.status(500).send({ error: 'Internal server error' });
     }
   })
   .delete(decodeToken, verifyToken, loadEvent, async (req: any, res) => {
+    const logger: Logger | Console = (req as any).logger || console;
     try {
       if (String(req.event.creatorId) !== req.user.id) {
         res
@@ -201,7 +208,7 @@ eventsApp
       if (req.event) res.status(200).send({ message: 'Event deleted' });
       else res.status(400).send({ error: 'Event not found' });
     } catch (error) {
-      console.error(error);
+      logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
       res.status(500).send({ error: 'Internal server error' });
     }
   });
@@ -210,6 +217,7 @@ eventsApp
 eventsApp
   .route('/:eventId(\\w+)/subscribe')
   .post(decodeToken, verifyToken, loadEvent, async (req: any, res) => {
+    const logger: Logger | Console = (req as any).logger || console;
     try {
       const inputSchema = Joi.object({
         comment: Joi.string().max(100),
@@ -259,7 +267,7 @@ eventsApp
         });
       }
     } catch (error) {
-      console.error(error);
+      logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
       res.status(500).send({ error: 'Internal server error' });
     }
   });

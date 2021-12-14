@@ -32,8 +32,9 @@ app.use('/events', eventsApp);
 app.use('/users', usersApp);
 
 app.post('/jobs/remind', checkBreeToken, async (req: any, res) => {
+  const logger: Logger | Console = (req as any).logger || console;
   try {
-    console.info('Remind:', req.dates);
+    logger.info('Remind:', req.dates);
     const { start, end } = req.dates;
 
     const events = await DB.Event.find({
@@ -42,7 +43,7 @@ app.post('/jobs/remind', checkBreeToken, async (req: any, res) => {
     await sendReminders(events);
     res.status(200).send({ message: 'Reminders sent' });
   } catch (error) {
-    console.error(error);
+    logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
     res.status(500).send({ error: 'Internal server error' });
   }
 });

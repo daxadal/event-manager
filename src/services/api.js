@@ -24,27 +24,27 @@ module.exports = () => {
 
   const get = (path, auth = currentAuth) =>
     Axios.get(
-      `${config.api.DOMAIN}:${config.api.PORT}/${path}`,
+      `http://localhost:${config.api.PORT}/${path}`,
       setAuth(auth)
     ).catch(errorHandler);
 
   const post = (path, body, auth = currentAuth) =>
     Axios.post(
-      `${config.api.DOMAIN}:${config.api.PORT}/${path}`,
+      `http://localhost:${config.api.PORT}/${path}`,
       body,
       setAuth(auth)
     ).catch(errorHandler);
 
   const put = (path, body, auth = currentAuth) =>
     Axios.put(
-      `${config.api.DOMAIN}:${config.api.PORT}/${path}`,
+      `http://localhost:${config.api.PORT}/${path}`,
       body,
       setAuth(auth)
     ).catch(errorHandler);
 
   const destroy = (path, auth = currentAuth) =>
     Axios.delete(
-      `${config.api.DOMAIN}:${config.api.PORT}/${path}`,
+      `http://localhost:${config.api.PORT}/${path}`,
       setAuth(auth)
     ).catch(errorHandler);
 

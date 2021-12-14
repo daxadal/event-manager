@@ -1,7 +1,7 @@
 import Graceful from '@ladjs/graceful';
 import Bree from 'bree';
 
-import config from '@/config';
+const REMINDER_INTERVAL = '1m';
 
 const bree = new Bree({
   jobs: [
@@ -11,7 +11,7 @@ const bree = new Bree({
     },
     {
       name: 'remind',
-      interval: config.bree.INTERVAL,
+      interval: REMINDER_INTERVAL,
     },
   ],
 });

@@ -2,6 +2,9 @@
 import mongoose from 'mongoose';
 
 import { db as dbConfig } from '@/config';
+import { getLogger } from '@/services/winston';
+
+const logger = getLogger('server-startup');
 
 export function setup() {
   mongoose.set('useCreateIndex', true);
@@ -11,9 +14,11 @@ export function setup() {
   });
 
   const db = mongoose.connection;
-  db.on('error', console.error.bind(console, 'connection error:'));
+  db.on('error', (error) => {
+    logger.error(`Error connecting to DB`, {error});
+  });
   db.once('open', () => {
-    console.info('DB connected');
+    logger.info('DB connected');
   });
 }
 

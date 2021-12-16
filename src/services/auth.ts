@@ -1,5 +1,6 @@
 import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
+import { Logger } from 'winston';
 import * as DB from './db';
 
 import { bree as breeConfig, jwt as jwtConfig } from '@/config';
@@ -9,6 +10,7 @@ const TOKEN_EXPIRATION = '8h';
 const BREE_EXPIRATION = '30s';
 
 export const decodeToken: RequestHandler = async (req: any, res, next) => {
+  const logger: Logger | Console = (req as any).logger || console;
   try {
     const bearerHeader = req.get('Authorization');
     const match = /^[Bb]earer (.+)$/.exec(bearerHeader);
@@ -24,7 +26,7 @@ export const decodeToken: RequestHandler = async (req: any, res, next) => {
       try {
         decoded = jwt.verify(match[1], jwtConfig.TOKEN_SECRET);
       } catch (error) {
-        console.error(error);
+        logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
         res.status(403).send({ error: 'Invalid session token' });
         return;
       }
@@ -32,7 +34,7 @@ export const decodeToken: RequestHandler = async (req: any, res, next) => {
       try {
         req.user = await DB.User.findById(decoded.id);
       } catch (error) {
-        console.error(error);
+        logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
         res.status(500).send({ error: 'Internal server error' });
         return;
       }
@@ -42,7 +44,7 @@ export const decodeToken: RequestHandler = async (req: any, res, next) => {
       else next();
     }
   } catch (error) {
-    console.error(error);
+    logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
     res.status(500).send({ error: 'Internal server error' });
   }
 };
@@ -53,6 +55,7 @@ export const verifyToken: RequestHandler = async (req: any, res, next) => {
 };
 
 export const checkBreeToken: RequestHandler = async (req: any, res, next) => {
+  const logger: Logger | Console = (req as any).logger || console;
   try {
     const bearerHeader = req.get('Authorization');
     const match = /^[Bb]earer (.+)$/.exec(bearerHeader);
@@ -66,7 +69,7 @@ export const checkBreeToken: RequestHandler = async (req: any, res, next) => {
       try {
         req.dates = jwt.verify(match[1], breeConfig.BREE_SECRET);
       } catch (error) {
-        console.error(error);
+        logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
         res.status(403).send({ error: 'Invalid session token' });
         return;
       }
@@ -76,7 +79,7 @@ export const checkBreeToken: RequestHandler = async (req: any, res, next) => {
       else next();
     }
   } catch (error) {
-    console.error(error);
+    logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
     res.status(500).send({ error: 'Internal server error' });
   }
 };

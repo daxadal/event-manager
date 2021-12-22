@@ -119,3 +119,4 @@ dist
 
 # Reportes de Jest
 junit.xml
+globalConfig.json

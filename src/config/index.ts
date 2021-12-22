@@ -1,6 +1,13 @@
 import dotenv from 'dotenv';
 
-import { parseBoolean, parseEnvString } from './types-helpers';
+import {
+  parseBoolean,
+  parseEnvString,
+  parseEnvLogLevel,
+  parseOptEnvString,
+} from './types-helpers';
+
+export { LogLevel } from './types-helpers';
 
 const { error, parsed } = dotenv.config();
 
@@ -34,6 +41,29 @@ export const pass = {
 
 export const mocha = {
   SOCKET_VERBOSE: parseBoolean('MOCHA_SOCKET_VERBOSE', parsingErrors),
+};
+
+export const winston = {
+  slack: {
+    level: parseEnvLogLevel('WINSTON_SLACK_LEVEL', parsingErrors),
+    webhooks: {
+      priority: parseOptEnvString(
+        'WINSTON_SLACK_PRIORITY_WEBHOOK',
+        parsingErrors
+      ),
+      all: parseOptEnvString(
+        'WINSTON_SLACK_NON_PRIORITY_WEBHOOK',
+        parsingErrors
+      ),
+    },
+  },
+  console: {
+    level: parseEnvLogLevel('WINSTON_CONSOLE_LEVEL', parsingErrors),
+  },
+  file: {
+    level: parseEnvLogLevel('WINSTON_FILE_LEVEL', parsingErrors),
+    prefix: parseOptEnvString('WINSTON_FILE_PREFIX', parsingErrors),
+  },
 };
 
 export const configDebug = { dotenv: { error, parsed }, parsingErrors };

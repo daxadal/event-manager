@@ -2,19 +2,22 @@ import http from 'http';
 import { Server } from 'socket.io';
 
 import * as DB from '@/services/db';
+import { getLogger } from '@/services/winston';
 
 const httpServer = http.createServer();
 const io = new Server(httpServer);
 
+const logger = getLogger('socket-server');
+
 io.on('connection', (socket) => {
-  console.log('Server: Connection made to server: ', socket.id);
+  logger.debug(`Server: Connection made to server: ${socket.id}`);
 
   socket.on('disconnect', () => {
-    console.log('Server: user disconnected');
+    logger.debug('Server: user disconnected');
   });
 
   socket.on('PONG', () => {
-    console.log('Server PONG', socket.id);
+    logger.debug(`Server PONG: ${socket.id}`);
   });
 
   socket.on('sign-in', async (sessionToken) => {
@@ -24,10 +27,10 @@ io.on('connection', (socket) => {
     if (user) {
       user.socketId = socket.id;
       await user.save();
-      console.log('Server: sign-in', socket.id, user.name, user.id);
+      logger.debug(`Server: sign-in ${socket.id} ${user.name} ${user.id}`);
       socket.emit('sign-in-ok');
     } else {
-      console.log('Server: failed to sign-in', {
+      logger.debug('Server: failed to sign-in', {
         socketId: socket.id,
         sessionToken,
       });
@@ -40,10 +43,10 @@ io.on('connection', (socket) => {
     });
     if (user && user.socketId === socket.id) {
       user.socketId = null;
-      console.log('Server: sign-out', socket.id, user.name, user.id);
+      logger.debug(`Server: sign-out ${socket.id} ${user.name} ${user.id}`);
       socket.emit('sign-out-ok');
     } else {
-      console.log('Server: failed to sign-out', {
+      logger.debug('Server: failed to sign-out', {
         socketId: socket.id,
         sessionToken,
       });
@@ -71,15 +74,12 @@ function format(event, user, sub) {
 
 export async function sendReminders(events) {
   const all = await io.fetchSockets();
-  console.info(
-    'All sockets:',
-    all.map((s) => s.id)
-  );
+  logger.info('All sockets:', { socketIds: all.map((s) => s.id) });
   const subscriptions = await DB.Subscription.find().in(
     'eventId',
     events.map((event) => event.id)
   );
-  console.info('subscriptions.length', subscriptions.length);
+  logger.info(`subscriptions.length ${subscriptions.length}`);
   const users = await DB.User.find().in(
     '_id',
     subscriptions.map((sub) => sub.subscriberId)

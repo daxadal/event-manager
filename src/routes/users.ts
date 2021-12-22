@@ -3,6 +3,7 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import auth from 'basic-auth';
 import Joi from 'joi';
+import { Logger } from 'winston';
 
 import * as DB from '@/services/db';
 import { createToken, decodeToken, verifyToken } from '@/services/auth';
@@ -27,6 +28,7 @@ usersApp.use(
 );
 
 usersApp.post('/sign-up', async (req, res) => {
+  const logger: Logger | Console = (req as any).logger || console;
   try {
     const inputSchema = Joi.object({
       name: Joi.string().required(),
@@ -62,12 +64,13 @@ usersApp.post('/sign-up', async (req, res) => {
 
     res.status(200).send({ message: 'Signed up successfully', token });
   } catch (error) {
-    console.error(error);
+    logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
     res.status(500).send({ error: 'Internal server error' });
   }
 });
 
 usersApp.post('/sign-in', async (req, res) => {
+  const logger: Logger | Console = (req as any).logger || console;
   try {
     const basicAuth = auth(req);
 
@@ -105,19 +108,20 @@ usersApp.post('/sign-in', async (req, res) => {
 
     res.status(200).send({ message: 'Signed in successfully', token });
   } catch (error) {
-    console.error(error);
+    logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
     res.status(500).send({ error: 'Internal server error' });
   }
 });
 
 usersApp.post('/sign-out', decodeToken, verifyToken, async (req: any, res) => {
+  const logger: Logger | Console = (req as any).logger || console;
   try {
     req.user.sessionToken = undefined;
     req.user.socketId = undefined;
     await req.user.save();
     res.status(200).send({ message: 'Signed out successfully' });
   } catch (error) {
-    console.error(error);
+    logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
     res.status(500).send({ error: 'Internal server error' });
   }
 });

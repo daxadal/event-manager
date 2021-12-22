@@ -1,12 +1,18 @@
 import request from 'supertest';
 import crypto from 'crypto';
+import { mocked } from 'ts-jest/utils';
 
 import app from '@/app';
 import { pass as passConfig } from '@/config';
 import { closeConnection, createConnection, User } from '@/services/db';
+import * as auth from '@/services/auth';
 
 import { clearDatabase } from './mocks/db';
 import { createToken } from '@/services/auth';
+
+jest.mock('@/services/auth');
+
+const mockedAuth = mocked(auth, true);
 
 const hash = (pass: string) =>
   crypto.createHmac('sha256', passConfig.SECRET).update(pass).digest('hex');
@@ -21,6 +27,10 @@ describe('Authentication', () => {
   afterAll(closeConnection);
 
   describe('Sign up - Register', () => {
+    beforeAll(() => mockedAuth.createToken.mockReturnValue('token'));
+
+    afterAll(() => mockedAuth.createToken.mockReset());
+
     it('Returns 400 on empty body', async () => {
       // given
       const body = {};
@@ -154,6 +164,15 @@ describe('Authentication', () => {
   });
 
   describe('Sign out - Logout', () => {
+    beforeAll(() => {
+      mockedAuth.decodeToken.mockImplementation(async (req: any, res, next) => {
+        req.token = 'token';
+        req.user = await User.findOne({});
+        next();
+      });
+      mockedAuth.verifyToken.mockImplementation((req, res, next) => next());
+    });
+
     beforeEach(() =>
       new User({
         name: 'John Doe',
@@ -162,23 +181,12 @@ describe('Authentication', () => {
       }).save()
     );
 
-    it('Returns 403 if the provided token is invalid', async () => {
-      // given
-      const token = 'invalidToken';
-
-      // when
-      const response = await request(app)
-        .post('/users/sign-out')
-        .set('Authorization', `Bearer ${token}`)
-        .send();
-
-      // then
-      expect(response.status).toEqual(403);
-      expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual('Invalid session token');
+    afterAll(() => {
+      mockedAuth.decodeToken.mockReset();
+      mockedAuth.verifyToken.mockReset();
     });
 
-    it('Returns 200 and a token on success', async () => {
+    it('Returns 200 on success', async () => {
       // given
       const user = await User.findOne({});
       const token = createToken(user);

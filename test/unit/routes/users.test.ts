@@ -16,7 +16,7 @@ const mockedAuth = mocked(auth, true);
 const hash = (pass: string) =>
   crypto.createHmac('sha256', passConfig.SECRET).update(pass).digest('hex');
 
-describe('Authentication', () => {
+describe('The /users API', () => {
   beforeAll(createConnection);
 
   beforeEach(jest.clearAllMocks);
@@ -25,7 +25,7 @@ describe('Authentication', () => {
 
   afterAll(closeConnection);
 
-  describe('Sign up - Register', () => {
+  describe('POST /users/sign-up endpoint', () => {
     beforeAll(() => mockedAuth.createToken.mockReturnValue('token'));
 
     afterAll(() => mockedAuth.createToken.mockReset());
@@ -101,7 +101,7 @@ describe('Authentication', () => {
     });
   });
 
-  describe('Sign in - Login', () => {
+  describe('POST /users/sign-in endpoint', () => {
     beforeEach(() =>
       new User({
         name: 'John Doe',
@@ -162,7 +162,7 @@ describe('Authentication', () => {
     });
   });
 
-  describe('Sign out - Logout', () => {
+  describe('POST /users/sign-out endpoint', () => {
     beforeAll(() => {
       mockedAuth.decodeToken.mockImplementation(async (req: any, res, next) => {
         req.token = 'token';

@@ -8,13 +8,11 @@ import { closeConnection, createConnection, User } from '@/services/db';
 import * as auth from '@/services/auth';
 
 import { clearDatabase } from 'test/mocks/db';
+import { hash } from '@/services/auth';
 
 jest.mock('@/services/auth');
 
 const mockedAuth = mocked(auth, true);
-
-const hash = (pass: string) =>
-  crypto.createHmac('sha256', passConfig.SECRET).update(pass).digest('hex');
 
 describe('The /users API', () => {
   beforeAll(createConnection);

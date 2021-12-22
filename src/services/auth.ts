@@ -1,13 +1,21 @@
+import crypto from 'crypto';
 import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import { Logger } from 'winston';
 import * as DB from './db';
 
-import { bree as breeConfig, jwt as jwtConfig } from '@/config';
+import {
+  bree as breeConfig,
+  jwt as jwtConfig,
+  pass as passConfig,
+} from '@/config';
 import { getMinuteInterval } from '@/services/utils';
 
 const TOKEN_EXPIRATION = '8h';
 const BREE_EXPIRATION = '30s';
+
+export const hash = (pass) =>
+  crypto.createHmac('sha256', passConfig.SECRET).update(pass).digest('hex');
 
 export const decodeToken: RequestHandler = async (req: any, res, next) => {
   const logger: Logger | Console = (req as any).logger || console;

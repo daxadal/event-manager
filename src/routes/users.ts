@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import auth from 'basic-auth';
@@ -6,7 +5,7 @@ import Joi from 'joi';
 import { Logger } from 'winston';
 
 import * as DB from '@/services/db';
-import { createToken, decodeToken, verifyToken } from '@/services/auth';
+import { createToken, decodeToken, hash, verifyToken } from '@/services/auth';
 import { pass as passConfig } from '@/config';
 
 const USER_SIZE = '512b';
@@ -14,9 +13,6 @@ const USER_RPM = 30;
 
 // Register / LOGIN
 const usersApp = express.Router();
-
-const hash = (pass) =>
-  crypto.createHmac('sha256', passConfig.SECRET).update(pass).digest('hex');
 
 usersApp.use(express.json({ limit: USER_SIZE }));
 usersApp.use(

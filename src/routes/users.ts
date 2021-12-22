@@ -7,7 +7,7 @@ import { Logger } from 'winston';
 
 import * as DB from '@/services/db';
 import { createToken, decodeToken, verifyToken } from '@/services/auth';
-import { pass } from '@/config';
+import { pass as passConfig } from '@/config';
 
 const USER_SIZE = '512b';
 const USER_RPM = 30;
@@ -16,7 +16,7 @@ const USER_RPM = 30;
 const usersApp = express.Router();
 
 const hash = (pass) =>
-  crypto.createHmac('sha256', pass.SECRET).update(pass).digest('hex');
+  crypto.createHmac('sha256', passConfig.SECRET).update(pass).digest('hex');
 
 usersApp.use(express.json({ limit: USER_SIZE }));
 usersApp.use(

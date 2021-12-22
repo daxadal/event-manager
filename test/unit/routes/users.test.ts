@@ -7,7 +7,7 @@ import { pass as passConfig } from '@/config';
 import { closeConnection, createConnection, User } from '@/services/db';
 import * as auth from '@/services/auth';
 
-import { clearDatabase } from './mocks/db';
+import { clearDatabase } from 'test/mocks/db';
 import { createToken } from '@/services/auth';
 
 jest.mock('@/services/auth');

@@ -30,7 +30,7 @@ if (configDebug.parsingErrors.length > 0) {
   process.exit(1);
 }
 
-DB.setup();
+DB.createConnection();
 
 app.listen(api.PORT, () => {
   logger.info(`Server listening on port ${api.PORT}...`);

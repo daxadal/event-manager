@@ -17,6 +17,12 @@ const MAIN_RPM = 10;
 
 const app = express();
 
+app.use(getLoggerMiddleware('api'));
+
+if (api.DEV) app.use('/dev', devApp);
+app.use('/events', eventsApp);
+app.use('/users', usersApp);
+
 app.use(
   rateLimit({
     max: MAIN_RPM,
@@ -24,12 +30,6 @@ app.use(
     message: 'Too many requests',
   })
 );
-
-app.use(getLoggerMiddleware('api'));
-
-if (api.DEV) app.use('/dev', devApp);
-app.use('/events', eventsApp);
-app.use('/users', usersApp);
 
 app.post('/jobs/remind', checkBreeToken, async (req: any, res) => {
   const logger: Logger | Console = (req as any).logger || console;

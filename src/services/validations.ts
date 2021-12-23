@@ -2,6 +2,8 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import Joi, { LanguageMessages } from "joi";
 import { Logger } from "winston";
 
+export const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/;
+
 const validate =
   (fieldToValidate: "body" | "query" | "params") =>
   (schema: Joi.Schema, messages?: LanguageMessages): RequestHandler =>

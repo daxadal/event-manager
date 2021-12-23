@@ -5,7 +5,7 @@ import { Logger } from 'winston';
 
 import * as DB from '@/services/db';
 import { verifyToken, decodeToken } from '@/services/auth';
-import { validateBody } from '@/services/validations';
+import { OBJECT_ID_REGEX, validateBody, validatePath } from '@/services/validations';
 
 const EVENT_SIZE = '1kb';
 const EVENT_RPM = 100;
@@ -124,6 +124,13 @@ eventsApp
 
 eventsApp
   .route('/:eventId(\\w+)')
+  .all(
+    validatePath(
+      Joi.object({
+        eventId: Joi.string().pattern(OBJECT_ID_REGEX),
+      })
+    )
+  )
   .get(decodeToken, loadEvent, async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
@@ -219,6 +226,11 @@ eventsApp
 eventsApp.route('/:eventId(\\w+)/subscribe').post(
   decodeToken,
   verifyToken,
+  validatePath(
+    Joi.object({
+      eventId: Joi.string().pattern(OBJECT_ID_REGEX),
+    })
+  ),
   validateBody(
     Joi.object({
       comment: Joi.string().max(100),

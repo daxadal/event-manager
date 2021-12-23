@@ -21,7 +21,10 @@ import {
   createMockUser,
 } from 'test/mocks/db';
 
-jest.mock('@/services/auth');
+jest.mock('@/services/auth', () => ({
+  decodeToken: jest.fn((req, res, next) => next()),
+  verifyToken: jest.fn((req, res, next) => next()),
+}));
 
 const mockedAuth = mocked(auth, true);
 
@@ -47,8 +50,6 @@ describe('The /events API', () => {
         req.user = user;
         next();
       });
-
-      mockedAuth.verifyToken.mockImplementationOnce((req, res, next) => next());
     });
 
     it('Returns 400 on empty body', async () => {
@@ -185,14 +186,6 @@ describe('The /events API', () => {
     let otherUser: UserType & Document;
     let events: Array<EventType & Document>;
 
-    beforeAll(() => {
-      mockedAuth.verifyToken.mockImplementation((req, res, next) => next());
-    });
-
-    afterAll(() => {
-      mockedAuth.verifyToken.mockReset();
-    });
-
     beforeEach(async () => {
       creatorUser = await createMockUser({ email: 'creator@doe.com' });
       otherUser = await createMockUser({ email: 'other@doe.com' });
@@ -280,14 +273,6 @@ describe('The /events API', () => {
   describe('GET /events/{eventId} endpoint', () => {
     let creatorUser: UserType & Document;
     let otherUser: UserType & Document;
-
-    beforeAll(() => {
-      mockedAuth.verifyToken.mockImplementation((req, res, next) => next());
-    });
-
-    afterAll(() => {
-      mockedAuth.verifyToken.mockReset();
-    });
 
     beforeEach(async () => {
       creatorUser = await createMockUser({ email: 'creator@doe.com' });
@@ -387,14 +372,6 @@ describe('The /events API', () => {
   describe('PUT /events/{eventId} endpoint', () => {
     let callerUser: UserType & Document;
     let otherUser: UserType & Document;
-
-    beforeAll(() => {
-      mockedAuth.verifyToken.mockImplementation((req, res, next) => next());
-    });
-
-    afterAll(() => {
-      mockedAuth.verifyToken.mockReset();
-    });
 
     beforeEach(async () => {
       callerUser = await createMockUser({ email: 'caller@doe.com' });
@@ -543,14 +520,6 @@ describe('The /events API', () => {
   describe('DELETE /events/{eventId} endpoint', () => {
     let callerUser: UserType & Document;
     let otherUser: UserType & Document;
-
-    beforeAll(() => {
-      mockedAuth.verifyToken.mockImplementation((req, res, next) => next());
-    });
-
-    afterAll(() => {
-      mockedAuth.verifyToken.mockReset();
-    });
 
     beforeEach(async () => {
       callerUser = await createMockUser({ email: 'caller@doe.com' });

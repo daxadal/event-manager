@@ -1,6 +1,6 @@
 {
-    "singleQuote": true,
+    "singleQuote": false,
     "tabWidth": 2,
-    "useTabs": false ,
+    "useTabs": false,
     "endOfLine": "lf"
 }

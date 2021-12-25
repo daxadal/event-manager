@@ -5,6 +5,7 @@ import { mocked } from 'ts-jest/utils';
 
 import app from '@/app';
 import { EVENT_RPM, EVENT_SIZE } from '@/routes/events';
+import { decodeToken } from '@/services/auth';
 import {
   closeConnection,
   createConnection,
@@ -13,13 +14,13 @@ import {
   format,
   UserType,
 } from '@/services/db';
-import * as auth from '@/services/auth';
 
 import { clearDatabase, createMockEvents, createMockUser } from 'test/mocks/db';
 
 jest.mock('@/services/auth', () => {
   const module =
     jest.requireActual<typeof import('@/services/auth')>('@/services/auth');
+
   return {
     ...module,
     decodeToken: jest.fn((req, res, next) => next()),
@@ -27,7 +28,7 @@ jest.mock('@/services/auth', () => {
   };
 });
 
-const mockedAuth = mocked(auth, true);
+const mockedDecodeToken = mocked(decodeToken, true);
 
 const AMOUNT_OF_EVENTS = 12;
 
@@ -46,7 +47,7 @@ describe('The /events API', () => {
     beforeEach(async () => {
       user = await createMockUser();
 
-      mockedAuth.decodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
         req.token = 'token';
         req.user = user;
         next();
@@ -208,7 +209,7 @@ describe('The /events API', () => {
 
     it('Returns 200 and all public events if the user is not authenticated', async () => {
       // given
-      mockedAuth.decodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
         next();
       });
 
@@ -228,7 +229,7 @@ describe('The /events API', () => {
 
     it('Returns 200 and all public and private events if the user has no events', async () => {
       // given
-      mockedAuth.decodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
         req.token = 'token';
         req.user = otherUser;
         next();
@@ -250,7 +251,7 @@ describe('The /events API', () => {
 
     it('Returns 200 and all public, private and owned events if the user has events', async () => {
       // given
-      mockedAuth.decodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
         req.token = 'token';
         req.user = creatorUser;
         next();
@@ -281,7 +282,7 @@ describe('The /events API', () => {
         headline: createRandomString(1000),
         startDate: Date.now(),
         location: { name: 'Somewhere' },
-        description: createRandomString(5000)
+        description: createRandomString(5000),
       };
 
       // when
@@ -290,7 +291,7 @@ describe('The /events API', () => {
       // then
       expect(response.status).toEqual(413);
       expect(response.body).toBeDefined();
-      expect(response.body.message).toEqual('Payload too large');
+      expect(response.body.error).toEqual('Payload too large');
     });
 
     it(`Returns 429 after ${EVENT_RPM} requests in a minute`, async () => {
@@ -299,14 +300,16 @@ describe('The /events API', () => {
       // when
       const requestPromises = new Array(EVENT_RPM + 1)
         .fill(undefined)
-        .map((_, i) =>
-          request(app).get('/events')
-        );
+        .map((_, i) => request(app).get('/events'));
       const responses = await Promise.all(requestPromises);
 
       // then
-      const validResponses = responses.filter(response=>response.status ===200)
-      const rejectedResponses = responses.filter(response=>response.status ===429)
+      const validResponses = responses.filter(
+        (response) => response.status === 200
+      );
+      const rejectedResponses = responses.filter(
+        (response) => response.status === 429
+      );
 
       expect(validResponses.length).toBeLessThanOrEqual(EVENT_RPM);
       expect(rejectedResponses.length).toBeGreaterThanOrEqual(1);

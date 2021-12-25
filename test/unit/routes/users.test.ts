@@ -4,14 +4,25 @@ import { mocked } from 'ts-jest/utils';
 
 import app from '@/app';
 import { closeConnection, createConnection, User } from '@/services/db';
-import * as auth from '@/services/auth';
+import { decodeToken, hash } from '@/services/auth';
 import { USER_RPM, USER_SIZE } from '@/routes/users';
 
 import { clearDatabase } from 'test/mocks/db';
 
-jest.mock('@/services/auth');
+jest.mock('@/services/auth', () => {
+  const module =
+    jest.requireActual<typeof import('@/services/auth')>('@/services/auth');
 
-const mockedAuth = mocked(auth, true);
+  return {
+    ...module,
+
+    decodeToken: jest.fn(),
+    verifyToken: jest.fn((req, res, next) => next()),
+    createToken: jest.fn(() => 'token'),
+  };
+});
+
+const mockedDecodeToken = mocked(decodeToken, true);
 
 describe('The /users API', () => {
   beforeAll(createConnection);
@@ -23,10 +34,6 @@ describe('The /users API', () => {
   afterAll(closeConnection);
 
   describe('POST /users/sign-up endpoint', () => {
-    beforeAll(() => mockedAuth.createToken.mockReturnValue('token'));
-
-    afterAll(() => mockedAuth.createToken.mockReset());
-
     it('Returns 400 on empty body', async () => {
       // given
       const body = {};
@@ -67,7 +74,7 @@ describe('The /users API', () => {
       await new User({
         name: 'John Doe',
         email: 'john@doe.com',
-        password: auth.hash('password'),
+        hashedPassword: hash('password'),
       }).save();
 
       // when
@@ -99,13 +106,19 @@ describe('The /users API', () => {
   });
 
   describe('POST /users/sign-in endpoint', () => {
-    beforeEach(() =>
-      new User({
+    beforeEach(async () => {
+      const user = await new User({
         name: 'John Doe',
         email: 'john@doe.com',
-        password: auth.hash('password'),
-      }).save()
-    );
+        hashedPassword: hash('password'),
+      }).save();
+
+      mockedDecodeToken.mockImplementation((req: any, res, next) => {
+        req.token = 'token';
+        req.user = user;
+        next();
+      });
+    });
 
     it('Returns 400 if no auth is provided', async () => {
       // given
@@ -160,26 +173,18 @@ describe('The /users API', () => {
   });
 
   describe('POST /users/sign-out endpoint', () => {
-    beforeAll(() => {
-      mockedAuth.decodeToken.mockImplementation(async (req: any, res, next) => {
-        req.token = 'token';
-        req.user = await User.findOne({});
-        next();
-      });
-      mockedAuth.verifyToken.mockImplementation((req, res, next) => next());
-    });
-
-    beforeEach(() =>
-      new User({
+    beforeEach(async () => {
+      const user = await new User({
         name: 'John Doe',
         email: 'john@doe.com',
-        password: auth.hash('password'),
-      }).save()
-    );
+        hashedPassword: hash('password'),
+      }).save();
 
-    afterAll(() => {
-      mockedAuth.decodeToken.mockReset();
-      mockedAuth.verifyToken.mockReset();
+      mockedDecodeToken.mockImplementation((req: any, res, next) => {
+        req.token = 'token';
+        req.user = user;
+        next();
+      });
     });
 
     it('Returns 200 on success', async () => {
@@ -213,7 +218,7 @@ describe('The /users API', () => {
       // then
       expect(response.status).toEqual(413);
       expect(response.body).toBeDefined();
-      expect(response.body.message).toEqual('Payload too large');
+      expect(response.body.error).toEqual('Payload too large');
     });
 
     it(`Returns 429 after ${USER_RPM} requests in a minute`, async () => {

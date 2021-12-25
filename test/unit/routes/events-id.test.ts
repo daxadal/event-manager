@@ -4,6 +4,8 @@ import { Document } from 'mongoose';
 import { mocked } from 'ts-jest/utils';
 
 import app from '@/app';
+import { EVENT_RPM, EVENT_SIZE } from '@/routes/events';
+import { decodeToken } from '@/services/auth';
 import {
   closeConnection,
   createConnection,
@@ -13,22 +15,21 @@ import {
   User,
   UserType,
 } from '@/services/db';
-import * as auth from '@/services/auth';
 
 import { clearDatabase, createMockEvent, createMockUser } from 'test/mocks/db';
-import { EVENT_RPM, EVENT_SIZE } from '@/routes/events';
 
 jest.mock('@/services/auth', () => {
   const module =
     jest.requireActual<typeof import('@/services/auth')>('@/services/auth');
+
   return {
     ...module,
     decodeToken: jest.fn((req, res, next) => next()),
     verifyToken: jest.fn((req, res, next) => next()),
   };
 });
-
-const mockedAuth = mocked(auth, true);
+decodeToken;
+const mockedDecodeToken = mocked(decodeToken, true);
 
 describe('The /events API', () => {
   beforeAll(createConnection);
@@ -50,15 +51,13 @@ describe('The /events API', () => {
 
     it('Returns 400 if the event does not exist', async () => {
       // given
-      mockedAuth.decodeToken.mockImplementationOnce(
-        async (req: any, res, next) => {
-          const user = await User.findOne({ email: 'creator@doe.com' });
-          req.token = user ? 'token' : undefined;
-          req.user = user;
+      mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
+        const user = await User.findOne({ email: 'creator@doe.com' });
+        req.token = user ? 'token' : undefined;
+        req.user = user;
 
-          next();
-        }
-      );
+        next();
+      });
       const eventId = '60123456789abcdef1234567';
 
       // when
@@ -76,16 +75,14 @@ describe('The /events API', () => {
       ${undefined}       | ${'private'} | ${'the event is private and the caller is NOT authenticated'}
     `('Returns 400 if $reason', async ({ authUser, state }) => {
       // given
-      mockedAuth.decodeToken.mockImplementationOnce(
-        async (req: any, res, next) => {
-          if (authUser) {
-            const user = await User.findOne({ email: authUser });
-            req.token = user ? 'token' : undefined;
-            req.user = user;
-          }
-          next();
+      mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
+        if (authUser) {
+          const user = await User.findOne({ email: authUser });
+          req.token = user ? 'token' : undefined;
+          req.user = user;
         }
-      );
+        next();
+      });
       const event = await createMockEvent({
         creatorId: creatorUser._id,
         state,
@@ -108,16 +105,14 @@ describe('The /events API', () => {
       ${undefined}         | ${'public'}  | ${'the event is public'}
     `('Returns 200 and an event if $reason', async ({ authUser, state }) => {
       // given
-      mockedAuth.decodeToken.mockImplementationOnce(
-        async (req: any, res, next) => {
-          if (authUser) {
-            const user = await User.findOne({ email: authUser });
-            req.token = user ? 'token' : undefined;
-            req.user = user;
-          }
-          next();
+      mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
+        if (authUser) {
+          const user = await User.findOne({ email: authUser });
+          req.token = user ? 'token' : undefined;
+          req.user = user;
         }
-      );
+        next();
+      });
       const event = await createMockEvent({
         creatorId: creatorUser._id,
         state,
@@ -144,7 +139,7 @@ describe('The /events API', () => {
       callerUser = await createMockUser({ email: 'caller@doe.com' });
       otherUser = await createMockUser({ email: 'other@doe.com' });
 
-      mockedAuth.decodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
         req.token = 'token';
         req.user = callerUser;
         next();
@@ -292,7 +287,7 @@ describe('The /events API', () => {
       callerUser = await createMockUser({ email: 'caller@doe.com' });
       otherUser = await createMockUser({ email: 'other@doe.com' });
 
-      mockedAuth.decodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
         req.token = 'token';
         req.user = callerUser;
         next();
@@ -371,7 +366,7 @@ describe('The /events API', () => {
       callerUser = await createMockUser({ email: 'caller@doe.com' });
       otherUser = await createMockUser({ email: 'other@doe.com' });
 
-      mockedAuth.decodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
         req.token = 'token';
         req.user = callerUser;
         next();
@@ -399,7 +394,7 @@ describe('The /events API', () => {
       // then
       expect(response.status).toEqual(413);
       expect(response.body).toBeDefined();
-      expect(response.body.message).toEqual('Payload too large');
+      expect(response.body.error).toEqual('Payload too large');
     });
 
     it(`Returns 429 after ${EVENT_RPM} requests in a minute`, async () => {

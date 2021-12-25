@@ -34,7 +34,7 @@ export const createMockUser = (
   return new User({
     name: `John Doe ${i}`,
     email: `${i}@doe.com`,
-    password: hash('password'),
+    hashedPassword: hash('password'),
 
     ...staticFields,
   }).save();

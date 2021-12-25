@@ -8,10 +8,14 @@ const validate =
   (fieldToValidate: "body" | "query" | "params") =>
   (schema: Joi.Schema, messages?: LanguageMessages): RequestHandler =>
   (req: Request, res: Response, next: NextFunction) => {
-    const logger : Logger | Console = (req as any).logger || console;
-    const { value, error } = schema.validate(req[fieldToValidate], {messages});
+    const logger: Logger | Console = (req as any).logger || console;
+    const { value, error } = schema.validate(req[fieldToValidate], {
+      messages,
+    });
     if (error) {
-      logger.info(`"${req.originalUrl}": ${fieldToValidate} failed validation:\n -  Error: ${error.message}`);
+      logger.info(
+        `"${req.originalUrl}": ${fieldToValidate} failed validation:\n -  Error: ${error.message}`
+      );
       logger.debug(`Full Joi error:`, error);
       res.status(400).send({ error: error.message });
     } else {

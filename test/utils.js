@@ -1,4 +1,4 @@
-const API = require('@/services/api')();
+const API = require("@/services/api")();
 /**
  * Generate a bunch of users for testing and returns an object containing
  * @param {String} common A common name for all the users. It's better if it's different each time you
@@ -11,7 +11,7 @@ async function generateTokens(common, uniques) {
     API.Users.signup({
       name: `${common}${unique}`,
       email: `${common}${unique}@example.com`,
-      password: 'pass',
+      password: "pass",
     })
   );
   const responses = await Promise.all(promises);
@@ -30,7 +30,7 @@ async function generateEvents({ length, startDate, state, token }) {
     API.Events.create({
       headline: `New event ${i}`,
       startDate,
-      location: { name: 'Somewhere' },
+      location: { name: "Somewhere" },
       state,
     })
   );

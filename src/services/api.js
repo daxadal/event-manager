@@ -1,6 +1,6 @@
-const { default: Axios } = require('axios');
+const { default: Axios } = require("axios");
 
-const config = require('@/config');
+const config = require("@/config");
 
 const setAuth = ({ token, user, pass } = {}) => {
   if (token) return { headers: { Authorization: `Bearer ${token}` } };
@@ -13,8 +13,8 @@ const errorHandler = (error) => {
     return error.response;
   }
 
-  if (error.request) console.error('Petition error: ', error.request);
-  else console.error('Unexpected Error', error.message);
+  if (error.request) console.error("Petition error: ", error.request);
+  else console.error("Unexpected Error", error.message);
 
   throw error;
 };
@@ -49,30 +49,30 @@ module.exports = () => {
     ).catch(errorHandler);
 
   const Events = {
-    getAll: () => get('events'),
+    getAll: () => get("events"),
     get: (eventId) => get(`events/${eventId}`),
-    create: (body) => post('events', body),
+    create: (body) => post("events", body),
     update: (eventId, body) => put(`events/${eventId}`, body),
     destroy: (eventId) => destroy(`events/${eventId}`),
     subscribe: (eventId, body) => post(`events/${eventId}/subscribe`, body),
   };
 
   const Users = {
-    signup: (body) => post('users/sign-up', body),
-    signin: (email, pass) => post('users/sign-in', null, { user: email, pass }),
-    signout: () => post('users/sign-out'),
+    signup: (body) => post("users/sign-up", body),
+    signin: (email, pass) => post("users/sign-in", null, { user: email, pass }),
+    signout: () => post("users/sign-out"),
   };
 
   const Dev = {
-    ping: () => post('dev/ping'),
-    remind: () => post('dev/remind'),
-    remindAll: () => post('dev/remind-all'),
-    remindAllBree: () => post('dev/remind-all-bree'),
-    remindBree: () => post('dev/remind-bree'),
+    ping: () => post("dev/ping"),
+    remind: () => post("dev/remind"),
+    remindAll: () => post("dev/remind-all"),
+    remindAllBree: () => post("dev/remind-all-bree"),
+    remindBree: () => post("dev/remind-bree"),
   };
 
   const Jobs = {
-    remind: (token) => post('jobs/remind', null, { token }),
+    remind: (token) => post("jobs/remind", null, { token }),
   };
 
   return {

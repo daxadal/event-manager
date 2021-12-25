@@ -1,13 +1,17 @@
-import express from 'express';
-import rateLimit from 'express-rate-limit';
-import Joi from 'joi';
-import { Logger } from 'winston';
+import express from "express";
+import rateLimit from "express-rate-limit";
+import Joi from "joi";
+import { Logger } from "winston";
 
-import * as DB from '@/services/db';
-import { verifyToken, decodeToken } from '@/services/auth';
-import { OBJECT_ID_REGEX, validateBody, validatePath } from '@/services/validations';
+import * as DB from "@/services/db";
+import { verifyToken, decodeToken } from "@/services/auth";
+import {
+  OBJECT_ID_REGEX,
+  validateBody,
+  validatePath,
+} from "@/services/validations";
 
-export const EVENT_SIZE = '1kb';
+export const EVENT_SIZE = "1kb";
 export const EVENT_RPM = 100;
 
 // EVENTS
@@ -19,20 +23,20 @@ eventsApp.use(
   rateLimit({
     max: EVENT_RPM,
     windowMs: 60 * 1000, // 1 minute
-    message: 'Too many requests',
+    message: "Too many requests",
   })
 );
 
 function isVisible(event, user) {
   switch (event.state) {
-    case 'public':
+    case "public":
       return true;
-    case 'private':
+    case "private":
       return Boolean(user);
-    case 'draft':
+    case "draft":
       return Boolean(user) && user.id === String(event.creatorId);
     default:
-      throw new Error('Event has an unexpected state');
+      throw new Error("Event has an unexpected state");
   }
 }
 
@@ -43,15 +47,18 @@ async function loadEvent(req, res, next) {
     req.event = await DB.Event.findById(eventId).exec();
 
     if (req.event && isVisible(req.event, req.user)) next();
-    else res.status(400).send({ error: 'Event not found' });
+    else res.status(400).send({ error: "Event not found" });
   } catch (error) {
-    logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
-    res.status(500).send({ error: 'Internal server error' });
+    logger.error(
+      `Internal server error at ${req.method} ${req.originalUrl}`,
+      error
+    );
+    res.status(500).send({ error: "Internal server error" });
   }
 }
 
 eventsApp
-  .route('/')
+  .route("/")
   .post(
     decodeToken,
     verifyToken,
@@ -65,65 +72,72 @@ eventsApp
           lat: Joi.number().min(-90).max(90),
           lon: Joi.number().min(-180).max(180),
         })
-          .or('name', 'lat', 'lon')
-          .and('lat', 'lon')
+          .or("name", "lat", "lon")
+          .and("lat", "lon")
           .required(),
-        state: Joi.valid('draft', 'public', 'private').default('draft'),
+        state: Joi.valid("draft", "public", "private").default("draft"),
       })
     ),
-  async (req: any, res) => {
-    const logger: Logger | Console = (req as any).logger || console;
-    try {
-      const event = req.body;
+    async (req: any, res) => {
+      const logger: Logger | Console = (req as any).logger || console;
+      try {
+        const event = req.body;
 
-      if (event.state === 'public') {
-        const events = await DB.Event.find({
-          state: 'public',
-          creatorId: req.user.id,
-        });
+        if (event.state === "public") {
+          const events = await DB.Event.find({
+            state: "public",
+            creatorId: req.user.id,
+          });
 
-        if (events.length > 0) {
-          res.status(400).send({ error: 'Public events limit exceeded' });
-          return;
+          if (events.length > 0) {
+            res.status(400).send({ error: "Public events limit exceeded" });
+            return;
+          }
         }
+
+        const eventDB = await new DB.Event({
+          ...event,
+          creatorId: req.user.id,
+        }).save();
+
+        res
+          .status(200)
+          .send({ message: "Event created", event: DB.format(eventDB) });
+      } catch (error) {
+        logger.error(
+          `Internal server error at ${req.method} ${req.originalUrl}`,
+          error
+        );
+        res.status(500).send({ error: "Internal server error" });
       }
-
-      const eventDB = await new DB.Event({
-        ...event,
-        creatorId: req.user.id,
-      }).save();
-
-      res
-        .status(200)
-        .send({ message: 'Event created', event: DB.format(eventDB) });
-    } catch (error) {
-      logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
-      res.status(500).send({ error: 'Internal server error' });
     }
-  })
+  )
   .get(decodeToken, async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
       let query;
       if (req.user)
         query = DB.Event.find().or([
-          { state: { $in: ['public', 'private'] } },
+          { state: { $in: ["public", "private"] } },
           { creatorId: req.user.id },
         ]);
-      else query = DB.Event.find({ state: 'public' });
+      else query = DB.Event.find({ state: "public" });
 
       const events = await query.exec();
 
       if (events) res.status(200).send({ events: events.map(DB.format) });
-      else res.status(400).send({ error: 'Event not found' });
+      else res.status(400).send({ error: "Event not found" });
     } catch (error) {
-      logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
-      res.status(500).send({ error: 'Internal server error' });
+      logger.error(
+        `Internal server error at ${req.method} ${req.originalUrl}`,
+        error
+      );
+      res.status(500).send({ error: "Internal server error" });
     }
   });
 
 eventsApp
-  .route('/:eventId(\\w+)')
+  .route("/:eventId(\\w+)")
   .all(
     validatePath(
       Joi.object({
@@ -136,8 +150,11 @@ eventsApp
     try {
       res.status(200).send({ event: DB.format(req.event) });
     } catch (error) {
-      logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
-      res.status(500).send({ error: 'Internal server error' });
+      logger.error(
+        `Internal server error at ${req.method} ${req.originalUrl}`,
+        error
+      );
+      res.status(500).send({ error: "Internal server error" });
     }
   })
   .put(
@@ -153,60 +170,64 @@ eventsApp
           lat: Joi.number().min(-90).max(90),
           lon: Joi.number().min(-180).max(180),
         })
-          .or('name', 'lat', 'lon')
-          .and('lat', 'lon'),
-        state: Joi.valid('draft', 'public', 'private'),
+          .or("name", "lat", "lon")
+          .and("lat", "lon"),
+        state: Joi.valid("draft", "public", "private"),
       })
     ),
     loadEvent,
-  async (req: any, res) => {
-    const logger: Logger | Console = (req as any).logger || console;
-    try {
-      const newEvent = req.body;
+    async (req: any, res) => {
+      const logger: Logger | Console = (req as any).logger || console;
+      try {
+        const newEvent = req.body;
 
-      if (String(req.event.creatorId) !== req.user.id) {
-        res
-          .status(400)
-          .send({ error: 'Events can only be edited by their creator' });
-        return;
-      }
-
-      if (req.event.state !== 'public' && newEvent.state === 'public') {
-        const events = await DB.Event.find({
-          state: 'public',
-          creatorId: req.user.id,
-        });
-
-        if (events.length > 0) {
-          res.status(400).send({ error: 'Public events limit exceeded' });
+        if (String(req.event.creatorId) !== req.user.id) {
+          res
+            .status(400)
+            .send({ error: "Events can only be edited by their creator" });
+          return;
         }
+
+        if (req.event.state !== "public" && newEvent.state === "public") {
+          const events = await DB.Event.find({
+            state: "public",
+            creatorId: req.user.id,
+          });
+
+          if (events.length > 0) {
+            res.status(400).send({ error: "Public events limit exceeded" });
+          }
+        }
+
+        if (newEvent.headline) req.event.headline = newEvent.headline;
+        if (newEvent.description) req.event.description = newEvent.description;
+        if (newEvent.startDate) req.event.startDate = newEvent.startDate;
+        if (newEvent.location) req.event.location = newEvent.location;
+        if (newEvent.state) req.event.state = newEvent.state;
+
+        req.event = await req.event.save();
+
+        if (req.event)
+          res
+            .status(200)
+            .send({ message: "Event updated", event: DB.format(req.event) });
+        else res.status(400).send({ error: "Event not found" });
+      } catch (error) {
+        logger.error(
+          `Internal server error at ${req.method} ${req.originalUrl}`,
+          error
+        );
+        res.status(500).send({ error: "Internal server error" });
       }
-
-      if (newEvent.headline) req.event.headline = newEvent.headline;
-      if (newEvent.description) req.event.description = newEvent.description;
-      if (newEvent.startDate) req.event.startDate = newEvent.startDate;
-      if (newEvent.location) req.event.location = newEvent.location;
-      if (newEvent.state) req.event.state = newEvent.state;
-
-      req.event = await req.event.save();
-
-      if (req.event)
-        res
-          .status(200)
-          .send({ message: 'Event updated', event: DB.format(req.event) });
-      else res.status(400).send({ error: 'Event not found' });
-    } catch (error) {
-      logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
-      res.status(500).send({ error: 'Internal server error' });
     }
-  })
+  )
   .delete(decodeToken, verifyToken, loadEvent, async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
       if (String(req.event.creatorId) !== req.user.id) {
         res
           .status(400)
-          .send({ error: 'Events can only be deleted by their creator' });
+          .send({ error: "Events can only be deleted by their creator" });
         return;
       }
 
@@ -214,16 +235,19 @@ eventsApp
 
       await DB.Subscription.deleteMany({ eventId: req.event.id }).exec();
 
-      if (req.event) res.status(200).send({ message: 'Event deleted' });
-      else res.status(400).send({ error: 'Event not found' });
+      if (req.event) res.status(200).send({ message: "Event deleted" });
+      else res.status(400).send({ error: "Event not found" });
     } catch (error) {
-      logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
-      res.status(500).send({ error: 'Internal server error' });
+      logger.error(
+        `Internal server error at ${req.method} ${req.originalUrl}`,
+        error
+      );
+      res.status(500).send({ error: "Internal server error" });
     }
   });
 
 // SUBSCRIPTIONS
-eventsApp.route('/:eventId(\\w+)/subscribe').post(
+eventsApp.route("/:eventId(\\w+)/subscribe").post(
   decodeToken,
   verifyToken,
   validatePath(
@@ -259,12 +283,12 @@ eventsApp.route('/:eventId(\\w+)/subscribe').post(
 
       if (oldSubscription) {
         res.status(400).send({
-          error: 'You already have subscribed to this event',
+          error: "You already have subscribed to this event",
           subscription: DB.format(oldSubscription),
         });
       } else if (subscriptions.length >= 3) {
         res.status(400).send({
-          error: 'Subscribed events limit exceeded',
+          error: "Subscribed events limit exceeded",
         });
       } else {
         const subscription = await new DB.Subscription({
@@ -275,14 +299,18 @@ eventsApp.route('/:eventId(\\w+)/subscribe').post(
         }).save();
 
         res.status(200).send({
-          message: 'Subscribed successfully',
+          message: "Subscribed successfully",
           subscription: DB.format(subscription),
         });
       }
     } catch (error) {
-      logger.error(`Internal server error at ${req.method} ${req.originalUrl}`, error);
-      res.status(500).send({ error: 'Internal server error' });
+      logger.error(
+        `Internal server error at ${req.method} ${req.originalUrl}`,
+        error
+      );
+      res.status(500).send({ error: "Internal server error" });
     }
-  });
+  }
+);
 
 export default eventsApp;

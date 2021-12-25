@@ -1,7 +1,7 @@
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document } from "mongoose";
 
-import { hash } from '@/services/auth';
-import { Event, EventType, User, UserType } from '@/services/db';
+import { hash } from "@/services/auth";
+import { Event, EventType, User, UserType } from "@/services/db";
 
 export async function clearDatabase(): Promise<void> {
   const collections = mongoose.connection.collections;
@@ -34,7 +34,7 @@ export const createMockUser = (
   return new User({
     name: `John Doe ${i}`,
     email: `${i}@doe.com`,
-    hashedPassword: hash('password'),
+    hashedPassword: hash("password"),
 
     ...staticFields,
   }).save();
@@ -48,8 +48,8 @@ export const createMockEvent = (
   return new Event({
     headline: `New event ${i}`,
     startDate: Date.now(),
-    location: { name: 'Somewhere' },
-    state: 'draft',
+    location: { name: "Somewhere" },
+    state: "draft",
 
     ...staticFields,
   }).save();

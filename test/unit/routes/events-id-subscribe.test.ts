@@ -1,9 +1,9 @@
-import request from 'supertest';
-import { Document } from 'mongoose';
-import { mocked } from 'ts-jest/utils';
+import request from "supertest";
+import { Document } from "mongoose";
+import { mocked } from "ts-jest/utils";
 
-import app from '@/app';
-import { decodeToken } from '@/services/auth';
+import app from "@/app";
+import { decodeToken } from "@/services/auth";
 import {
   closeConnection,
   createConnection,
@@ -11,18 +11,18 @@ import {
   format,
   Subscription,
   UserType,
-} from '@/services/db';
+} from "@/services/db";
 
 import {
   clearDatabase,
   createMockEvent,
   createMockEvents,
   createMockUser,
-} from 'test/mocks/db';
+} from "test/mocks/db";
 
-jest.mock('@/services/auth', () => {
+jest.mock("@/services/auth", () => {
   const module =
-    jest.requireActual<typeof import('@/services/auth')>('@/services/auth');
+    jest.requireActual<typeof import("@/services/auth")>("@/services/auth");
   return {
     ...module,
     decodeToken: jest.fn((req, res, next) => next()),
@@ -32,7 +32,7 @@ jest.mock('@/services/auth', () => {
 
 const mockedDecodeToken = mocked(decodeToken, true);
 
-describe('The /events API', () => {
+describe("The /events API", () => {
   beforeAll(createConnection);
 
   beforeEach(jest.clearAllMocks);
@@ -41,24 +41,24 @@ describe('The /events API', () => {
 
   afterAll(closeConnection);
 
-  describe('POST /events/{eventId}/subscribe endpoint', () => {
+  describe("POST /events/{eventId}/subscribe endpoint", () => {
     let callerUser: UserType & Document;
     let otherUser: UserType & Document;
 
     beforeEach(async () => {
-      callerUser = await createMockUser({ email: 'caller@doe.com' });
-      otherUser = await createMockUser({ email: 'other@doe.com' });
+      callerUser = await createMockUser({ email: "caller@doe.com" });
+      otherUser = await createMockUser({ email: "other@doe.com" });
 
       mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
-        req.token = 'token';
+        req.token = "token";
         req.user = callerUser;
         next();
       });
     });
 
-    it('Returns 400 if the event does not exist', async () => {
+    it("Returns 400 if the event does not exist", async () => {
       // given
-      const eventId = '60123456789abcdef1234567';
+      const eventId = "60123456789abcdef1234567";
       const body = {};
 
       // when
@@ -69,14 +69,14 @@ describe('The /events API', () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual('Event not found');
+      expect(response.body.error).toEqual("Event not found");
     });
 
-    it('Returns 400 if you are the owner of the event you want to subscribe to', async () => {
+    it("Returns 400 if you are the owner of the event you want to subscribe to", async () => {
       // given
       const event = await createMockEvent({
         creatorId: callerUser._id,
-        state: 'public',
+        state: "public",
       });
       const eventId = event._id;
 
@@ -95,17 +95,17 @@ describe('The /events API', () => {
       );
     });
 
-    it('Returns 400 if the comment is too long', async () => {
+    it("Returns 400 if the comment is too long", async () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: 'public',
+        state: "public",
       });
       const eventId = event._id;
 
       const body = {
         comment:
-          'BBDzxzQQ1Z Sk7htzCHH yYoxbBXjg D6xQVB9Pl W5NjeVjvl WUWUH6q3s d9nLlX6Dd u7aQ8XOKH LTtWw0JHb PDQMhmmeq IVEqhZbK1 QTOW9wPLd cvWkEDvTL Wg4v67A8EBBDzxzQQ1Z Sk7htzCHH yYoxbBXjg D6xQVB9Pl W5NjeVjvl WUWUH6q3s d9nLlX6Dd u7aQ8XOKH LTtWw0JHb PDQMhmmeq IVEqhZbK1 QTOW9wPLd cvWkEDvTL Wg4v67A8E T4A71VIYj vYhU2TF8g FKdjU9fGO FxkM8djYP 3Jqz6iROj 1UJXjvIid pESX4XP1F hv66f7OAj 97TcC1XyG MlS86AoUi aipsTaZBV eh1rIukyT DeWavtMY8 A90ICXjOT EO3yQ2LAW 7zFT5A2LB d3wQhIl2X zxZw2FiwL XG0jp484e I40jYQBVq jAoH1Ixii GZdN1Okva scwwQCxqE J7i1HixhA Mws9icxXw jZbWMHKGO SLCFX2IFX E8v30FU04 I9ZVhavaP 4ZZnrzhUq vz1J2e2c3 eKXiU4qdr KcB9CF9Nf rNbG9zfDd RgvolUcZe SS2iTdEAp ',
+          "BBDzxzQQ1Z Sk7htzCHH yYoxbBXjg D6xQVB9Pl W5NjeVjvl WUWUH6q3s d9nLlX6Dd u7aQ8XOKH LTtWw0JHb PDQMhmmeq IVEqhZbK1 QTOW9wPLd cvWkEDvTL Wg4v67A8EBBDzxzQQ1Z Sk7htzCHH yYoxbBXjg D6xQVB9Pl W5NjeVjvl WUWUH6q3s d9nLlX6Dd u7aQ8XOKH LTtWw0JHb PDQMhmmeq IVEqhZbK1 QTOW9wPLd cvWkEDvTL Wg4v67A8E T4A71VIYj vYhU2TF8g FKdjU9fGO FxkM8djYP 3Jqz6iROj 1UJXjvIid pESX4XP1F hv66f7OAj 97TcC1XyG MlS86AoUi aipsTaZBV eh1rIukyT DeWavtMY8 A90ICXjOT EO3yQ2LAW 7zFT5A2LB d3wQhIl2X zxZw2FiwL XG0jp484e I40jYQBVq jAoH1Ixii GZdN1Okva scwwQCxqE J7i1HixhA Mws9icxXw jZbWMHKGO SLCFX2IFX E8v30FU04 I9ZVhavaP 4ZZnrzhUq vz1J2e2c3 eKXiU4qdr KcB9CF9Nf rNbG9zfDd RgvolUcZe SS2iTdEAp ",
       };
 
       // when
@@ -121,11 +121,11 @@ describe('The /events API', () => {
       );
     });
 
-    it('Returns 200 and the subscription if no comment is present', async () => {
+    it("Returns 200 and the subscription if no comment is present", async () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: 'public',
+        state: "public",
       });
       const eventId = event._id;
 
@@ -141,15 +141,15 @@ describe('The /events API', () => {
 
       expect(response.status).toEqual(200);
       expect(response.body).toBeDefined();
-      expect(response.body.message).toEqual('Subscribed successfully');
+      expect(response.body.message).toEqual("Subscribed successfully");
       expect(response.body.subscription).toBeDefined();
     });
 
-    it('Returns 200 and the subscription if a comment is present', async () => {
+    it("Returns 200 and the subscription if a comment is present", async () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: 'public',
+        state: "public",
       });
       const eventId = event._id;
 
@@ -165,23 +165,23 @@ describe('The /events API', () => {
 
       expect(response.status).toEqual(200);
       expect(response.body).toBeDefined();
-      expect(response.body.message).toEqual('Subscribed successfully');
+      expect(response.body.message).toEqual("Subscribed successfully");
       expect(response.body.subscription).toBeDefined();
     });
 
-    it('Returns 400 and the previous subscription is the user is already subscribed to this event', async () => {
+    it("Returns 400 and the previous subscription is the user is already subscribed to this event", async () => {
       // given
       const MAX_SUBSCRIPTIONS = 3;
 
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: 'public',
+        state: "public",
       });
       const oldSubscription = await new Subscription({
         eventId: event.id,
         subscriberId: callerUser.id,
         subscriptionDate: new Date(1970, 0, 1),
-        comment: 'I have subscribed once',
+        comment: "I have subscribed once",
       }).save();
 
       const eventId = event._id;
@@ -196,19 +196,19 @@ describe('The /events API', () => {
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
       expect(response.body.error).toEqual(
-        'You already have subscribed to this event'
+        "You already have subscribed to this event"
       );
       expect(response.body.subscription).toBeDefined();
       expect(response.body.subscription).toMatchObject(format(oldSubscription));
     });
 
-    it('Returns 400 is the user has reached the maximum number of subscriptions', async () => {
+    it("Returns 400 is the user has reached the maximum number of subscriptions", async () => {
       // given
       const MAX_SUBSCRIPTIONS = 3;
 
       const events = await createMockEvents(MAX_SUBSCRIPTIONS, {
         creatorId: otherUser._id,
-        state: 'public',
+        state: "public",
       });
       const subscriptionPromises = events.map((event) =>
         new Subscription({
@@ -221,7 +221,7 @@ describe('The /events API', () => {
 
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: 'public',
+        state: "public",
       });
       const eventId = event._id;
       const body = {};
@@ -234,7 +234,7 @@ describe('The /events API', () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual('Subscribed events limit exceeded');
+      expect(response.body.error).toEqual("Subscribed events limit exceeded");
     });
   });
 });

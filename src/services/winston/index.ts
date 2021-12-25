@@ -38,7 +38,12 @@ function getTransportsPerConfig(service: string) {
       const filterPriorityOut = Boolean(config.slack.webhooks.priority);
       const level = getWinstonLevel(config.slack.level);
       transports.push(
-        getSlackTransport(level, service, config.slack.webhooks.all, filterPriorityOut)
+        getSlackTransport(
+          level,
+          service,
+          config.slack.webhooks.all,
+          filterPriorityOut
+        )
       );
     }
   }
@@ -85,7 +90,7 @@ export function getLogger(service = "api"): Logger {
 }
 
 export const getLoggerMiddleware =
-  (service= "api"): RequestHandler =>
+  (service = "api"): RequestHandler =>
   (req: any, res, next) => {
     req.logger = getLogger(service);
     req.logger.info(

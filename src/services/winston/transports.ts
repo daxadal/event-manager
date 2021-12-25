@@ -15,7 +15,7 @@ export const getSlackTransport = (
   new SlackHook({
     webhookUrl,
     level,
-    formatter: info => slackFormatter(service, filterPriorityOut, info),
+    formatter: (info) => slackFormatter(service, filterPriorityOut, info),
   });
 
 export const getConsoleTransport = (

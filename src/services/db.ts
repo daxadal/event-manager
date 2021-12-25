@@ -1,30 +1,30 @@
 /* eslint-disable no-underscore-dangle */
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-import { db as dbConfig } from '@/config';
-import { getLogger } from '@/services/winston';
+import { db as dbConfig } from "@/config";
+import { getLogger } from "@/services/winston";
 
 export function createConnection(): Promise<typeof mongoose> {
-  const logger = getLogger('server-startup');
+  const logger = getLogger("server-startup");
 
   logger.info(`Connecting to MongoDB...`);
 
-  mongoose.connection.on('connected', function () {
-    logger.info('Mongoose default connection open to ' + dbConfig.URL);
+  mongoose.connection.on("connected", function () {
+    logger.info("Mongoose default connection open to " + dbConfig.URL);
   });
 
-  mongoose.connection.on('error', function (err) {
-    logger.error('Mongoose default connection error: ' + err);
+  mongoose.connection.on("error", function (err) {
+    logger.error("Mongoose default connection error: " + err);
   });
 
-  mongoose.connection.on('disconnected', function () {
-    logger.info('Mongoose default connection disconnected');
+  mongoose.connection.on("disconnected", function () {
+    logger.info("Mongoose default connection disconnected");
   });
 
-  process.on('SIGINT', function () {
+  process.on("SIGINT", function () {
     mongoose.connection.close(function () {
       logger.info(
-        'Mongoose default connection disconnected through app termination'
+        "Mongoose default connection disconnected through app termination"
       );
       process.exit(0);
     });
@@ -105,9 +105,9 @@ export const format = (object: unknown) => {
   return formatted;
 };
 
-export const Event = mongoose.model<EventType>('Event', eventSchema);
+export const Event = mongoose.model<EventType>("Event", eventSchema);
 export const Subscription = mongoose.model<SubscriptionType>(
-  'Subscription',
+  "Subscription",
   subscriptionSchema
 );
-export const User = mongoose.model<UserType>('User', userSchema);
+export const User = mongoose.model<UserType>("User", userSchema);

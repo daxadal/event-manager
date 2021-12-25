@@ -8,6 +8,8 @@ module.exports = {
   preset: '@shelf/jest-mongodb',
   reporters: ['default', 'jest-junit'],
 
+  globalSetup: '<rootDir>/jest.setup.js',
+
   roots: ['./test'],
   testMatch: ['**/?(*.)+(spec|test).+(ts|js)'],
   transform: {

@@ -120,8 +120,22 @@ describe("The /users API", () => {
       });
     });
 
-    it("Returns 400 if no auth is provided", async () => {
+    it("Returns 400 if no body is provided", async () => {
       // given
+      const body = undefined;
+
+      // when
+      const response = await request(app).post("/users/sign-in").send(body);
+
+      // then
+      expect(response.status).toEqual(400);
+      expect(response.body).toBeDefined();
+      expect(response.body.message).toMatch(/is required/);
+    });
+
+    it("Returns 400 if body is empty", async () => {
+      // given
+      const body = {};
 
       // when
       const response = await request(app).post("/users/sign-in").send();
@@ -129,40 +143,18 @@ describe("The /users API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.message).toEqual(
-        "Credentials must be provided as Basic Auth (email:password)"
-      );
-    });
-
-    it("Returns 400 if auth is empty", async () => {
-      // given
-      const email = undefined;
-      const password = undefined;
-
-      // when
-      const response = await request(app)
-        .post("/users/sign-in")
-        .auth(email, password)
-        .send();
-
-      // then
-      expect(response.status).toEqual(400);
-      expect(response.body).toBeDefined();
-      expect(response.body.message).toEqual(
-        expect.stringContaining("must be a valid email")
-      );
+      expect(response.body.message).toMatch(/is required/);
     });
 
     it("Returns 200 and a token on success", async () => {
       // given
-      const email = "john@doe.com";
-      const password = "password";
+      const body = {
+        email: "john@doe.com",
+        password: "password",
+      };
 
       // when
-      const response = await request(app)
-        .post("/users/sign-in")
-        .auth(email, password)
-        .send();
+      const response = await request(app).post("/users/sign-in").send(body);
 
       // then
       expect(response.status).toEqual(200);

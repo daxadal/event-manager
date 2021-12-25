@@ -1,6 +1,5 @@
 import { json, Router } from "express";
 import rateLimit from "express-rate-limit";
-import auth from "basic-auth";
 import Joi from "joi";
 import { Logger } from "winston";
 
@@ -68,31 +67,22 @@ router.post(
   }
 );
 
-router.post("/sign-in", async (req, res) => {
+router.post(
+  "/sign-in",
+  validateBody(
+    Joi.object({
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+    })
+  ),
+async (req, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
-    const basicAuth = auth(req);
-
-    if (!basicAuth) {
-      res.status(400).send({
-        message: "Credentials must be provided as Basic Auth (email:password)",
-      });
-      return;
-    }
-    const inputSchema = Joi.object({
-      name: Joi.string().email().required(),
-      pass: Joi.string().required(),
-    });
-
-    const { value: credentials, error } = inputSchema.validate(basicAuth);
-    if (error) {
-      res.status(400).send({ message: error.message });
-      return;
-    }
+    const credentials = req.body;
 
     const user = await User.findOne({
-      email: credentials.name,
-      hashedPassword: hash(credentials.pass),
+      email: credentials.email,
+      hashedPassword: hash(credentials.password),
     });
 
     if (!user) {

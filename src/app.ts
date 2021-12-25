@@ -49,15 +49,16 @@ app.post('/jobs/remind', checkBreeToken, async (req: any, res) => {
 });
 
 app.use((err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
   const logger: Logger | Console = (req as any).logger || console;
   logger.error(
     `Internal server error at ${req.method} ${req.originalUrl} captured at final handler`,
     err
   );
-  res.status(500).send({ error: 'Internal server error' });
+
+  if (res.headersSent) next(err);
+  else if (err.type === 'entity.too.large')
+    res.status(413).send({ error: 'Payload too large' });
+  else res.status(500).send({ error: 'Internal server error' });
 });
 
 app.use((req, res) => {

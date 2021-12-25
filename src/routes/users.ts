@@ -8,8 +8,8 @@ import * as DB from '@/services/db';
 import { createToken, decodeToken, hash, verifyToken } from '@/services/auth';
 import { pass as passConfig } from '@/config';
 
-const USER_SIZE = '512b';
-const USER_RPM = 30;
+export const USER_SIZE = '512b';
+export const USER_RPM = 30;
 
 // Register / LOGIN
 const usersApp = express.Router();

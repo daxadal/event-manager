@@ -1,8 +1,10 @@
 import request from 'supertest';
+import crypto from 'crypto';
 import { Document } from 'mongoose';
 import { mocked } from 'ts-jest/utils';
 
 import app from '@/app';
+import { EVENT_RPM, EVENT_SIZE } from '@/routes/events';
 import {
   closeConnection,
   createConnection,
@@ -266,6 +268,48 @@ describe('The /events API', () => {
       response.body.events.forEach((event: EventType) => {
         expect(['public', 'private', 'draft']).toContain(event.state);
       });
+    });
+  });
+
+  describe('Denial of service', () => {
+    it(`Returns 413 if the payload is greater than ${EVENT_SIZE}`, async () => {
+      // given
+      const createRandomString = (length: number): string =>
+        crypto.randomBytes(length).toString('hex');
+
+      const body = {
+        headline: createRandomString(1000),
+        startDate: Date.now(),
+        location: { name: 'Somewhere' },
+        description: createRandomString(5000)
+      };
+
+      // when
+      const response = await request(app).post('/events').send(body);
+
+      // then
+      expect(response.status).toEqual(413);
+      expect(response.body).toBeDefined();
+      expect(response.body.message).toEqual('Payload too large');
+    });
+
+    it(`Returns 429 after ${EVENT_RPM} requests in a minute`, async () => {
+      // given
+
+      // when
+      const requestPromises = new Array(EVENT_RPM + 1)
+        .fill(undefined)
+        .map((_, i) =>
+          request(app).get('/events')
+        );
+      const responses = await Promise.all(requestPromises);
+
+      // then
+      const validResponses = responses.filter(response=>response.status ===200)
+      const rejectedResponses = responses.filter(response=>response.status ===429)
+
+      expect(validResponses.length).toBeLessThanOrEqual(EVENT_RPM);
+      expect(rejectedResponses.length).toBeGreaterThanOrEqual(1);
     });
   });
 });

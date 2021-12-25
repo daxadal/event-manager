@@ -6,8 +6,8 @@ import { Logger } from 'winston';
 import * as DB from '@/services/db';
 import { verifyToken, decodeToken } from '@/services/auth';
 
-const EVENT_SIZE = '1kb';
-const EVENT_RPM = 100;
+export const EVENT_SIZE = '1kb';
+export const EVENT_RPM = 100;
 
 // EVENTS
 const eventsApp = express.Router();

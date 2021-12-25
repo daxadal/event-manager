@@ -1,4 +1,5 @@
 import request from 'supertest';
+import crypto from 'crypto';
 import { Document } from 'mongoose';
 import { mocked } from 'ts-jest/utils';
 
@@ -15,6 +16,7 @@ import {
 import * as auth from '@/services/auth';
 
 import { clearDatabase, createMockEvent, createMockUser } from 'test/mocks/db';
+import { EVENT_RPM, EVENT_SIZE } from '@/routes/events';
 
 jest.mock('@/services/auth', () => {
   const module =
@@ -124,8 +126,6 @@ describe('The /events API', () => {
 
       // when
       const response = await request(app).get(`/events/${eventId}`);
-
-      console.info({ status: response.status, body: response.body });
 
       // then
       const formattedEvent = format(event);
@@ -360,6 +360,69 @@ describe('The /events API', () => {
       expect(response.status).toEqual(200);
       expect(response.body).toBeDefined();
       expect(response.body.message).toEqual('Event deleted');
+    });
+  });
+
+  describe('Denial of service', () => {
+    let callerUser: UserType & Document;
+    let otherUser: UserType & Document;
+
+    beforeEach(async () => {
+      callerUser = await createMockUser({ email: 'caller@doe.com' });
+      otherUser = await createMockUser({ email: 'other@doe.com' });
+
+      mockedAuth.decodeToken.mockImplementationOnce((req: any, res, next) => {
+        req.token = 'token';
+        req.user = callerUser;
+        next();
+      });
+    });
+
+    it(`Returns 413 if the payload is greater than ${EVENT_SIZE}`, async () => {
+      // given
+      const createRandomString = (length: number): string =>
+        crypto.randomBytes(length).toString('hex');
+
+      const event = await createMockEvent({ creatorId: callerUser._id });
+      const eventId = event._id;
+
+      const body = {
+        headline: createRandomString(1000),
+        startDate: Date.now(),
+        location: { name: 'Somewhere' },
+        description: createRandomString(5000),
+      };
+
+      // when
+      const response = await request(app).put(`/events/${eventId}`).send(body);
+
+      // then
+      expect(response.status).toEqual(413);
+      expect(response.body).toBeDefined();
+      expect(response.body.message).toEqual('Payload too large');
+    });
+
+    it(`Returns 429 after ${EVENT_RPM} requests in a minute`, async () => {
+      // given
+      const event = await createMockEvent({ creatorId: callerUser._id });
+      const eventId = event._id;
+
+      // when
+      const requestPromises = new Array(EVENT_RPM + 1)
+        .fill(undefined)
+        .map((_, i) => request(app).get(`/events/${eventId}`));
+      const responses = await Promise.all(requestPromises);
+
+      // then
+      const validResponses = responses.filter(
+        (response) => response.status === 200
+      );
+      const rejectedResponses = responses.filter(
+        (response) => response.status === 429
+      );
+
+      expect(validResponses.length).toBeLessThanOrEqual(EVENT_RPM);
+      expect(rejectedResponses.length).toBeGreaterThanOrEqual(1);
     });
   });
 });

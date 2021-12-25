@@ -3,12 +3,11 @@ import crypto from 'crypto';
 import { mocked } from 'ts-jest/utils';
 
 import app from '@/app';
-import { pass as passConfig } from '@/config';
 import { closeConnection, createConnection, User } from '@/services/db';
 import * as auth from '@/services/auth';
+import { USER_RPM, USER_SIZE } from '@/routes/users';
 
 import { clearDatabase } from 'test/mocks/db';
-import { hash } from '@/services/auth';
 
 jest.mock('@/services/auth');
 
@@ -68,7 +67,7 @@ describe('The /users API', () => {
       await new User({
         name: 'John Doe',
         email: 'john@doe.com',
-        password: hash('password'),
+        password: auth.hash('password'),
       }).save();
 
       // when
@@ -104,7 +103,7 @@ describe('The /users API', () => {
       new User({
         name: 'John Doe',
         email: 'john@doe.com',
-        password: hash('password'),
+        password: auth.hash('password'),
       }).save()
     );
 
@@ -174,7 +173,7 @@ describe('The /users API', () => {
       new User({
         name: 'John Doe',
         email: 'john@doe.com',
-        password: hash('password'),
+        password: auth.hash('password'),
       }).save()
     );
 
@@ -187,14 +186,62 @@ describe('The /users API', () => {
       // given
 
       // when
-      const response = await request(app)
-        .post('/users/sign-out')
-        .send();
+      const response = await request(app).post('/users/sign-out').send();
 
       // then
       expect(response.status).toEqual(200);
       expect(response.body).toBeDefined();
       expect(response.body.message).toEqual('Signed out successfully');
+    });
+  });
+
+  describe('Denial of service', () => {
+    it(`Returns 413 if the payload is greater than ${USER_SIZE}`, async () => {
+      // given
+      const createRandomString = (length: number): string =>
+        crypto.randomBytes(length).toString('hex');
+
+      const body = {
+        email: 'fail@example.com',
+        password: 'password',
+        name: createRandomString(5000),
+      };
+
+      // when
+      const response = await request(app).post('/users/sign-up').send(body);
+
+      // then
+      expect(response.status).toEqual(413);
+      expect(response.body).toBeDefined();
+      expect(response.body.message).toEqual('Payload too large');
+    });
+
+    it(`Returns 429 after ${USER_RPM} requests in a minute`, async () => {
+      // given
+      const generateBody = (i: number) => ({
+        name: `John Doe ${i}`,
+        email: `john-${i}@doe.com`,
+        password: 'password',
+      });
+
+      // when
+      const requestPromises = new Array(USER_RPM + 1)
+        .fill(undefined)
+        .map((_, i) =>
+          request(app).post('/users/sign-up').send(generateBody(i))
+        );
+      const responses = await Promise.all(requestPromises);
+
+      // then
+      const validResponses = responses.filter(
+        (response) => response.status === 200
+      );
+      const rejectedResponses = responses.filter(
+        (response) => response.status === 429
+      );
+
+      expect(validResponses.length).toBeLessThanOrEqual(USER_RPM);
+      expect(rejectedResponses.length).toBeGreaterThanOrEqual(1);
     });
   });
 });

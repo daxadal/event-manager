@@ -5,6 +5,7 @@ import { Logger } from 'winston';
 
 import * as DB from '@/services/db';
 import { verifyToken, decodeToken } from '@/services/auth';
+import { OBJECT_ID_REGEX, validateBody, validatePath } from '@/services/validations';
 
 export const EVENT_SIZE = '1kb';
 export const EVENT_RPM = 100;
@@ -51,10 +52,11 @@ async function loadEvent(req, res, next) {
 
 eventsApp
   .route('/')
-  .post(decodeToken, verifyToken, async (req: any, res) => {
-    const logger: Logger | Console = (req as any).logger || console;
-    try {
-      const newEventSchema = Joi.object({
+  .post(
+    decodeToken,
+    verifyToken,
+    validateBody(
+      Joi.object({
         headline: Joi.string().min(5).max(100).required(),
         description: Joi.string().max(500),
         startDate: Joi.date().required(),
@@ -67,13 +69,12 @@ eventsApp
           .and('lat', 'lon')
           .required(),
         state: Joi.valid('draft', 'public', 'private').default('draft'),
-      });
-
-      const { value: event, error } = newEventSchema.validate(req.body);
-      if (error) {
-        res.status(400).send({ error: error.message });
-        return;
-      }
+      })
+    ),
+  async (req: any, res) => {
+    const logger: Logger | Console = (req as any).logger || console;
+    try {
+      const event = req.body;
 
       if (event.state === 'public') {
         const events = await DB.Event.find({
@@ -123,6 +124,13 @@ eventsApp
 
 eventsApp
   .route('/:eventId(\\w+)')
+  .all(
+    validatePath(
+      Joi.object({
+        eventId: Joi.string().pattern(OBJECT_ID_REGEX),
+      })
+    )
+  )
   .get(decodeToken, loadEvent, async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
@@ -132,10 +140,11 @@ eventsApp
       res.status(500).send({ error: 'Internal server error' });
     }
   })
-  .put(decodeToken, verifyToken, loadEvent, async (req: any, res) => {
-    const logger: Logger | Console = (req as any).logger || console;
-    try {
-      const updateEventSchema = Joi.object({
+  .put(
+    decodeToken,
+    verifyToken,
+    validateBody(
+      Joi.object({
         headline: Joi.string().min(5).max(100),
         description: Joi.string().max(500),
         startDate: Joi.date(),
@@ -147,13 +156,13 @@ eventsApp
           .or('name', 'lat', 'lon')
           .and('lat', 'lon'),
         state: Joi.valid('draft', 'public', 'private'),
-      });
-
-      const { value: newEvent, error } = updateEventSchema.validate(req.body);
-      if (error) {
-        res.status(400).send({ error: error.message });
-        return;
-      }
+      })
+    ),
+    loadEvent,
+  async (req: any, res) => {
+    const logger: Logger | Console = (req as any).logger || console;
+    try {
+      const newEvent = req.body;
 
       if (String(req.event.creatorId) !== req.user.id) {
         res
@@ -214,20 +223,24 @@ eventsApp
   });
 
 // SUBSCRIPTIONS
-eventsApp
-  .route('/:eventId(\\w+)/subscribe')
-  .post(decodeToken, verifyToken, loadEvent, async (req: any, res) => {
+eventsApp.route('/:eventId(\\w+)/subscribe').post(
+  decodeToken,
+  verifyToken,
+  validatePath(
+    Joi.object({
+      eventId: Joi.string().pattern(OBJECT_ID_REGEX),
+    })
+  ),
+  validateBody(
+    Joi.object({
+      comment: Joi.string().max(100),
+    }).optional()
+  ),
+  loadEvent,
+  async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
-      const inputSchema = Joi.object({
-        comment: Joi.string().max(100),
-      }).optional();
-
-      const { value: params, error } = inputSchema.validate(req.body);
-      if (error) {
-        res.status(400).send({ error: error.message });
-        return;
-      }
+      const params = req.body;
 
       if (String(req.event.creatorId) === req.user.id) {
         res

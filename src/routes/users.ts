@@ -6,7 +6,7 @@ import { Logger } from 'winston';
 
 import * as DB from '@/services/db';
 import { createToken, decodeToken, hash, verifyToken } from '@/services/auth';
-import { pass as passConfig } from '@/config';
+import { validateBody } from '@/services/validations';
 
 export const USER_SIZE = '512b';
 export const USER_RPM = 30;
@@ -23,20 +23,19 @@ usersApp.use(
   })
 );
 
-usersApp.post('/sign-up', async (req, res) => {
-  const logger: Logger | Console = (req as any).logger || console;
-  try {
-    const inputSchema = Joi.object({
+usersApp.post(
+  '/sign-up',
+  validateBody(
+    Joi.object({
       name: Joi.string().required(),
       email: Joi.string().email().required(),
       password: Joi.string().required(),
-    });
-
-    const { value: newUser, error } = inputSchema.validate(req.body);
-    if (error) {
-      res.status(400).send({ error: error.message });
-      return;
-    }
+    })
+  ),
+async (req, res) => {
+  const logger: Logger | Console = (req as any).logger || console;
+  try {
+    const newUser = req.body;
 
     const oldUser = await DB.User.findOne({
       email: newUser.email,

@@ -4,22 +4,41 @@ import mongoose from 'mongoose';
 import { db as dbConfig } from '@/config';
 import { getLogger } from '@/services/winston';
 
-const logger = getLogger('server-startup');
+export function createConnection(): Promise<typeof mongoose> {
+  const logger = getLogger('server-startup');
 
-export function setup() {
-  mongoose.set('useCreateIndex', true);
-  mongoose.connect(dbConfig.URL, {
-    useNewUrlParser: true,
+  logger.info(`Connecting to MongoDB...`);
+
+  mongoose.connection.on('connected', function () {
+    logger.info('Mongoose default connection open to ' + dbConfig.URL);
+  });
+
+  mongoose.connection.on('error', function (err) {
+    logger.error('Mongoose default connection error: ' + err);
+  });
+
+  mongoose.connection.on('disconnected', function () {
+    logger.info('Mongoose default connection disconnected');
+  });
+
+  process.on('SIGINT', function () {
+    mongoose.connection.close(function () {
+      logger.info(
+        'Mongoose default connection disconnected through app termination'
+      );
+      process.exit(0);
+    });
+  });
+
+  return mongoose.connect(dbConfig.URL, {
     useUnifiedTopology: true,
+    useNewUrlParser: true,
+    useCreateIndex: true,
   });
+}
 
-  const db = mongoose.connection;
-  db.on('error', (error) => {
-    logger.error(`Error connecting to DB`, {error});
-  });
-  db.once('open', () => {
-    logger.info('DB connected');
-  });
+export function closeConnection(): Promise<void> {
+  return mongoose.connection.close();
 }
 
 export interface EventType {

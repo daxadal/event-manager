@@ -17,6 +17,12 @@ const MAIN_RPM = 10;
 
 const app = express();
 
+app.use(getLoggerMiddleware('api'));
+
+if (api.DEV) app.use('/dev', devApp);
+app.use('/events', eventsApp);
+app.use('/users', usersApp);
+
 app.use(
   rateLimit({
     max: MAIN_RPM,
@@ -24,12 +30,6 @@ app.use(
     message: 'Too many requests',
   })
 );
-
-app.use(getLoggerMiddleware('api'));
-
-if (api.DEV) app.use('/dev', devApp);
-app.use('/events', eventsApp);
-app.use('/users', usersApp);
 
 app.post('/jobs/remind', checkBreeToken, async (req: any, res) => {
   const logger: Logger | Console = (req as any).logger || console;
@@ -49,15 +49,16 @@ app.post('/jobs/remind', checkBreeToken, async (req: any, res) => {
 });
 
 app.use((err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
   const logger: Logger | Console = (req as any).logger || console;
   logger.error(
     `Internal server error at ${req.method} ${req.originalUrl} captured at final handler`,
     err
   );
-  res.status(500).send({ error: 'Internal server error' });
+
+  if (res.headersSent) next(err);
+  else if (err.type === 'entity.too.large')
+    res.status(413).send({ error: 'Payload too large' });
+  else res.status(500).send({ error: 'Internal server error' });
 });
 
 app.use((req, res) => {

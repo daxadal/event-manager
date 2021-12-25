@@ -7,8 +7,8 @@ import * as DB from '@/services/db';
 import { verifyToken, decodeToken } from '@/services/auth';
 import { OBJECT_ID_REGEX, validateBody, validatePath } from '@/services/validations';
 
-const EVENT_SIZE = '1kb';
-const EVENT_RPM = 100;
+export const EVENT_SIZE = '1kb';
+export const EVENT_RPM = 100;
 
 // EVENTS
 const eventsApp = express.Router();

@@ -4,11 +4,18 @@ const { compilerOptions } = require('./tsconfig.json');
 const moduleNameMapper = pathsToModuleNameMapper(compilerOptions.paths, {
   prefix: '<rootDir>/',
 });
+
+process.env.WINSTON_CONSOLE_LEVEL = 'none';
+process.env.WINSTON_SLACK_LEVEL = 'none';
+
+process.env.WINSTON_FILE_LEVEL = 'info';
+process.env.WINSTON_FILE_PREFIX = '_jest_';
+
+process.env.DISABLE_MOCKED_WARNING = true;
+
 module.exports = {
   preset: '@shelf/jest-mongodb',
   reporters: ['default', 'jest-junit'],
-
-  globalSetup: '<rootDir>/jest.setup.js',
 
   roots: ['./test'],
   testMatch: ['**/?(*.)+(spec|test).+(ts|js)'],

@@ -4,7 +4,7 @@ import { api, bree as breeConfig, configDebug, socket } from "@/config";
 import bree from "@/scheduler";
 import socketServer from "@/socket";
 import app from "@/app";
-import * as DB from "@/services/db";
+import { createConnection } from "@/services/db";
 import { getLogger } from "@/services/winston";
 
 const logger = getLogger("server-startup");
@@ -30,7 +30,7 @@ if (configDebug.parsingErrors.length > 0) {
   process.exit(1);
 }
 
-DB.createConnection();
+createConnection();
 
 app.listen(api.PORT, () => {
   logger.info(`Server listening on port ${api.PORT}...`);

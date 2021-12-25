@@ -5,12 +5,12 @@ import { Logger } from "winston";
 import { api } from "@/config";
 import { sendReminders } from "@/socket";
 
-import * as DB from "@/services/db";
+import { Event } from "@/services/db";
 import { checkBreeToken } from "@/services/auth";
 
-import eventsApp from "@/routes/events";
-import usersApp from "@/routes/users";
-import devApp from "@/routes/dev";
+import eventsRouter from "@/routes/events";
+import usersRouter from "@/routes/users";
+import devRouter from "@/routes/dev";
 import { getLoggerMiddleware } from "@/services/winston";
 
 const MAIN_RPM = 10;
@@ -19,9 +19,9 @@ const app = express();
 
 app.use(getLoggerMiddleware("api"));
 
-if (api.DEV) app.use("/dev", devApp);
-app.use("/events", eventsApp);
-app.use("/users", usersApp);
+if (api.DEV) app.use("/dev", devRouter);
+app.use("/events", eventsRouter);
+app.use("/users", usersRouter);
 
 app.use(
   rateLimit({
@@ -37,7 +37,7 @@ app.post("/jobs/remind", checkBreeToken, async (req: any, res) => {
     logger.info("Remind:", req.dates);
     const { start, end } = req.dates;
 
-    const events = await DB.Event.find({
+    const events = await Event.find({
       startDate: { $gte: start, $lte: end },
     });
     await sendReminders(events);

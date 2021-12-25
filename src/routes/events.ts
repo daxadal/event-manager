@@ -1,9 +1,9 @@
-import express from "express";
+import { json, Router, urlencoded } from "express";
 import rateLimit from "express-rate-limit";
 import Joi from "joi";
 import { Logger } from "winston";
 
-import * as DB from "@/services/db";
+import { Event, format, Subscription } from "@/services/db";
 import { verifyToken, decodeToken } from "@/services/auth";
 import {
   OBJECT_ID_REGEX,
@@ -15,11 +15,11 @@ export const EVENT_SIZE = "1kb";
 export const EVENT_RPM = 100;
 
 // EVENTS
-const eventsApp = express.Router();
+const router = Router();
 
-eventsApp.use(express.json({ limit: EVENT_SIZE }));
-eventsApp.use(express.urlencoded({ extended: true }));
-eventsApp.use(
+router.use(json({ limit: EVENT_SIZE }));
+router.use(urlencoded({ extended: true }));
+router.use(
   rateLimit({
     max: EVENT_RPM,
     windowMs: 60 * 1000, // 1 minute
@@ -44,7 +44,7 @@ async function loadEvent(req, res, next) {
   const logger: Logger | Console = (req as any).logger || console;
   const { eventId } = req.params;
   try {
-    req.event = await DB.Event.findById(eventId).exec();
+    req.event = await Event.findById(eventId).exec();
 
     if (req.event && isVisible(req.event, req.user)) next();
     else res.status(400).send({ message: "Event not found" });
@@ -57,7 +57,7 @@ async function loadEvent(req, res, next) {
   }
 }
 
-eventsApp
+router
   .route("/")
   .post(
     decodeToken,
@@ -84,7 +84,7 @@ eventsApp
         const event = req.body;
 
         if (event.state === "public") {
-          const events = await DB.Event.find({
+          const events = await Event.find({
             state: "public",
             creatorId: req.user.id,
           });
@@ -95,14 +95,14 @@ eventsApp
           }
         }
 
-        const eventDB = await new DB.Event({
+        const eventDB = await new Event({
           ...event,
           creatorId: req.user.id,
         }).save();
 
         res
           .status(200)
-          .send({ message: "Event created", event: DB.format(eventDB) });
+          .send({ message: "Event created", event: format(eventDB) });
       } catch (error) {
         logger.error(
           `Internal server error at ${req.method} ${req.originalUrl}`,
@@ -117,15 +117,15 @@ eventsApp
     try {
       let query;
       if (req.user)
-        query = DB.Event.find().or([
+        query = Event.find().or([
           { state: { $in: ["public", "private"] } },
           { creatorId: req.user.id },
         ]);
-      else query = DB.Event.find({ state: "public" });
+      else query = Event.find({ state: "public" });
 
       const events = await query.exec();
 
-      if (events) res.status(200).send({ events: events.map(DB.format) });
+      if (events) res.status(200).send({ events: events.map(format) });
       else res.status(400).send({ message: "Event not found" });
     } catch (error) {
       logger.error(
@@ -136,7 +136,7 @@ eventsApp
     }
   });
 
-eventsApp
+router
   .route("/:eventId(\\w+)")
   .all(
     validatePath(
@@ -148,7 +148,7 @@ eventsApp
   .get(decodeToken, loadEvent, async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
-      res.status(200).send({ event: DB.format(req.event) });
+      res.status(200).send({ event: format(req.event) });
     } catch (error) {
       logger.error(
         `Internal server error at ${req.method} ${req.originalUrl}`,
@@ -189,7 +189,7 @@ eventsApp
         }
 
         if (req.event.state !== "public" && newEvent.state === "public") {
-          const events = await DB.Event.find({
+          const events = await Event.find({
             state: "public",
             creatorId: req.user.id,
           });
@@ -210,7 +210,7 @@ eventsApp
         if (req.event)
           res
             .status(200)
-            .send({ message: "Event updated", event: DB.format(req.event) });
+            .send({ message: "Event updated", event: format(req.event) });
         else res.status(400).send({ message: "Event not found" });
       } catch (error) {
         logger.error(
@@ -233,7 +233,7 @@ eventsApp
 
       await req.event.delete();
 
-      await DB.Subscription.deleteMany({ eventId: req.event.id }).exec();
+      await Subscription.deleteMany({ eventId: req.event.id }).exec();
 
       if (req.event) res.status(200).send({ message: "Event deleted" });
       else res.status(400).send({ message: "Event not found" });
@@ -247,7 +247,7 @@ eventsApp
   });
 
 // SUBSCRIPTIONS
-eventsApp.route("/:eventId(\\w+)/subscribe").post(
+router.route("/:eventId(\\w+)/subscribe").post(
   decodeToken,
   verifyToken,
   validatePath(
@@ -273,7 +273,7 @@ eventsApp.route("/:eventId(\\w+)/subscribe").post(
         return;
       }
 
-      const subscriptions = await DB.Subscription.find({
+      const subscriptions = await Subscription.find({
         subscriberId: req.user.id,
       });
 
@@ -284,14 +284,14 @@ eventsApp.route("/:eventId(\\w+)/subscribe").post(
       if (oldSubscription) {
         res.status(400).send({
           message: "You already have subscribed to this event",
-          subscription: DB.format(oldSubscription),
+          subscription: format(oldSubscription),
         });
       } else if (subscriptions.length >= 3) {
         res.status(400).send({
           message: "Subscribed events limit exceeded",
         });
       } else {
-        const subscription = await new DB.Subscription({
+        const subscription = await new Subscription({
           eventId: req.event.id,
           subscriberId: req.user.id,
           subscriptionDate: Date.now(),
@@ -300,7 +300,7 @@ eventsApp.route("/:eventId(\\w+)/subscribe").post(
 
         res.status(200).send({
           message: "Subscribed successfully",
-          subscription: DB.format(subscription),
+          subscription: format(subscription),
         });
       }
     } catch (error) {
@@ -313,4 +313,4 @@ eventsApp.route("/:eventId(\\w+)/subscribe").post(
   }
 );
 
-export default eventsApp;
+export default router;

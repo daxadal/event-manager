@@ -1,10 +1,10 @@
-import express from "express";
+import { json, Router } from "express";
 import rateLimit from "express-rate-limit";
 import auth from "basic-auth";
 import Joi from "joi";
 import { Logger } from "winston";
 
-import * as DB from "@/services/db";
+import { User } from "@/services/db";
 import { createToken, decodeToken, hash, verifyToken } from "@/services/auth";
 import { validateBody } from "@/services/validations";
 
@@ -12,10 +12,10 @@ export const USER_SIZE = "512b";
 export const USER_RPM = 30;
 
 // Register / LOGIN
-const usersApp = express.Router();
+const router = Router();
 
-usersApp.use(express.json({ limit: USER_SIZE }));
-usersApp.use(
+router.use(json({ limit: USER_SIZE }));
+router.use(
   rateLimit({
     max: USER_RPM,
     windowMs: 60 * 1000, // 1 minute
@@ -23,7 +23,7 @@ usersApp.use(
   })
 );
 
-usersApp.post(
+router.post(
   "/sign-up",
   validateBody(
     Joi.object({
@@ -37,7 +37,7 @@ usersApp.post(
     try {
       const newUser = req.body;
 
-      const oldUser = await DB.User.findOne({
+      const oldUser = await User.findOne({
         email: newUser.email,
       });
 
@@ -46,7 +46,7 @@ usersApp.post(
         return;
       }
 
-      const user = await new DB.User({
+      const user = await new User({
         name: newUser.name,
         email: newUser.email,
         hashedPassword: hash(newUser.password),
@@ -68,7 +68,7 @@ usersApp.post(
   }
 );
 
-usersApp.post("/sign-in", async (req, res) => {
+router.post("/sign-in", async (req, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
     const basicAuth = auth(req);
@@ -90,7 +90,7 @@ usersApp.post("/sign-in", async (req, res) => {
       return;
     }
 
-    const user = await DB.User.findOne({
+    const user = await User.findOne({
       email: credentials.name,
       hashedPassword: hash(credentials.pass),
     });
@@ -115,7 +115,7 @@ usersApp.post("/sign-in", async (req, res) => {
   }
 });
 
-usersApp.post("/sign-out", decodeToken, verifyToken, async (req: any, res) => {
+router.post("/sign-out", decodeToken, verifyToken, async (req: any, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
     req.user.sessionToken = undefined;
@@ -131,4 +131,4 @@ usersApp.post("/sign-out", decodeToken, verifyToken, async (req: any, res) => {
   }
 });
 
-export default usersApp;
+export default router;

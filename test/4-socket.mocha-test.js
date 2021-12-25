@@ -12,7 +12,7 @@ const sleep = (millis) => new Promise((resolve) => setTimeout(resolve, millis));
 
 const mdescribe = config.api.DEV ? describe : xdescribe;
 
-describe('Sockets', () => {
+xdescribe('Sockets', () => {
   mdescribe('Connection (DEV API required)', () => {
     it('PING all', async () => {
       const sockets = Array(8).map(() => Socket.new());

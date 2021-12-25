@@ -47,7 +47,7 @@ app.post("/jobs/remind", checkBreeToken, async (req: any, res) => {
       `Internal server error at ${req.method} ${req.originalUrl}`,
       error
     );
-    res.status(500).send({ error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
   }
 });
 
@@ -60,8 +60,8 @@ app.use((err, req, res, next) => {
 
   if (res.headersSent) next(err);
   else if (err.type === "entity.too.large")
-    res.status(413).send({ error: "Payload too large" });
-  else res.status(500).send({ error: "Internal server error" });
+    res.status(413).send({ message: "Payload too large" });
+  else res.status(500).send({ message: "Internal server error" });
 });
 
 app.use((req, res) => {
@@ -69,7 +69,7 @@ app.use((req, res) => {
   logger.error(
     `Error at ${req.method} ${req.originalUrl} - Endpoint not found`
   );
-  res.status(404).send({ error: "Endpoint not found" });
+  res.status(404).send({ message: "Endpoint not found" });
 });
 
 export default app;

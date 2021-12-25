@@ -44,7 +44,7 @@ describe("The /users API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(/is required/);
+      expect(response.body.message).toMatch(/is required/);
     });
 
     it("Returns 400 if the provided email is invalid", async () => {
@@ -61,7 +61,7 @@ describe("The /users API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(/email.*must be a valid email/);
+      expect(response.body.message).toMatch(/email.*must be a valid email/);
     });
 
     it("Returns 400 if the email is already in use", async () => {
@@ -83,7 +83,7 @@ describe("The /users API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Email already in use");
+      expect(response.body.message).toEqual("Email already in use");
     });
 
     it("Returns 200 and a token on success", async () => {
@@ -129,7 +129,7 @@ describe("The /users API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual(
+      expect(response.body.message).toEqual(
         "Credentials must be provided as Basic Auth (email:password)"
       );
     });
@@ -148,7 +148,7 @@ describe("The /users API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual(
+      expect(response.body.message).toEqual(
         expect.stringContaining("must be a valid email")
       );
     });
@@ -218,7 +218,7 @@ describe("The /users API", () => {
       // then
       expect(response.status).toEqual(413);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Payload too large");
+      expect(response.body.message).toEqual("Payload too large");
     });
 
     it(`Returns 429 after ${USER_RPM} requests in a minute`, async () => {

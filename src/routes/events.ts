@@ -47,13 +47,13 @@ async function loadEvent(req, res, next) {
     req.event = await DB.Event.findById(eventId).exec();
 
     if (req.event && isVisible(req.event, req.user)) next();
-    else res.status(400).send({ error: "Event not found" });
+    else res.status(400).send({ message: "Event not found" });
   } catch (error) {
     logger.error(
       `Internal server error at ${req.method} ${req.originalUrl}`,
       error
     );
-    res.status(500).send({ error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
   }
 }
 
@@ -90,7 +90,7 @@ eventsApp
           });
 
           if (events.length > 0) {
-            res.status(400).send({ error: "Public events limit exceeded" });
+            res.status(400).send({ message: "Public events limit exceeded" });
             return;
           }
         }
@@ -108,7 +108,7 @@ eventsApp
           `Internal server error at ${req.method} ${req.originalUrl}`,
           error
         );
-        res.status(500).send({ error: "Internal server error" });
+        res.status(500).send({ message: "Internal server error" });
       }
     }
   )
@@ -126,13 +126,13 @@ eventsApp
       const events = await query.exec();
 
       if (events) res.status(200).send({ events: events.map(DB.format) });
-      else res.status(400).send({ error: "Event not found" });
+      else res.status(400).send({ message: "Event not found" });
     } catch (error) {
       logger.error(
         `Internal server error at ${req.method} ${req.originalUrl}`,
         error
       );
-      res.status(500).send({ error: "Internal server error" });
+      res.status(500).send({ message: "Internal server error" });
     }
   });
 
@@ -154,7 +154,7 @@ eventsApp
         `Internal server error at ${req.method} ${req.originalUrl}`,
         error
       );
-      res.status(500).send({ error: "Internal server error" });
+      res.status(500).send({ message: "Internal server error" });
     }
   })
   .put(
@@ -184,7 +184,7 @@ eventsApp
         if (String(req.event.creatorId) !== req.user.id) {
           res
             .status(400)
-            .send({ error: "Events can only be edited by their creator" });
+            .send({ message: "Events can only be edited by their creator" });
           return;
         }
 
@@ -195,7 +195,7 @@ eventsApp
           });
 
           if (events.length > 0) {
-            res.status(400).send({ error: "Public events limit exceeded" });
+            res.status(400).send({ message: "Public events limit exceeded" });
           }
         }
 
@@ -211,13 +211,13 @@ eventsApp
           res
             .status(200)
             .send({ message: "Event updated", event: DB.format(req.event) });
-        else res.status(400).send({ error: "Event not found" });
+        else res.status(400).send({ message: "Event not found" });
       } catch (error) {
         logger.error(
           `Internal server error at ${req.method} ${req.originalUrl}`,
           error
         );
-        res.status(500).send({ error: "Internal server error" });
+        res.status(500).send({ message: "Internal server error" });
       }
     }
   )
@@ -227,7 +227,7 @@ eventsApp
       if (String(req.event.creatorId) !== req.user.id) {
         res
           .status(400)
-          .send({ error: "Events can only be deleted by their creator" });
+          .send({ message: "Events can only be deleted by their creator" });
         return;
       }
 
@@ -236,13 +236,13 @@ eventsApp
       await DB.Subscription.deleteMany({ eventId: req.event.id }).exec();
 
       if (req.event) res.status(200).send({ message: "Event deleted" });
-      else res.status(400).send({ error: "Event not found" });
+      else res.status(400).send({ message: "Event not found" });
     } catch (error) {
       logger.error(
         `Internal server error at ${req.method} ${req.originalUrl}`,
         error
       );
-      res.status(500).send({ error: "Internal server error" });
+      res.status(500).send({ message: "Internal server error" });
     }
   });
 
@@ -269,7 +269,7 @@ eventsApp.route("/:eventId(\\w+)/subscribe").post(
       if (String(req.event.creatorId) === req.user.id) {
         res
           .status(400)
-          .send({ error: "You can't subscribe to your own events" });
+          .send({ message: "You can't subscribe to your own events" });
         return;
       }
 
@@ -283,12 +283,12 @@ eventsApp.route("/:eventId(\\w+)/subscribe").post(
 
       if (oldSubscription) {
         res.status(400).send({
-          error: "You already have subscribed to this event",
+          message: "You already have subscribed to this event",
           subscription: DB.format(oldSubscription),
         });
       } else if (subscriptions.length >= 3) {
         res.status(400).send({
-          error: "Subscribed events limit exceeded",
+          message: "Subscribed events limit exceeded",
         });
       } else {
         const subscription = await new DB.Subscription({
@@ -308,7 +308,7 @@ eventsApp.route("/:eventId(\\w+)/subscribe").post(
         `Internal server error at ${req.method} ${req.originalUrl}`,
         error
       );
-      res.status(500).send({ error: "Internal server error" });
+      res.status(500).send({ message: "Internal server error" });
     }
   }
 );

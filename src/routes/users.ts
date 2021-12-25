@@ -42,7 +42,7 @@ usersApp.post(
       });
 
       if (oldUser) {
-        res.status(400).send({ error: "Email already in use" });
+        res.status(400).send({ message: "Email already in use" });
         return;
       }
 
@@ -63,7 +63,7 @@ usersApp.post(
         `Internal server error at ${req.method} ${req.originalUrl}`,
         error
       );
-      res.status(500).send({ error: "Internal server error" });
+      res.status(500).send({ message: "Internal server error" });
     }
   }
 );
@@ -75,7 +75,7 @@ usersApp.post("/sign-in", async (req, res) => {
 
     if (!basicAuth) {
       res.status(400).send({
-        error: "Credentials must be provided as Basic Auth (email:password)",
+        message: "Credentials must be provided as Basic Auth (email:password)",
       });
       return;
     }
@@ -86,7 +86,7 @@ usersApp.post("/sign-in", async (req, res) => {
 
     const { value: credentials, error } = inputSchema.validate(basicAuth);
     if (error) {
-      res.status(400).send({ error: error.message });
+      res.status(400).send({ message: error.message });
       return;
     }
 
@@ -96,7 +96,7 @@ usersApp.post("/sign-in", async (req, res) => {
     });
 
     if (!user) {
-      res.status(400).send({ error: "Invalid credentials" });
+      res.status(400).send({ message: "Invalid credentials" });
       return;
     }
 
@@ -111,7 +111,7 @@ usersApp.post("/sign-in", async (req, res) => {
       `Internal server error at ${req.method} ${req.originalUrl}`,
       error
     );
-    res.status(500).send({ error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
   }
 });
 
@@ -127,7 +127,7 @@ usersApp.post("/sign-out", decodeToken, verifyToken, async (req: any, res) => {
       `Internal server error at ${req.method} ${req.originalUrl}`,
       error
     );
-    res.status(500).send({ error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
   }
 });
 

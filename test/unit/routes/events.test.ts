@@ -64,7 +64,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(/is required/);
+      expect(response.body.message).toMatch(/is required/);
     });
 
     it("Returns 400 if only one of `location.lat` or `location.lon` is present", async () => {
@@ -81,7 +81,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(
+      expect(response.body.message).toMatch(
         /location.* contains \[lat\] without its required peers \[lon\]/
       );
     });
@@ -99,7 +99,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(/is required/);
+      expect(response.body.message).toMatch(/is required/);
     });
 
     it("Returns 200 and the created event on success (minimum required fields)", async () => {
@@ -179,7 +179,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Public events limit exceeded");
+      expect(response.body.message).toEqual("Public events limit exceeded");
     });
   });
 
@@ -291,7 +291,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(413);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Payload too large");
+      expect(response.body.message).toEqual("Payload too large");
     });
 
     it(`Returns 429 after ${EVENT_RPM} requests in a minute`, async () => {

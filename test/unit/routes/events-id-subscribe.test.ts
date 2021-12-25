@@ -69,7 +69,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it("Returns 400 if you are the owner of the event you want to subscribe to", async () => {
@@ -90,7 +90,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual(
+      expect(response.body.message).toEqual(
         "You can't subscribe to your own events"
       );
     });
@@ -116,7 +116,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(
+      expect(response.body.message).toMatch(
         /^.comment. length must be less than or equal to \d+ characters long$/
       );
     });
@@ -195,7 +195,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual(
+      expect(response.body.message).toEqual(
         "You already have subscribed to this event"
       );
       expect(response.body.subscription).toBeDefined();
@@ -234,7 +234,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Subscribed events limit exceeded");
+      expect(response.body.message).toEqual("Subscribed events limit exceeded");
     });
   });
 });

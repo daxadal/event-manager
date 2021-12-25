@@ -66,7 +66,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it.each`
@@ -95,7 +95,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it.each`
@@ -157,7 +157,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it("Returns 400 if only one of `location.lat` or `location.lon` is present", async () => {
@@ -177,7 +177,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(
+      expect(response.body.message).toMatch(
         /location.* contains \[lat\] without its required peers \[lon\]/
       );
     });
@@ -250,7 +250,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it("Returns 400 if the authenticated user is not the creator of the event", async () => {
@@ -273,7 +273,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual(
+      expect(response.body.message).toEqual(
         "Events can only be edited by their creator"
       );
     });
@@ -304,7 +304,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it("Returns 400 if the event is not visible", async () => {
@@ -321,7 +321,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it("Returns 400 if the event does not belong to the user", async () => {
@@ -338,7 +338,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual(
+      expect(response.body.message).toEqual(
         "Events can only be deleted by their creator"
       );
     });
@@ -394,7 +394,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(413);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Payload too large");
+      expect(response.body.message).toEqual("Payload too large");
     });
 
     it(`Returns 429 after ${EVENT_RPM} requests in a minute`, async () => {

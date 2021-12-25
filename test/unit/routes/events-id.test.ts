@@ -16,10 +16,15 @@ import * as auth from '@/services/auth';
 
 import { clearDatabase, createMockEvent, createMockUser } from 'test/mocks/db';
 
-jest.mock('@/services/auth', () => ({
-  decodeToken: jest.fn((req, res, next) => next()),
-  verifyToken: jest.fn((req, res, next) => next()),
-}));
+jest.mock('@/services/auth', () => {
+  const module =
+    jest.requireActual<typeof import('@/services/auth')>('@/services/auth');
+  return {
+    ...module,
+    decodeToken: jest.fn((req, res, next) => next()),
+    verifyToken: jest.fn((req, res, next) => next()),
+  };
+});
 
 const mockedAuth = mocked(auth, true);
 

@@ -87,7 +87,9 @@ router
           .or("name", "lat", "lon")
           .and("lat", "lon")
           .required(),
-        state: Joi.valid(...Object.values(EventState)).default(EventState.DRAFT),
+        state: Joi.valid(...Object.values(EventState)).default(
+          EventState.DRAFT
+        ),
       })
     ),
     async (req: any, res) => {
@@ -184,7 +186,7 @@ router
         })
           .or("name", "lat", "lon")
           .and("lat", "lon"),
-          state: Joi.valid(...Object.values(EventState)),
+        state: Joi.valid(...Object.values(EventState)),
       })
     ),
     loadEvent,
@@ -200,7 +202,10 @@ router
           return;
         }
 
-        if (req.event.state !== EventState.PUBLIC && newEvent.state === EventState.PUBLIC) {
+        if (
+          req.event.state !== EventState.PUBLIC &&
+          newEvent.state === EventState.PUBLIC
+        ) {
           const events = await Event.find({
             state: EventState.PUBLIC,
             creatorId: req.user.id,

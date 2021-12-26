@@ -12,10 +12,7 @@ import {
   UserDocument,
   UserType,
 } from "@/services/db";
-import {
-  closeConnection,
-  createConnection
-} from "@/services/db/setup";
+import { closeConnection, createConnection } from "@/services/db/setup";
 
 import {
   clearDatabase,

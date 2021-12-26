@@ -79,32 +79,33 @@ router.post(
       password: Joi.string().required(),
     })
   ),
-async (req, res) => {
-  const logger: Logger | Console = (req as any).logger || console;
-  try {
-    const { email, password } = req.body;
+  async (req, res) => {
+    const logger: Logger | Console = (req as any).logger || console;
+    try {
+      const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+      const user = await User.findOne({ email });
 
-    if (!user || !(await compare(password, user.hashedPassword))) {
-      res.status(400).send({ message: "Invalid credentials" });
-      return;
+      if (!user || !(await compare(password, user.hashedPassword))) {
+        res.status(400).send({ message: "Invalid credentials" });
+        return;
+      }
+
+      const token = createToken(user);
+
+      user.sessionToken = token;
+      user.save();
+
+      res.status(200).send({ message: "Signed in successfully", token });
+    } catch (error) {
+      logger.error(
+        `Internal server error at ${req.method} ${req.originalUrl}`,
+        error
+      );
+      res.status(500).send({ message: "Internal server error" });
     }
-
-    const token = createToken(user);
-
-    user.sessionToken = token;
-    user.save();
-
-    res.status(200).send({ message: "Signed in successfully", token });
-  } catch (error) {
-    logger.error(
-      `Internal server error at ${req.method} ${req.originalUrl}`,
-      error
-    );
-    res.status(500).send({ message: "Internal server error" });
   }
-});
+);
 
 router.post("/sign-out", decodeToken, verifyToken, async (req: any, res) => {
   const logger: Logger | Console = (req as any).logger || console;

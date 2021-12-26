@@ -4,7 +4,8 @@
   "description": "A test server",
   "main": "src/index.js",
   "scripts": {
-    "start": "npm run tsc && node dist/index.js",
+    "docs": "ts-node ./src/docs/generator.ts",
+    "start": "npm run docs && npm run tsc && node dist/index.js",
     "watch": "nodemon",
     "reset": "node scripts/reset.js",
     "test": "jest --runInBand",
@@ -28,7 +29,8 @@
     "jsonwebtoken": "^8.5.1",
     "module-alias": "^2.2.2",
     "mongoose": "^5.12.10",
-    "socket.io": "^4.1.2"
+    "socket.io": "^4.1.2",
+    "swagger-jsdoc": "^6.1.0"
   },
   "devDependencies": {
     "@shelf/jest-mongodb": "^2.1.0",
@@ -39,6 +41,7 @@
     "@types/jsonwebtoken": "^8.5.6",
     "@types/node": "^17.0.2",
     "@types/supertest": "^2.0.11",
+    "@types/swagger-jsdoc": "^6.0.1",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "assert": "^2.0.0",

@@ -140,7 +140,7 @@ describe("The /users API", () => {
       const body = {};
 
       // when
-      const response = await request(app).post("/users/sign-in").send();
+      const response = await request(app).post("/users/sign-in").send(body);
 
       // then
       expect(response.status).toEqual(400);

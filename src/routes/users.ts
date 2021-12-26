@@ -37,11 +37,9 @@ router.post(
   async (req, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
-      const newUser = req.body;
+      const { name, email, password } = req.body;
 
-      const oldUser = await User.findOne({
-        email: newUser.email,
-      });
+      const oldUser = await User.findOne({ email });
 
       if (oldUser) {
         res.status(400).send({ message: "Email already in use" });
@@ -49,9 +47,9 @@ router.post(
       }
 
       const user = await new User({
-        name: newUser.name,
-        email: newUser.email,
-        hashedPassword: await hash(newUser.password, HASH_ROUNDS),
+        name,
+        email,
+        hashedPassword: await hash(password, HASH_ROUNDS),
       }).save();
 
       const token = createToken(user);
@@ -81,16 +79,11 @@ router.post(
 async (req, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
-    const credentials = req.body;
+    const { email, password } = req.body;
 
-    const user = await User.findOne({
-      email: credentials.email,
-    });
+    const user = await User.findOne({ email });
 
-    if (
-      !user ||
-      !(await compare(credentials.password, user.hashedPassword))
-    ) {
+    if (!user || !(await compare(password, user.hashedPassword))) {
       res.status(400).send({ message: "Invalid credentials" });
       return;
     }

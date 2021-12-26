@@ -72,11 +72,11 @@ eventSchema.index({ state: 1 });
 eventSchema.index({ startDate: -1 });
 
 export interface UserType {
-  name?: string;
-  email?: string;
-  hashedPassword?: string;
-  sessionToken: string;
-  socketId: string;
+  name: string;
+  email: string;
+  hashedPassword: string;
+  sessionToken?: string;
+  socketId?: string;
 }
 
 export type UserDocument = UserType & Document;

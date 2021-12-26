@@ -7,14 +7,14 @@ import app from "@/app";
 import { EVENT_RPM, EVENT_SIZE } from "@/routes/events";
 import { decodeToken } from "@/services/auth";
 import {
-  closeConnection,
-  createConnection,
   Event,
+  EventState,
   EventType,
   format,
   User,
-  UserType,
+  UserDocument,
 } from "@/services/db";
+import { closeConnection, createConnection } from "@/services/db/setup";
 
 import { clearDatabase, createMockEvent, createMockUser } from "test/mocks/db";
 
@@ -41,8 +41,8 @@ describe("The /events API", () => {
   afterAll(closeConnection);
 
   describe("GET /events/{eventId} endpoint", () => {
-    let creatorUser: UserType & Document;
-    let otherUser: UserType & Document;
+    let creatorUser: UserDocument;
+    let otherUser: UserDocument;
 
     beforeEach(async () => {
       creatorUser = await createMockUser({ email: "creator@doe.com" });
@@ -70,9 +70,9 @@ describe("The /events API", () => {
     });
 
     it.each`
-      authUser           | state        | reason
-      ${"other@doe.com"} | ${"draft"}   | ${"the event is draft and the caller is NOT the creator"}
-      ${undefined}       | ${"private"} | ${"the event is private and the caller is NOT authenticated"}
+      authUser           | state                 | reason
+      ${"other@doe.com"} | ${EventState.DRAFT}   | ${"the event is draft and the caller is NOT the creator"}
+      ${undefined}       | ${EventState.PRIVATE} | ${"the event is private and the caller is NOT authenticated"}
     `("Returns 400 if $reason", async ({ authUser, state }) => {
       // given
       mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
@@ -99,10 +99,10 @@ describe("The /events API", () => {
     });
 
     it.each`
-      authUser             | state        | reason
-      ${"creator@doe.com"} | ${"draft"}   | ${"the event is draft and the caller is the creator"}
-      ${"other@doe.com"}   | ${"private"} | ${"the event is private and the caller is authenticated"}
-      ${undefined}         | ${"public"}  | ${"the event is public"}
+      authUser             | state                 | reason
+      ${"creator@doe.com"} | ${EventState.DRAFT}   | ${"the event is draft and the caller is the creator"}
+      ${"other@doe.com"}   | ${EventState.PRIVATE} | ${"the event is private and the caller is authenticated"}
+      ${undefined}         | ${EventState.PUBLIC}  | ${"the event is public"}
     `("Returns 200 and an event if $reason", async ({ authUser, state }) => {
       // given
       mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
@@ -132,8 +132,8 @@ describe("The /events API", () => {
   });
 
   describe("PUT /events/{eventId} endpoint", () => {
-    let callerUser: UserType & Document;
-    let otherUser: UserType & Document;
+    let callerUser: UserDocument;
+    let otherUser: UserDocument;
 
     beforeEach(async () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
@@ -234,7 +234,7 @@ describe("The /events API", () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "draft",
+        state: EventState.DRAFT,
       });
       const eventId = event._id;
 
@@ -257,7 +257,7 @@ describe("The /events API", () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
 
@@ -280,8 +280,8 @@ describe("The /events API", () => {
   });
 
   describe("DELETE /events/{eventId} endpoint", () => {
-    let callerUser: UserType & Document;
-    let otherUser: UserType & Document;
+    let callerUser: UserDocument;
+    let otherUser: UserDocument;
 
     beforeEach(async () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
@@ -311,7 +311,7 @@ describe("The /events API", () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "draft",
+        state: EventState.DRAFT,
       });
       const eventId = event._id;
 
@@ -328,7 +328,7 @@ describe("The /events API", () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
 
@@ -359,8 +359,8 @@ describe("The /events API", () => {
   });
 
   describe("Denial of service", () => {
-    let callerUser: UserType & Document;
-    let otherUser: UserType & Document;
+    let callerUser: UserDocument;
+    let otherUser: UserDocument;
 
     beforeEach(async () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });

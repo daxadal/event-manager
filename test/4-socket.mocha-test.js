@@ -117,7 +117,7 @@ xdescribe("Sockets", () => {
       events = await generateEvents({
         length: 4,
         startDate: date,
-        state: "private",
+        state: EventState.PRIVATE,
         token: tokens.O,
       });
 

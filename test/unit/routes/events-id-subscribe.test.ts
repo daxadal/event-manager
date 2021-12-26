@@ -5,13 +5,17 @@ import { mocked } from "ts-jest/utils";
 import app from "@/app";
 import { decodeToken } from "@/services/auth";
 import {
-  closeConnection,
-  createConnection,
   Event,
+  EventState,
   format,
   Subscription,
+  UserDocument,
   UserType,
 } from "@/services/db";
+import {
+  closeConnection,
+  createConnection
+} from "@/services/db/setup";
 
 import {
   clearDatabase,
@@ -42,8 +46,8 @@ describe("The /events API", () => {
   afterAll(closeConnection);
 
   describe("POST /events/{eventId}/subscribe endpoint", () => {
-    let callerUser: UserType & Document;
-    let otherUser: UserType & Document;
+    let callerUser: UserDocument;
+    let otherUser: UserDocument;
 
     beforeEach(async () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
@@ -76,7 +80,7 @@ describe("The /events API", () => {
       // given
       const event = await createMockEvent({
         creatorId: callerUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
 
@@ -99,7 +103,7 @@ describe("The /events API", () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
 
@@ -125,7 +129,7 @@ describe("The /events API", () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
 
@@ -149,7 +153,7 @@ describe("The /events API", () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
 
@@ -175,7 +179,7 @@ describe("The /events API", () => {
 
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const oldSubscription = await new Subscription({
         eventId: event.id,
@@ -208,7 +212,7 @@ describe("The /events API", () => {
 
       const events = await createMockEvents(MAX_SUBSCRIPTIONS, {
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const subscriptionPromises = events.map((event) =>
         new Subscription({
@@ -221,7 +225,7 @@ describe("The /events API", () => {
 
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
       const body = {};

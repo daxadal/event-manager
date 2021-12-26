@@ -4,7 +4,8 @@ import crypto from "crypto";
 import { mocked } from "ts-jest/utils";
 
 import app from "@/app";
-import { closeConnection, createConnection, User } from "@/services/db";
+import { User } from "@/services/db";
+import { closeConnection, createConnection } from "@/services/db/setup";
 import { decodeToken } from "@/services/auth";
 import { HASH_ROUNDS, USER_RPM, USER_SIZE } from "@/routes/users";
 

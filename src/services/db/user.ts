@@ -1,4 +1,4 @@
-import mongoose, { Document } from "mongoose";
+import { Document, Schema } from "mongoose";
 
 export interface UserType {
   name: string;
@@ -10,7 +10,7 @@ export interface UserType {
 
 export type UserDocument = UserType & Document;
 
-export const userSchema = new mongoose.Schema<UserType>({
+export const userSchema = new Schema<UserType>({
   name: String,
   email: String,
   hashedPassword: String,

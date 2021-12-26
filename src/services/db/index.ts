@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import mongoose from "mongoose";
+import { model } from "mongoose";
 import { EventType, eventSchema } from "./event";
 import { SubscriptionType, subscriptionSchema } from "./subscription";
 import { UserType, userSchema } from "./user";
@@ -16,9 +16,9 @@ export const format = (object: unknown) => {
   return formatted;
 };
 
-export const Event = mongoose.model<EventType>("Event", eventSchema);
-export const Subscription = mongoose.model<SubscriptionType>(
+export const Event = model<EventType>("Event", eventSchema);
+export const Subscription = model<SubscriptionType>(
   "Subscription",
   subscriptionSchema
 );
-export const User = mongoose.model<UserType>("User", userSchema);
+export const User = model<UserType>("User", userSchema);

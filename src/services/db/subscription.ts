@@ -1,17 +1,17 @@
-import mongoose, { Document } from "mongoose";
+import { Document, Schema, Types } from "mongoose";
 
 export interface SubscriptionType {
-  eventId: mongoose.Types.ObjectId;
-  subscriberId: mongoose.Types.ObjectId;
+  eventId: Types.ObjectId;
+  subscriberId: Types.ObjectId;
   subscriptionDate: Date;
   comment?: string;
 }
 
 export type SubscriptionDocument = SubscriptionType & Document;
 
-export const subscriptionSchema = new mongoose.Schema<SubscriptionType>({
-  eventId: mongoose.Types.ObjectId,
-  subscriberId: mongoose.Types.ObjectId,
+export const subscriptionSchema = new Schema<SubscriptionType>({
+  eventId: Types.ObjectId,
+  subscriberId: Types.ObjectId,
   subscriptionDate: Date,
   comment: String,
 });

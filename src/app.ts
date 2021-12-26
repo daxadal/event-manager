@@ -1,19 +1,13 @@
-import express from "express";
-import rateLimit from "express-rate-limit";
+import express, { NextFunction, Request, Response } from "express";
 import { Logger } from "winston";
 
 import { api } from "@/config";
-import { sendReminders } from "@/socket";
-
-import { Event } from "@/services/db";
-import { checkBreeToken } from "@/services/auth";
 
 import eventsRouter from "@/routes/events";
 import usersRouter from "@/routes/users";
 import devRouter from "@/routes/dev";
+import jobsRouter from "@/routes/jobs";
 import { getLoggerMiddleware } from "@/services/winston";
-
-const MAIN_RPM = 10;
 
 const app = express();
 
@@ -22,36 +16,9 @@ app.use(getLoggerMiddleware("api"));
 if (api.DEV) app.use("/dev", devRouter);
 app.use("/events", eventsRouter);
 app.use("/users", usersRouter);
+app.use("/jobs", jobsRouter);
 
-app.use(
-  rateLimit({
-    max: MAIN_RPM,
-    windowMs: 60 * 1000,
-    message: "Too many requests",
-  })
-);
-
-app.post("/jobs/remind", checkBreeToken, async (req: any, res) => {
-  const logger: Logger | Console = (req as any).logger || console;
-  try {
-    logger.info("Remind:", req.dates);
-    const { start, end } = req.dates;
-
-    const events = await Event.find({
-      startDate: { $gte: start, $lte: end },
-    });
-    await sendReminders(events);
-    res.status(200).send({ message: "Reminders sent" });
-  } catch (error) {
-    logger.error(
-      `Internal server error at ${req.method} ${req.originalUrl}`,
-      error
-    );
-    res.status(500).send({ message: "Internal server error" });
-  }
-});
-
-app.use((err, req, res, next) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const logger: Logger | Console = (req as any).logger || console;
   logger.error(
     `Internal server error at ${req.method} ${req.originalUrl} captured at final handler`,

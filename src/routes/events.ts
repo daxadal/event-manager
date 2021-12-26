@@ -17,6 +17,7 @@ import {
   validateBody,
   validatePath,
 } from "@/services/validations";
+import { getLoggerMiddleware } from "@/services/winston";
 
 export const EVENT_SIZE = "1kb";
 export const EVENT_RPM = 100;
@@ -25,6 +26,8 @@ export const MAX_SUBSCRIPTIONS = 3;
 
 // EVENTS
 const router = Router();
+
+router.use(getLoggerMiddleware("routes/events"));
 
 router.use(json({ limit: EVENT_SIZE }));
 router.use(urlencoded({ extended: true }));

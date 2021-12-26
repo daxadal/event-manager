@@ -5,10 +5,13 @@ import { Logger } from "winston";
 import { sendReminders } from "@/socket";
 import { Event } from "@/services/db";
 import { checkBreeToken } from "@/services/auth";
+import { getLoggerMiddleware } from "@/services/winston";
 
 export const MAIN_RPM = 10;
 
 const router = Router();
+
+router.use(getLoggerMiddleware("routes/jobs"));
 
 router.use(
   rateLimit({

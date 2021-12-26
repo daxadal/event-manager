@@ -7,11 +7,8 @@ import eventsRouter from "@/routes/events";
 import usersRouter from "@/routes/users";
 import devRouter from "@/routes/dev";
 import jobsRouter from "@/routes/jobs";
-import { getLoggerMiddleware } from "@/services/winston";
 
 const app = express();
-
-app.use(getLoggerMiddleware("api"));
 
 if (api.DEV) app.use("/dev", devRouter);
 app.use("/events", eventsRouter);

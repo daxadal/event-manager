@@ -1,12 +1,15 @@
 import { Router } from "express";
 import { Logger } from "winston";
 
-const router = Router();
-
 import { sendReminders, pingAll } from "../socket";
 import { getMinuteInterval } from "@/services/utils";
 import bree from "../scheduler";
 import * as DB from "@/services/db";
+import { getLoggerMiddleware } from "@/services/winston";
+
+const router = Router();
+
+router.use(getLoggerMiddleware("routes/dev"));
 
 router.post("/ping", async (req, res) => {
   const logger: Logger | Console = (req as any).logger || console;

@@ -7,6 +7,7 @@ import { Logger } from "winston";
 import { User } from "@/services/db";
 import { createToken, decodeToken, verifyToken } from "@/services/auth";
 import { validateBody } from "@/services/validations";
+import { getLoggerMiddleware } from "@/services/winston";
 
 export const USER_SIZE = "512b";
 export const USER_RPM = 30;
@@ -15,6 +16,8 @@ export const HASH_ROUNDS = 10;
 
 // Register / LOGIN
 const router = Router();
+
+router.use(getLoggerMiddleware("routes/users"));
 
 router.use(json({ limit: USER_SIZE }));
 router.use(

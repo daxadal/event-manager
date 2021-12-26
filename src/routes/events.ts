@@ -192,7 +192,7 @@ router
 
         if (String(req.event.creatorId) !== req.user.id) {
           res
-            .status(400)
+            .status(403)
             .send({ message: "Events can only be edited by their creator" });
           return;
         }
@@ -235,7 +235,7 @@ router
     try {
       if (String(req.event.creatorId) !== req.user.id) {
         res
-          .status(400)
+          .status(403)
           .send({ message: "Events can only be deleted by their creator" });
         return;
       }

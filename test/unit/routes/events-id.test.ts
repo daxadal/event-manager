@@ -7,14 +7,14 @@ import app from "@/app";
 import { EVENT_RPM, EVENT_SIZE } from "@/routes/events";
 import { decodeToken } from "@/services/auth";
 import {
-  closeConnection,
-  createConnection,
   Event,
+  EventState,
   EventType,
   format,
   User,
-  UserType,
+  UserDocument,
 } from "@/services/db";
+import { closeConnection, createConnection } from "@/services/db/setup";
 
 import { clearDatabase, createMockEvent, createMockUser } from "test/mocks/db";
 
@@ -41,8 +41,8 @@ describe("The /events API", () => {
   afterAll(closeConnection);
 
   describe("GET /events/{eventId} endpoint", () => {
-    let creatorUser: UserType & Document;
-    let otherUser: UserType & Document;
+    let creatorUser: UserDocument;
+    let otherUser: UserDocument;
 
     beforeEach(async () => {
       creatorUser = await createMockUser({ email: "creator@doe.com" });
@@ -66,13 +66,13 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it.each`
-      authUser           | state        | reason
-      ${"other@doe.com"} | ${"draft"}   | ${"the event is draft and the caller is NOT the creator"}
-      ${undefined}       | ${"private"} | ${"the event is private and the caller is NOT authenticated"}
+      authUser           | state                 | reason
+      ${"other@doe.com"} | ${EventState.DRAFT}   | ${"the event is draft and the caller is NOT the creator"}
+      ${undefined}       | ${EventState.PRIVATE} | ${"the event is private and the caller is NOT authenticated"}
     `("Returns 400 if $reason", async ({ authUser, state }) => {
       // given
       mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
@@ -95,14 +95,14 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it.each`
-      authUser             | state        | reason
-      ${"creator@doe.com"} | ${"draft"}   | ${"the event is draft and the caller is the creator"}
-      ${"other@doe.com"}   | ${"private"} | ${"the event is private and the caller is authenticated"}
-      ${undefined}         | ${"public"}  | ${"the event is public"}
+      authUser             | state                 | reason
+      ${"creator@doe.com"} | ${EventState.DRAFT}   | ${"the event is draft and the caller is the creator"}
+      ${"other@doe.com"}   | ${EventState.PRIVATE} | ${"the event is private and the caller is authenticated"}
+      ${undefined}         | ${EventState.PUBLIC}  | ${"the event is public"}
     `("Returns 200 and an event if $reason", async ({ authUser, state }) => {
       // given
       mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
@@ -132,8 +132,8 @@ describe("The /events API", () => {
   });
 
   describe("PUT /events/{eventId} endpoint", () => {
-    let callerUser: UserType & Document;
-    let otherUser: UserType & Document;
+    let callerUser: UserDocument;
+    let otherUser: UserDocument;
 
     beforeEach(async () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
@@ -157,7 +157,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it("Returns 400 if only one of `location.lat` or `location.lon` is present", async () => {
@@ -177,7 +177,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(
+      expect(response.body.message).toMatch(
         /location.* contains \[lat\] without its required peers \[lon\]/
       );
     });
@@ -234,7 +234,7 @@ describe("The /events API", () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "draft",
+        state: EventState.DRAFT,
       });
       const eventId = event._id;
 
@@ -250,14 +250,14 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it("Returns 400 if the authenticated user is not the creator of the event", async () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
 
@@ -273,15 +273,15 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual(
+      expect(response.body.message).toEqual(
         "Events can only be edited by their creator"
       );
     });
   });
 
   describe("DELETE /events/{eventId} endpoint", () => {
-    let callerUser: UserType & Document;
-    let otherUser: UserType & Document;
+    let callerUser: UserDocument;
+    let otherUser: UserDocument;
 
     beforeEach(async () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
@@ -304,14 +304,14 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it("Returns 400 if the event is not visible", async () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "draft",
+        state: EventState.DRAFT,
       });
       const eventId = event._id;
 
@@ -321,14 +321,14 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it("Returns 400 if the event does not belong to the user", async () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
 
@@ -338,7 +338,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual(
+      expect(response.body.message).toEqual(
         "Events can only be deleted by their creator"
       );
     });
@@ -359,8 +359,8 @@ describe("The /events API", () => {
   });
 
   describe("Denial of service", () => {
-    let callerUser: UserType & Document;
-    let otherUser: UserType & Document;
+    let callerUser: UserDocument;
+    let otherUser: UserDocument;
 
     beforeEach(async () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
@@ -394,7 +394,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(413);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Payload too large");
+      expect(response.body.message).toEqual("Payload too large");
     });
 
     it(`Returns 429 after ${EVENT_RPM} requests in a minute`, async () => {

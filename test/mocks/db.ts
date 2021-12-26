@@ -1,7 +1,16 @@
-import mongoose, { Document } from "mongoose";
+import { hash } from "bcrypt";
+import mongoose from "mongoose";
 
-import { hash } from "@/services/auth";
-import { Event, EventType, User, UserType } from "@/services/db";
+import {
+  Event,
+  EventDocument,
+  EventState,
+  EventType,
+  User,
+  UserDocument,
+  UserType,
+} from "@/services/db";
+import { HASH_ROUNDS } from "@/routes/users";
 
 export async function clearDatabase(): Promise<void> {
   const collections = mongoose.connection.collections;
@@ -26,15 +35,15 @@ const staticfy = <T extends Record<string, unknown>>(
     return result;
   }, {});
 
-export const createMockUser = (
+export const createMockUser = async (
   fieldsToOverride: Dynamic<Partial<UserType>> = {},
   i = 0
-): Promise<UserType & Document> => {
+): Promise<UserDocument> => {
   const staticFields = staticfy(fieldsToOverride, i);
   return new User({
     name: `John Doe ${i}`,
     email: `${i}@doe.com`,
-    hashedPassword: hash("password"),
+    hashedPassword: await hash("password", HASH_ROUNDS),
 
     ...staticFields,
   }).save();
@@ -43,13 +52,13 @@ export const createMockUser = (
 export const createMockEvent = (
   fieldsToOverride: Dynamic<Partial<EventType>> = {},
   i = 0
-): Promise<EventType & Document> => {
+): Promise<EventDocument> => {
   const staticFields = staticfy(fieldsToOverride, i);
   return new Event({
     headline: `New event ${i}`,
     startDate: Date.now(),
     location: { name: "Somewhere" },
-    state: "draft",
+    state: EventState.DRAFT,
 
     ...staticFields,
   }).save();
@@ -58,7 +67,7 @@ export const createMockEvent = (
 export function createMockEvents(
   amount: number,
   fieldsToOverride: Dynamic<Partial<EventType>> = {}
-): Promise<Array<EventType & Document>> {
+): Promise<Array<EventDocument>> {
   const eventPromises = new Array(amount)
     .fill(undefined)
     .map((_, i) => createMockEvent(fieldsToOverride, i));

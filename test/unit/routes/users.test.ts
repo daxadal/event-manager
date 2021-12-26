@@ -1,11 +1,13 @@
+import { hash } from "bcrypt";
 import request from "supertest";
 import crypto from "crypto";
 import { mocked } from "ts-jest/utils";
 
 import app from "@/app";
-import { closeConnection, createConnection, User } from "@/services/db";
-import { decodeToken, hash } from "@/services/auth";
-import { USER_RPM, USER_SIZE } from "@/routes/users";
+import { User } from "@/services/db";
+import { closeConnection, createConnection } from "@/services/db/setup";
+import { decodeToken } from "@/services/auth";
+import { HASH_ROUNDS, USER_RPM, USER_SIZE } from "@/routes/users";
 
 import { clearDatabase } from "test/mocks/db";
 
@@ -44,7 +46,7 @@ describe("The /users API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(/is required/);
+      expect(response.body.message).toMatch(/is required/);
     });
 
     it("Returns 400 if the provided email is invalid", async () => {
@@ -61,7 +63,7 @@ describe("The /users API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(/email.*must be a valid email/);
+      expect(response.body.message).toMatch(/email.*must be a valid email/);
     });
 
     it("Returns 400 if the email is already in use", async () => {
@@ -74,7 +76,7 @@ describe("The /users API", () => {
       await new User({
         name: "John Doe",
         email: "john@doe.com",
-        hashedPassword: hash("password"),
+        hashedPassword: await hash("password", HASH_ROUNDS),
       }).save();
 
       // when
@@ -83,7 +85,7 @@ describe("The /users API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Email already in use");
+      expect(response.body.message).toEqual("Email already in use");
     });
 
     it("Returns 200 and a token on success", async () => {
@@ -110,7 +112,7 @@ describe("The /users API", () => {
       const user = await new User({
         name: "John Doe",
         email: "john@doe.com",
-        hashedPassword: hash("password"),
+        hashedPassword: await hash("password", HASH_ROUNDS),
       }).save();
 
       mockedDecodeToken.mockImplementation((req: any, res, next) => {
@@ -120,49 +122,41 @@ describe("The /users API", () => {
       });
     });
 
-    it("Returns 400 if no auth is provided", async () => {
+    it("Returns 400 if no body is provided", async () => {
       // given
+      const body = undefined;
 
       // when
-      const response = await request(app).post("/users/sign-in").send();
+      const response = await request(app).post("/users/sign-in").send(body);
 
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual(
-        "Credentials must be provided as Basic Auth (email:password)"
-      );
+      expect(response.body.message).toMatch(/is required/);
     });
 
-    it("Returns 400 if auth is empty", async () => {
+    it("Returns 400 if body is empty", async () => {
       // given
-      const email = undefined;
-      const password = undefined;
+      const body = {};
 
       // when
-      const response = await request(app)
-        .post("/users/sign-in")
-        .auth(email, password)
-        .send();
+      const response = await request(app).post("/users/sign-in").send(body);
 
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual(
-        expect.stringContaining("must be a valid email")
-      );
+      expect(response.body.message).toMatch(/is required/);
     });
 
     it("Returns 200 and a token on success", async () => {
       // given
-      const email = "john@doe.com";
-      const password = "password";
+      const body = {
+        email: "john@doe.com",
+        password: "password",
+      };
 
       // when
-      const response = await request(app)
-        .post("/users/sign-in")
-        .auth(email, password)
-        .send();
+      const response = await request(app).post("/users/sign-in").send(body);
 
       // then
       expect(response.status).toEqual(200);
@@ -177,7 +171,7 @@ describe("The /users API", () => {
       const user = await new User({
         name: "John Doe",
         email: "john@doe.com",
-        hashedPassword: hash("password"),
+        hashedPassword: await hash("password", HASH_ROUNDS),
       }).save();
 
       mockedDecodeToken.mockImplementation((req: any, res, next) => {
@@ -218,7 +212,7 @@ describe("The /users API", () => {
       // then
       expect(response.status).toEqual(413);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Payload too large");
+      expect(response.body.message).toEqual("Payload too large");
     });
 
     it(`Returns 429 after ${USER_RPM} requests in a minute`, async () => {

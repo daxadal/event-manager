@@ -1,19 +1,19 @@
 import request from "supertest";
 import crypto from "crypto";
-import { Document } from "mongoose";
 import { mocked } from "ts-jest/utils";
 
 import app from "@/app";
 import { EVENT_RPM, EVENT_SIZE } from "@/routes/events";
 import { decodeToken } from "@/services/auth";
 import {
-  closeConnection,
-  createConnection,
   Event,
+  EventDocument,
+  EventState,
   EventType,
   format,
-  UserType,
+  UserDocument,
 } from "@/services/db";
+import { closeConnection, createConnection } from "@/services/db/setup";
 
 import { clearDatabase, createMockEvents, createMockUser } from "test/mocks/db";
 
@@ -42,7 +42,7 @@ describe("The /events API", () => {
   afterAll(closeConnection);
 
   describe("POST /events endpoint", () => {
-    let user: UserType & Document;
+    let user: UserDocument;
 
     beforeEach(async () => {
       user = await createMockUser();
@@ -64,7 +64,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(/is required/);
+      expect(response.body.message).toMatch(/is required/);
     });
 
     it("Returns 400 if only one of `location.lat` or `location.lon` is present", async () => {
@@ -81,7 +81,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(
+      expect(response.body.message).toMatch(
         /location.* contains \[lat\] without its required peers \[lon\]/
       );
     });
@@ -99,7 +99,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(/is required/);
+      expect(response.body.message).toMatch(/is required/);
     });
 
     it("Returns 200 and the created event on success (minimum required fields)", async () => {
@@ -138,7 +138,7 @@ describe("The /events API", () => {
           lat: 40.168453126,
           lon: -5.1561561231,
         },
-        state: "private",
+        state: EventState.PRIVATE,
       };
 
       // when
@@ -162,7 +162,7 @@ describe("The /events API", () => {
         headline: "Previous event",
         startDate: new Date(),
         location: { name: "Somewhere" },
-        state: "public",
+        state: EventState.PUBLIC,
         creatorId: user.id,
       }).save();
 
@@ -170,7 +170,7 @@ describe("The /events API", () => {
         headline: "New event",
         startDate: new Date(),
         location: { name: "Somewhere" },
-        state: "public",
+        state: EventState.PUBLIC,
       };
 
       // when
@@ -179,14 +179,14 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Public events limit exceeded");
+      expect(response.body.message).toEqual("Public events limit exceeded");
     });
   });
 
   describe("GET /events endpoint", () => {
-    let creatorUser: UserType & Document;
-    let otherUser: UserType & Document;
-    let events: Array<EventType & Document>;
+    let creatorUser: UserDocument;
+    let otherUser: UserDocument;
+    let events: Array<EventDocument>;
 
     beforeEach(async () => {
       creatorUser = await createMockUser({ email: "creator@doe.com" });
@@ -197,11 +197,11 @@ describe("The /events API", () => {
         state: (i) => {
           switch (i % 3) {
             case 0:
-              return "draft";
+              return EventState.DRAFT;
             case 1:
-              return "private";
+              return EventState.PRIVATE;
             case 2:
-              return "public";
+              return EventState.PUBLIC;
           }
         },
       });
@@ -223,7 +223,7 @@ describe("The /events API", () => {
       expect(response.body.events).toHaveLength(AMOUNT_OF_EVENTS / 3);
 
       response.body.events.forEach((event: EventType) => {
-        expect(["public"]).toContain(event.state);
+        expect([EventState.PUBLIC]).toContain(event.state);
       });
     });
 
@@ -245,7 +245,7 @@ describe("The /events API", () => {
       expect(response.body.events).toHaveLength((2 * AMOUNT_OF_EVENTS) / 3);
 
       response.body.events.forEach((event: EventType) => {
-        expect(["public", "private"]).toContain(event.state);
+        expect([EventState.PUBLIC, EventState.PRIVATE]).toContain(event.state);
       });
     });
 
@@ -267,7 +267,11 @@ describe("The /events API", () => {
       expect(response.body.events).toHaveLength(AMOUNT_OF_EVENTS);
 
       response.body.events.forEach((event: EventType) => {
-        expect(["public", "private", "draft"]).toContain(event.state);
+        expect([
+          EventState.PUBLIC,
+          EventState.PRIVATE,
+          EventState.DRAFT,
+        ]).toContain(event.state);
       });
     });
   });
@@ -291,7 +295,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(413);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Payload too large");
+      expect(response.body.message).toEqual("Payload too large");
     });
 
     it(`Returns 429 after ${EVENT_RPM} requests in a minute`, async () => {

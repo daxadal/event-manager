@@ -17,7 +17,7 @@ const validate =
         `"${req.originalUrl}": ${fieldToValidate} failed validation:\n -  Error: ${error.message}`
       );
       logger.debug(`Full Joi error:`, error);
-      res.status(400).send({ error: error.message });
+      res.status(400).send({ message: error.message });
     } else {
       req[fieldToValidate] = value;
       next();

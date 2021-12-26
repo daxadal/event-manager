@@ -5,13 +5,17 @@ import { mocked } from "ts-jest/utils";
 import app from "@/app";
 import { decodeToken } from "@/services/auth";
 import {
-  closeConnection,
-  createConnection,
   Event,
+  EventState,
   format,
   Subscription,
+  UserDocument,
   UserType,
 } from "@/services/db";
+import {
+  closeConnection,
+  createConnection
+} from "@/services/db/setup";
 
 import {
   clearDatabase,
@@ -42,8 +46,8 @@ describe("The /events API", () => {
   afterAll(closeConnection);
 
   describe("POST /events/{eventId}/subscribe endpoint", () => {
-    let callerUser: UserType & Document;
-    let otherUser: UserType & Document;
+    let callerUser: UserDocument;
+    let otherUser: UserDocument;
 
     beforeEach(async () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
@@ -69,14 +73,14 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Event not found");
+      expect(response.body.message).toEqual("Event not found");
     });
 
     it("Returns 400 if you are the owner of the event you want to subscribe to", async () => {
       // given
       const event = await createMockEvent({
         creatorId: callerUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
 
@@ -90,7 +94,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual(
+      expect(response.body.message).toEqual(
         "You can't subscribe to your own events"
       );
     });
@@ -99,7 +103,7 @@ describe("The /events API", () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
 
@@ -116,7 +120,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toMatch(
+      expect(response.body.message).toMatch(
         /^.comment. length must be less than or equal to \d+ characters long$/
       );
     });
@@ -125,7 +129,7 @@ describe("The /events API", () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
 
@@ -149,7 +153,7 @@ describe("The /events API", () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
 
@@ -175,7 +179,7 @@ describe("The /events API", () => {
 
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const oldSubscription = await new Subscription({
         eventId: event.id,
@@ -195,7 +199,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual(
+      expect(response.body.message).toEqual(
         "You already have subscribed to this event"
       );
       expect(response.body.subscription).toBeDefined();
@@ -208,7 +212,7 @@ describe("The /events API", () => {
 
       const events = await createMockEvents(MAX_SUBSCRIPTIONS, {
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const subscriptionPromises = events.map((event) =>
         new Subscription({
@@ -221,7 +225,7 @@ describe("The /events API", () => {
 
       const event = await createMockEvent({
         creatorId: otherUser._id,
-        state: "public",
+        state: EventState.PUBLIC,
       });
       const eventId = event._id;
       const body = {};
@@ -234,7 +238,7 @@ describe("The /events API", () => {
       // then
       expect(response.status).toEqual(400);
       expect(response.body).toBeDefined();
-      expect(response.body.error).toEqual("Subscribed events limit exceeded");
+      expect(response.body.message).toEqual("Subscribed events limit exceeded");
     });
   });
 });

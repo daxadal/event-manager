@@ -1,21 +1,26 @@
-import express from "express";
+import { hash, compare } from "bcrypt";
+import { json, Router } from "express";
 import rateLimit from "express-rate-limit";
-import auth from "basic-auth";
 import Joi from "joi";
 import { Logger } from "winston";
 
-import * as DB from "@/services/db";
-import { createToken, decodeToken, hash, verifyToken } from "@/services/auth";
+import { User } from "@/services/db";
+import { createToken, decodeToken, verifyToken } from "@/services/auth";
 import { validateBody } from "@/services/validations";
+import { getLoggerMiddleware } from "@/services/winston";
 
 export const USER_SIZE = "512b";
 export const USER_RPM = 30;
 
-// Register / LOGIN
-const usersApp = express.Router();
+export const HASH_ROUNDS = 10;
 
-usersApp.use(express.json({ limit: USER_SIZE }));
-usersApp.use(
+// Register / LOGIN
+const router = Router();
+
+router.use(getLoggerMiddleware("routes/users"));
+
+router.use(json({ limit: USER_SIZE }));
+router.use(
   rateLimit({
     max: USER_RPM,
     windowMs: 60 * 1000, // 1 minute
@@ -23,7 +28,7 @@ usersApp.use(
   })
 );
 
-usersApp.post(
+router.post(
   "/sign-up",
   validateBody(
     Joi.object({
@@ -35,21 +40,19 @@ usersApp.post(
   async (req, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
-      const newUser = req.body;
+      const { name, email, password } = req.body;
 
-      const oldUser = await DB.User.findOne({
-        email: newUser.email,
-      });
+      const oldUser = await User.findOne({ email });
 
       if (oldUser) {
-        res.status(400).send({ error: "Email already in use" });
+        res.status(400).send({ message: "Email already in use" });
         return;
       }
 
-      const user = await new DB.User({
-        name: newUser.name,
-        email: newUser.email,
-        hashedPassword: hash(newUser.password),
+      const user = await new User({
+        name,
+        email,
+        hashedPassword: await hash(password, HASH_ROUNDS),
       }).save();
 
       const token = createToken(user);
@@ -63,40 +66,28 @@ usersApp.post(
         `Internal server error at ${req.method} ${req.originalUrl}`,
         error
       );
-      res.status(500).send({ error: "Internal server error" });
+      res.status(500).send({ message: "Internal server error" });
     }
   }
 );
 
-usersApp.post("/sign-in", async (req, res) => {
+router.post(
+  "/sign-in",
+  validateBody(
+    Joi.object({
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+    })
+  ),
+async (req, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
-    const basicAuth = auth(req);
+    const { email, password } = req.body;
 
-    if (!basicAuth) {
-      res.status(400).send({
-        error: "Credentials must be provided as Basic Auth (email:password)",
-      });
-      return;
-    }
-    const inputSchema = Joi.object({
-      name: Joi.string().email().required(),
-      pass: Joi.string().required(),
-    });
+    const user = await User.findOne({ email });
 
-    const { value: credentials, error } = inputSchema.validate(basicAuth);
-    if (error) {
-      res.status(400).send({ error: error.message });
-      return;
-    }
-
-    const user = await DB.User.findOne({
-      email: credentials.name,
-      hashedPassword: hash(credentials.pass),
-    });
-
-    if (!user) {
-      res.status(400).send({ error: "Invalid credentials" });
+    if (!user || !(await compare(password, user.hashedPassword))) {
+      res.status(400).send({ message: "Invalid credentials" });
       return;
     }
 
@@ -111,11 +102,11 @@ usersApp.post("/sign-in", async (req, res) => {
       `Internal server error at ${req.method} ${req.originalUrl}`,
       error
     );
-    res.status(500).send({ error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
   }
 });
 
-usersApp.post("/sign-out", decodeToken, verifyToken, async (req: any, res) => {
+router.post("/sign-out", decodeToken, verifyToken, async (req: any, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
     req.user.sessionToken = undefined;
@@ -127,8 +118,8 @@ usersApp.post("/sign-out", decodeToken, verifyToken, async (req: any, res) => {
       `Internal server error at ${req.method} ${req.originalUrl}`,
       error
     );
-    res.status(500).send({ error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
   }
 });
 
-export default usersApp;
+export default router;

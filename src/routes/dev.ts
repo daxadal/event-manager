@@ -1,14 +1,17 @@
-import express from "express";
+import { Router } from "express";
 import { Logger } from "winston";
-
-const app = express.Router();
 
 import { sendReminders, pingAll } from "../socket";
 import { getMinuteInterval } from "@/services/utils";
 import bree from "../scheduler";
 import * as DB from "@/services/db";
+import { getLoggerMiddleware } from "@/services/winston";
 
-app.post("/ping", async (req, res) => {
+const router = Router();
+
+router.use(getLoggerMiddleware("routes/dev"));
+
+router.post("/ping", async (req, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
     await pingAll();
@@ -18,11 +21,11 @@ app.post("/ping", async (req, res) => {
       `Internal server error at ${req.method} ${req.originalUrl}`,
       error
     );
-    res.status(500).send({ error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
   }
 });
 
-app.post("/remind", async (req, res) => {
+router.post("/remind", async (req, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
     const { start, end } = getMinuteInterval();
@@ -37,21 +40,21 @@ app.post("/remind", async (req, res) => {
       `Internal server error at ${req.method} ${req.originalUrl}`,
       error
     );
-    res.status(500).send({ error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
   }
 });
 
-app.post("/remind-bree", async (req, res) => {
+router.post("/remind-bree", async (req, res) => {
   bree.run("remind");
   res.status(200).send({ message: "Reminders sent" });
 });
 
-app.post("/remind-all-bree", async (req, res) => {
+router.post("/remind-all-bree", async (req, res) => {
   bree.run("remind-all");
   res.status(200).send({ message: "Reminders sent" });
 });
 
-app.post("/remind-all", async (req, res) => {
+router.post("/remind-all", async (req, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
     const events = await DB.Event.find();
@@ -62,8 +65,8 @@ app.post("/remind-all", async (req, res) => {
       `Internal server error at ${req.method} ${req.originalUrl}`,
       error
     );
-    res.status(500).send({ error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
   }
 });
 
-export default app;
+export default router;

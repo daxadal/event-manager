@@ -14,9 +14,6 @@ import { getMinuteInterval } from "@/services/utils";
 const TOKEN_EXPIRATION = "8h";
 const BREE_EXPIRATION = "30s";
 
-export const hash = (pass) =>
-  crypto.createHmac("sha256", passConfig.SECRET).update(pass).digest("hex");
-
 export const decodeToken: RequestHandler = async (req: any, res, next) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
@@ -38,7 +35,7 @@ export const decodeToken: RequestHandler = async (req: any, res, next) => {
           `Internal server error at ${req.method} ${req.originalUrl}`,
           error
         );
-        res.status(403).send({ error: "Invalid session token" });
+        res.status(403).send({ message: "Invalid session token" });
         return;
       }
 
@@ -49,12 +46,12 @@ export const decodeToken: RequestHandler = async (req: any, res, next) => {
           `Internal server error at ${req.method} ${req.originalUrl}`,
           error
         );
-        res.status(500).send({ error: "Internal server error" });
+        res.status(500).send({ message: "Internal server error" });
         return;
       }
 
       if (!req.user || req.user.sessionToken !== req.token)
-        res.status(403).send({ error: "Session token expired" });
+        res.status(403).send({ message: "Session token expired" });
       else next();
     }
   } catch (error) {
@@ -62,12 +59,12 @@ export const decodeToken: RequestHandler = async (req: any, res, next) => {
       `Internal server error at ${req.method} ${req.originalUrl}`,
       error
     );
-    res.status(500).send({ error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
   }
 };
 
 export const verifyToken: RequestHandler = async (req: any, res, next) => {
-  if (!req.user) res.status(401).send({ error: "Unauthorized" });
+  if (!req.user) res.status(401).send({ message: "Unauthorized" });
   else next();
 };
 
@@ -78,7 +75,7 @@ export const checkBreeToken: RequestHandler = async (req: any, res, next) => {
     const match = /^[Bb]earer (.+)$/.exec(bearerHeader);
 
     if (!match) {
-      res.status(404).send({ error: "Endpoint not found" });
+      res.status(404).send({ message: "Endpoint not found" });
     } else {
       // eslint-disable-next-line prefer-destructuring
       req.token = match[1];
@@ -90,12 +87,12 @@ export const checkBreeToken: RequestHandler = async (req: any, res, next) => {
           `Internal server error at ${req.method} ${req.originalUrl}`,
           error
         );
-        res.status(403).send({ error: "Invalid session token" });
+        res.status(403).send({ message: "Invalid session token" });
         return;
       }
 
       if (!req.dates || !req.dates.start || !req.dates.end)
-        res.status(403).send({ error: "Invalid session token" });
+        res.status(403).send({ message: "Invalid session token" });
       else next();
     }
   } catch (error) {
@@ -103,7 +100,7 @@ export const checkBreeToken: RequestHandler = async (req: any, res, next) => {
       `Internal server error at ${req.method} ${req.originalUrl}`,
       error
     );
-    res.status(500).send({ error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
   }
 };
 

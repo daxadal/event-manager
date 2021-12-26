@@ -1,9 +1,16 @@
-import { json, Router, urlencoded } from "express";
+import { json, RequestHandler, Router, urlencoded } from "express";
 import rateLimit from "express-rate-limit";
 import Joi from "joi";
 import { Logger } from "winston";
 
-import { Event, format, Subscription } from "@/services/db";
+import {
+  Event,
+  EventDocument,
+  EventState,
+  format,
+  Subscription,
+  UserDocument,
+} from "@/services/db";
 import { verifyToken, decodeToken } from "@/services/auth";
 import {
   OBJECT_ID_REGEX,
@@ -13,6 +20,8 @@ import {
 
 export const EVENT_SIZE = "1kb";
 export const EVENT_RPM = 100;
+
+export const MAX_SUBSCRIPTIONS = 3;
 
 // EVENTS
 const router = Router();
@@ -27,20 +36,20 @@ router.use(
   })
 );
 
-function isVisible(event, user) {
+function isVisible(event: EventDocument, user: UserDocument) {
   switch (event.state) {
-    case "public":
+    case EventState.PUBLIC:
       return true;
-    case "private":
+    case EventState.PRIVATE:
       return Boolean(user);
-    case "draft":
+    case EventState.DRAFT:
       return Boolean(user) && user.id === String(event.creatorId);
     default:
       throw new Error("Event has an unexpected state");
   }
 }
 
-async function loadEvent(req, res, next) {
+const loadEvent: RequestHandler = async (req: any, res, next) => {
   const logger: Logger | Console = (req as any).logger || console;
   const { eventId } = req.params;
   try {
@@ -55,7 +64,7 @@ async function loadEvent(req, res, next) {
     );
     res.status(500).send({ message: "Internal server error" });
   }
-}
+};
 
 router
   .route("/")
@@ -75,7 +84,7 @@ router
           .or("name", "lat", "lon")
           .and("lat", "lon")
           .required(),
-        state: Joi.valid("draft", "public", "private").default("draft"),
+        state: Joi.valid(...Object.values(EventState)).default(EventState.DRAFT),
       })
     ),
     async (req: any, res) => {
@@ -83,9 +92,9 @@ router
       try {
         const event = req.body;
 
-        if (event.state === "public") {
+        if (event.state === EventState.PUBLIC) {
           const events = await Event.find({
-            state: "public",
+            state: EventState.PUBLIC,
             creatorId: req.user.id,
           });
 
@@ -118,10 +127,10 @@ router
       let query;
       if (req.user)
         query = Event.find().or([
-          { state: { $in: ["public", "private"] } },
+          { state: { $in: [EventState.PUBLIC, EventState.PRIVATE] } },
           { creatorId: req.user.id },
         ]);
-      else query = Event.find({ state: "public" });
+      else query = Event.find({ state: EventState.PUBLIC });
 
       const events = await query.exec();
 
@@ -172,7 +181,7 @@ router
         })
           .or("name", "lat", "lon")
           .and("lat", "lon"),
-        state: Joi.valid("draft", "public", "private"),
+          state: Joi.valid(...Object.values(EventState)),
       })
     ),
     loadEvent,
@@ -188,9 +197,9 @@ router
           return;
         }
 
-        if (req.event.state !== "public" && newEvent.state === "public") {
+        if (req.event.state !== EventState.PUBLIC && newEvent.state === EventState.PUBLIC) {
           const events = await Event.find({
-            state: "public",
+            state: EventState.PUBLIC,
             creatorId: req.user.id,
           });
 
@@ -286,7 +295,7 @@ router.route("/:eventId(\\w+)/subscribe").post(
           message: "You already have subscribed to this event",
           subscription: format(oldSubscription),
         });
-      } else if (subscriptions.length >= 3) {
+      } else if (subscriptions.length >= MAX_SUBSCRIPTIONS) {
         res.status(400).send({
           message: "Subscribed events limit exceeded",
         });

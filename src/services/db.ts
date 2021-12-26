@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 
 import { db as dbConfig } from "@/config";
 import { getLogger } from "@/services/winston";
@@ -41,14 +41,22 @@ export function closeConnection(): Promise<void> {
   return mongoose.connection.close();
 }
 
+export enum EventState {
+  DRAFT = "draft",
+  PRIVATE = "private",
+  PUBLIC = "public",
+}
+
 export interface EventType {
   headline: string;
   description?: string;
   startDate: Date;
   location?: { name?: String; lat?: number; lon?: number };
-  state: string;
+  state: EventState;
   creatorId: mongoose.Types.ObjectId;
 }
+
+export type EventDocument = EventType & Document;
 
 const eventSchema = new mongoose.Schema<EventType>({
   headline: String,
@@ -71,6 +79,8 @@ export interface UserType {
   socketId: string;
 }
 
+export type UserDocument = UserType & Document;
+
 const userSchema = new mongoose.Schema<UserType>({
   name: String,
   email: String,
@@ -87,6 +97,8 @@ export interface SubscriptionType {
   subscriptionDate: Date;
   comment?: string;
 }
+
+export type SubscriptionDocument = SubscriptionType & Document;
 
 const subscriptionSchema = new mongoose.Schema<SubscriptionType>({
   eventId: mongoose.Types.ObjectId,

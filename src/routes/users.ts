@@ -1,14 +1,17 @@
+import { hash, compare } from "bcrypt";
 import { json, Router } from "express";
 import rateLimit from "express-rate-limit";
 import Joi from "joi";
 import { Logger } from "winston";
 
 import { User } from "@/services/db";
-import { createToken, decodeToken, hash, verifyToken } from "@/services/auth";
+import { createToken, decodeToken, verifyToken } from "@/services/auth";
 import { validateBody } from "@/services/validations";
 
 export const USER_SIZE = "512b";
 export const USER_RPM = 30;
+
+export const HASH_ROUNDS = 10;
 
 // Register / LOGIN
 const router = Router();
@@ -48,7 +51,7 @@ router.post(
       const user = await new User({
         name: newUser.name,
         email: newUser.email,
-        hashedPassword: hash(newUser.password),
+        hashedPassword: await hash(newUser.password, HASH_ROUNDS),
       }).save();
 
       const token = createToken(user);
@@ -82,10 +85,12 @@ async (req, res) => {
 
     const user = await User.findOne({
       email: credentials.email,
-      hashedPassword: hash(credentials.password),
     });
 
-    if (!user) {
+    if (
+      !user ||
+      !(await compare(credentials.password, user.hashedPassword))
+    ) {
       res.status(400).send({ message: "Invalid credentials" });
       return;
     }

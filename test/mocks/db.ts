@@ -1,7 +1,8 @@
+import { hash } from "bcrypt";
 import mongoose, { Document } from "mongoose";
 
-import { hash } from "@/services/auth";
 import { Event, EventType, User, UserType } from "@/services/db";
+import { HASH_ROUNDS } from "@/routes/users";
 
 export async function clearDatabase(): Promise<void> {
   const collections = mongoose.connection.collections;
@@ -26,7 +27,7 @@ const staticfy = <T extends Record<string, unknown>>(
     return result;
   }, {});
 
-export const createMockUser = (
+export const createMockUser = async (
   fieldsToOverride: Dynamic<Partial<UserType>> = {},
   i = 0
 ): Promise<UserType & Document> => {
@@ -34,7 +35,7 @@ export const createMockUser = (
   return new User({
     name: `John Doe ${i}`,
     email: `${i}@doe.com`,
-    hashedPassword: hash("password"),
+    hashedPassword: await hash("password", HASH_ROUNDS),
 
     ...staticFields,
   }).save();

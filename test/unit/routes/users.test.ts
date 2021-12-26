@@ -1,11 +1,12 @@
+import { hash } from "bcrypt";
 import request from "supertest";
 import crypto from "crypto";
 import { mocked } from "ts-jest/utils";
 
 import app from "@/app";
 import { closeConnection, createConnection, User } from "@/services/db";
-import { decodeToken, hash } from "@/services/auth";
-import { USER_RPM, USER_SIZE } from "@/routes/users";
+import { decodeToken } from "@/services/auth";
+import { HASH_ROUNDS, USER_RPM, USER_SIZE } from "@/routes/users";
 
 import { clearDatabase } from "test/mocks/db";
 
@@ -74,7 +75,7 @@ describe("The /users API", () => {
       await new User({
         name: "John Doe",
         email: "john@doe.com",
-        hashedPassword: hash("password"),
+        hashedPassword: await hash("password", HASH_ROUNDS),
       }).save();
 
       // when
@@ -110,7 +111,7 @@ describe("The /users API", () => {
       const user = await new User({
         name: "John Doe",
         email: "john@doe.com",
-        hashedPassword: hash("password"),
+        hashedPassword: await hash("password", HASH_ROUNDS),
       }).save();
 
       mockedDecodeToken.mockImplementation((req: any, res, next) => {
@@ -169,7 +170,7 @@ describe("The /users API", () => {
       const user = await new User({
         name: "John Doe",
         email: "john@doe.com",
-        hashedPassword: hash("password"),
+        hashedPassword: await hash("password", HASH_ROUNDS),
       }).save();
 
       mockedDecodeToken.mockImplementation((req: any, res, next) => {

@@ -1,0 +1,89 @@
+components:
+  schemas:
+    Event:
+      allOf:
+        - type: object
+          properties:
+            id:
+              $ref: "#/components/schemas/ObjectId"
+            creatorId:
+              $ref: "#/components/schemas/ObjectId"
+        - $ref: "#/components/schemas/EventData"
+
+    EventData:
+      type: object
+      properties:
+        headline:
+          type: string
+          minLength: 5
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        startDate:
+          type: string
+          format: date-time
+        location:
+          $ref: "#/components/schemas/Location"
+        state:
+          type: string
+          enum: [draft, private, public]
+
+    Subscription:
+      allOf:
+        - type: object
+          properties:
+            id:
+              $ref: "#/components/schemas/ObjectId"
+            eventId:
+              $ref: "#/components/schemas/ObjectId"
+            subscriberId:
+              $ref: "#/components/schemas/ObjectId"
+            subscriptionDate:
+              type: string
+              format: date-time
+        - $ref: "#/components/schemas/SubscriptionData"
+
+    SubscriptionData:
+      type: object
+      properties:
+        comment:
+          type: string
+          maxLength: 100
+
+    SignInData:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    SignUpData:
+      allOf:
+        - type: object
+          properties:
+            name:
+              type: string
+        - $ref: "#/components/schemas/SignInData"
+
+    ObjectId:
+      type: string
+      pattern: ^[0-9a-fA-F]{24}$
+
+    Location:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        lat:
+          type: number
+          minimum: -90
+          maximum: 90
+        lon:
+          type: number
+          minimum: -180
+          maximum: 180

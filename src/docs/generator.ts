@@ -35,12 +35,17 @@ export async function generate(): Promise<object> {
         contact: { email: "e.garciadececa@gmail.com" },
         version: "1.0.0",
       },
+      security: [{ bearerAuth: [] }],
       servers,
     },
     apis: ["./src/docs/*.yml", "./src/routes/**/*.js", "./src/routes/**/*.ts"],
   };
 
-  return generateDocsForVersion(options, "event-manager-api", "Event Manager API");
+  return generateDocsForVersion(
+    options,
+    "event-manager-api",
+    "Event Manager API"
+  );
 }
 
 generate();

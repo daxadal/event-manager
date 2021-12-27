@@ -8,6 +8,7 @@ import usersRouter from "@/routes/users";
 import docsRouter from "@/routes/docs";
 import devRouter from "@/routes/dev";
 import jobsRouter from "@/routes/jobs";
+import { getLogger } from "@/services/winston";
 
 const app = express();
 
@@ -18,7 +19,7 @@ app.use("/users", usersRouter);
 app.use("/jobs", jobsRouter);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  const logger: Logger | Console = (req as any).logger || console;
+  const logger: Logger = (req as any).logger || getLogger("routes/_default_");
   logger.error(
     `Internal server error at ${req.method} ${req.originalUrl} captured at final handler`,
     err
@@ -31,7 +32,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use((req, res) => {
-  const logger: Logger | Console = (req as any).logger || console;
+  const logger: Logger = (req as any).logger || getLogger("routes/_default_");
   logger.error(
     `Error at ${req.method} ${req.originalUrl} - Endpoint not found`
   );

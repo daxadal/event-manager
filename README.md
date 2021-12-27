@@ -4,6 +4,27 @@
 
 Whisbi Event Manager allows you to manage your upcoming events, either create your own or subscribe to events from other users. No login is required to take a look at available events, but the events you will see may be more limited. Also, login is required to create, update or delete an event, or to subscribe to any event from other users. A notification will be sent to you via socket 24 hours before the event starts, to remind you of it.
 
+# Stack
+
+This project uses these libraries for this purposes:
+
+- `express`: API configuration
+- `joi`: Parameter validation
+- `mongoose`: Implementing the database
+- `winston`: Logging
+- `module-alias`: Importing routes as absolutes instead of relatives
+- `socket.io`: Implementing server-side sockets
+- `swagger-jsdoc`: Generating OpenAPI documentation
+- `swagger-ui-express`: Serving OpenAPI documentation
+
+This project also uses the following dev dependencies:
+
+- `jest`/`ts-jest`: Testing
+- `jest-unit`: Generating testing reports (compatible with Gitlab CI/CD)
+- `@shelf/jest-mongodb`: Replacing the DB for testing
+- `socket.io`: Implementing client-side sockets
+- `supertest`: Making request to the express app
+
 ## Implementation
 
 This API is made using Node.JS, Express and Socket.io. The database is implemented using MongoDB and Mongoose. Authentication is implemented using Basic Auth to log you in and JWT through Bearer Auth to keep you logged in. Input correctness is implemented using Joi.
@@ -18,9 +39,16 @@ The server can be started using `npm start` script. The server also can be execu
 
 ## Cleanup and test
 
-The database can be purged using the `npm run reset`. Tests on the API (powered by `mocha`) can be performed by executing `npm test`. (This script assumes the server is already up and running).
+The database can be purged using the `npm run reset`.
+Tests on the API (powered by `jest`) can be performed by executing `npm test`.
 
-A Postman collection is also provided to test the API manually.
+## Documentation
+
+OpenAPI documentation is generated every time `npm start` is executed.
+It can be found at `<rootDir>/docs/event-manager-api.openapi.json`.
+This documentation can also be manually generated using `npm run docs`.
+
+If the server is executed, this documentation is also served as HTML at `localhost:3000/docs`, and can be used to interact with the running server.
 
 ### Important notices
 

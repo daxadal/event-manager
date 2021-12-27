@@ -52,46 +52,9 @@ If the server is executed, this documentation is also served as HTML at `localho
 
 ### Important notices
 
-#### Purges
-`npm test` script will purge all data from the database before it\'s run. If that behavior is not desired, tests can be run using `mocha` command, if installed globally. If a global `mocha` command is not available, you can also use the `npm run mocha` script. Nevertheless, as `mocha` assumes the database is empty when the tests are performed, some tests may fail if the database is not reset.
-
 #### Dev API
-For some specific tests, Dev API is expected to be mounted (more info below). If Dev API is not mounted, those specific tests will be marked as pending.
-
-#### Denial of service
-As part of the tests, `mocha` will try to perform a DoS attack. After `mocha` is run, the server surely will decline any more requests from the same host for a minute. It is recommended to restart the server after that (or wait a minute) before making more requests.
-
-## API summary
-
-Unless otherwise specified:
-* All `POST` and `PUT` methods expect a JSON body.
-* All `GET` and `DELETE` methods **do not** expect any body.
-* All endpoints **require** the user to provide a session token in the Bearer Auth.
-
-### Users
-* `POST /users/sign-up`: Creates a new user and returns a token for authentication in future requests. No Auth required.
-* `POST /users/sign-in`: Logs in an existing user and returns a token for authentication in future requests. Credentials are provided as Basic Auth (email:password) instead of JSON body. If multiple logins are performed, only the latest token will be valid.
-* `POST /users/sign-out`: Logs out an existing user, making the token no longer valid. No body required, just the session token.
-
-### Events
-* `GET /events`: Get all events visible with current credentials. A session token is allowed but not required.
-* `POST /events`: Creates a new event. Only one public event per user is allowed.
-* `GET /events/{id}`: Get an event (if visible). A session token is allowed but not required.
-* `PUT /events/{id}`: Updates an event. The event must have been created by the same user. Partial updates are allowed.
-* `DELETE /events/{id}`: Deletes an event. The event must have been created by the same user.
-* `POST /events/{id}/subscribe`: Subscribe to an event from **another** user. Only 3 subscriptions per user are allowed. A comment can be attached to the subscription.
-
-### Jobs
-This API is called by the own server, since background processes does not have access to the connected sockets. It uses a Bearer Auth, but completely different from the above stated and with a very short expiration.
-* `POST /jobs/remind`: Finds the events that will ocurr in exactly 24 hours, or another time lapse if configured in the environment variables, and sends a reminder to the users through sockets.
-
-### Dev
-This API is only mounted if `DEVELOPMENT_API=true` in the environment variables, and provides some extra methods to test the sockets. These methods are not expected to be deployed to production (and **shouldn't be**), so no Auth or body is required
-* `POST /dev/ping`: Pings all connected sockets.
-* `POST /dev/remind`: Finds all the events that will occur in exactly 24 hours, or another time lapse if configured in the environment variables, and sends a reminder to subscribed users through sockets.
-* `POST /dev/remind-bree`: Same as above but using background jobs.
-* `POST /dev/remind-all`: Gets all events in the database and sends a reminder to subscribed users through sockets.
-* `POST /dev/remind-all-bree`: Same as above but using background jobs.
+For some specific tests, Dev API is expected to be mounted.
+If Dev API is not mounted, those specific tests will be marked as pending.
 
 ## Socket events summary
 

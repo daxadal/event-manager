@@ -53,6 +53,9 @@ components:
 
     SignInData:
       type: object
+      required:
+        - email
+        - password
       properties:
         email:
           type: string
@@ -64,6 +67,8 @@ components:
     SignUpData:
       allOf:
         - type: object
+          required:
+            - name
           properties:
             name:
               type: string

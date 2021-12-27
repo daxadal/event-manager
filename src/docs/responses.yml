@@ -1,5 +1,15 @@
 components:
   responses:
+    Generic200:
+      description: Successful request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Confirmation message
     400:
       description: Bad request
       content:
@@ -49,14 +59,14 @@ components:
             properties:
               message:
                 type: string
-                description: More info about the error
+                description: Generic error message
     429:
       description: Too many requests
       content:
         text/html:
           schema:
             type: string
-            description: More info about the error
+            description: Generic error message
     500:
       description: Internal server error
       content:

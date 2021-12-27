@@ -28,6 +28,42 @@ router.use(
   })
 );
 
+/**
+ * @openapi
+ * /users/sign-up:
+ *   post:
+ *     tags:
+ *       - users
+ *     description: Registers an user
+ *     requestBody:
+ *       description: Necessary data to register
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SignUpData'
+ *     responses:
+ *       200:
+ *         description: A confirmation message and a token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Confirmation message
+ *                 token:
+ *                   type: string
+ *       400:
+ *         $ref: '#/components/responses/400'
+ *       413:
+ *         $ref: '#/components/responses/413'
+ *       429:
+ *         $ref: '#/components/responses/429'
+ *       500:
+ *         $ref: '#/components/responses/500'
+ */
 router.post(
   "/sign-up",
   validateBody(
@@ -71,6 +107,42 @@ router.post(
   }
 );
 
+/**
+ * @openapi
+ * /users/sign-in:
+ *   post:
+ *     tags:
+ *       - users
+ *     description: Logs in an user
+ *     requestBody:
+ *       description: Necessary data to login
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SignInData'
+ *     responses:
+ *       200:
+ *         description: A confirmation message and a token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Confirmation message
+ *                 token:
+ *                   type: string
+ *       400:
+ *         $ref: '#/components/responses/400'
+ *       413:
+ *         $ref: '#/components/responses/413'
+ *       429:
+ *         $ref: '#/components/responses/429'
+ *       500:
+ *         $ref: '#/components/responses/500'
+ */
 router.post(
   "/sign-in",
   validateBody(
@@ -107,6 +179,29 @@ router.post(
   }
 );
 
+/**
+ * @openapi
+ * /users/sign-out:
+ *   post:
+ *     tags:
+ *       - users
+ *     description: Logs out an user
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/Generic200'
+ *       400:
+ *         $ref: '#/components/responses/400'
+ *       401:
+ *         $ref: '#/components/responses/401'
+ *       403:
+ *         $ref: '#/components/responses/403'
+ *       413:
+ *         $ref: '#/components/responses/413'
+ *       429:
+ *         $ref: '#/components/responses/429'
+ *       500:
+ *         $ref: '#/components/responses/500'
+ */
 router.post("/sign-out", decodeToken, verifyToken, async (req: any, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {

@@ -22,7 +22,7 @@ This project also uses the following dev dependencies:
 - `jest`/`ts-jest`: Testing
 - `jest-unit`: Generating testing reports (compatible with Gitlab CI/CD)
 - `@shelf/jest-mongodb`: Replacing the DB for testing
-- `socket.io`: Implementing client-side sockets
+- `socket.io-client`: Implementing client-side sockets
 - `supertest`: Making request to the express app
 
 ## Implementation

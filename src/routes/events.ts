@@ -237,7 +237,7 @@ router
    * /events/{eventId}:
    *   get:
    *     tags:
-   *       - ingredients
+   *       - events
    *     description: Get an event by id.
    *     parameters:
    *       - $ref: '#/components/parameters/eventId'
@@ -390,7 +390,7 @@ router
    * /events/{eventId}:
    *   delete:
    *     tags:
-   *       - ingredients
+   *       - events
    *     description: Deleted an event by id.
    *     parameters:
    *       - $ref: '#/components/parameters/eventId'

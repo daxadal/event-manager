@@ -71,6 +71,47 @@ const loadEvent: RequestHandler = async (req: any, res, next) => {
 
 router
   .route("/")
+
+  /**
+   * @openapi
+   * /events:
+   *   post:
+   *     tags:
+   *       - events
+   *     description: Creates an event
+   *     requestBody:
+   *       description: Event to create
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/EventData'
+   *     responses:
+   *       200:
+   *         description: The created event.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *                   description: Confirmation message
+   *                 event:
+   *                   $ref: '#/components/schemas/Event'
+   *       400:
+   *         $ref: '#/components/responses/400'
+   *       401:
+   *         $ref: '#/components/responses/401'
+   *       403:
+   *         $ref: '#/components/responses/403'
+   *       413:
+   *         $ref: '#/components/responses/413'
+   *       429:
+   *         $ref: '#/components/responses/429'
+   *       500:
+   *         $ref: '#/components/responses/500'
+   */
   .post(
     decodeToken,
     verifyToken,
@@ -126,6 +167,37 @@ router
       }
     }
   )
+
+  /**
+   * @openapi
+   * /events:
+   *   get:
+   *     tags:
+   *       - events
+   *     description: Get all visible events.
+   *     responses:
+   *       200:
+   *         description: A list of all visible events (depending on credentials, if present).
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 events:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/components/schemas/Event'
+   *       400:
+   *         $ref: '#/components/responses/400'
+   *       403:
+   *         $ref: '#/components/responses/403'
+   *       413:
+   *         $ref: '#/components/responses/413'
+   *       429:
+   *         $ref: '#/components/responses/429'
+   *       500:
+   *         $ref: '#/components/responses/500'
+   */
   .get(decodeToken, async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
@@ -159,6 +231,37 @@ router
       })
     )
   )
+
+  /**
+   * @openapi
+   * /events/{eventId}:
+   *   get:
+   *     tags:
+   *       - events
+   *     description: Get an event by id.
+   *     parameters:
+   *       - $ref: '#/components/parameters/eventId'
+   *     responses:
+   *       200:
+   *         description: The requested event.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 event:
+   *                   $ref: '#/components/schemas/Event'
+   *       400:
+   *         $ref: '#/components/responses/400'
+   *       403:
+   *         $ref: '#/components/responses/403'
+   *       413:
+   *         $ref: '#/components/responses/413'
+   *       429:
+   *         $ref: '#/components/responses/429'
+   *       500:
+   *         $ref: '#/components/responses/500'
+   */
   .get(decodeToken, loadEvent, async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
@@ -171,6 +274,49 @@ router
       res.status(500).send({ message: "Internal server error" });
     }
   })
+
+  /**
+   * @openapi
+   * /events/{eventId}:
+   *   put:
+   *     tags:
+   *       - events
+   *     description: Updates an event
+   *     parameters:
+   *       - $ref: '#/components/parameters/eventId'
+   *     requestBody:
+   *       description: Event to create
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/EventData'
+   *     responses:
+   *       200:
+   *         description: The updated event.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *                   description: Confirmation message
+   *                 event:
+   *                   $ref: '#/components/schemas/Event'
+   *       400:
+   *         $ref: '#/components/responses/400'
+   *       401:
+   *         $ref: '#/components/responses/401'
+   *       403:
+   *         $ref: '#/components/responses/403'
+   *       413:
+   *         $ref: '#/components/responses/413'
+   *       429:
+   *         $ref: '#/components/responses/429'
+   *       500:
+   *         $ref: '#/components/responses/500'
+   */
   .put(
     decodeToken,
     verifyToken,
@@ -238,6 +384,32 @@ router
       }
     }
   )
+
+  /**
+   * @openapi
+   * /events/{eventId}:
+   *   delete:
+   *     tags:
+   *       - events
+   *     description: Deleted an event by id.
+   *     parameters:
+   *       - $ref: '#/components/parameters/eventId'
+   *     responses:
+   *       200:
+   *         $ref: '#/components/responses/Generic200'
+   *       400:
+   *         $ref: '#/components/responses/400'
+   *       401:
+   *         $ref: '#/components/responses/401'
+   *       403:
+   *         $ref: '#/components/responses/403'
+   *       413:
+   *         $ref: '#/components/responses/413'
+   *       429:
+   *         $ref: '#/components/responses/429'
+   *       500:
+   *         $ref: '#/components/responses/500'
+   */
   .delete(decodeToken, verifyToken, loadEvent, async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
@@ -264,6 +436,57 @@ router
   });
 
 // SUBSCRIPTIONS
+
+/**
+ * @openapi
+ * /events/{eventId}/subscribe:
+ *   post:
+ *     tags:
+ *       - subscriptions
+ *     description: Subscribes the authenticated user to an event
+ *     requestBody:
+ *       description: Comment to attach to the subscription
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SubscriptionData'
+ *     responses:
+ *       200:
+ *         description: The created subscription.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Confirmation message
+ *                 subscription:
+ *                   $ref: '#/components/schemas/Subscription'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: More info about the error
+ *                 subscription:
+ *                   description: Preexisting subscription (if present)
+ *                   $ref: '#/components/schemas/Subscription'
+ *       401:
+ *         $ref: '#/components/responses/401'
+ *       403:
+ *         $ref: '#/components/responses/403'
+ *       413:
+ *         $ref: '#/components/responses/413'
+ *       429:
+ *         $ref: '#/components/responses/429'
+ *       500:
+ *         $ref: '#/components/responses/500'
+ */
 router.route("/:eventId(\\w+)/subscribe").post(
   decodeToken,
   verifyToken,

@@ -1,0 +1,7 @@
+tags:
+  - name: users
+    description: Methods to manage user sign up, log in and log out
+  - name: events
+    description: Methods to manage events
+  - name: subscriptions
+    description: Methods to manage subscriptions

@@ -1,0 +1,14 @@
+components:
+  schemas:
+    ObjectId:
+      type: string
+      pattern: ^[0-9a-fA-F]{24}$
+
+  parameters:
+    eventId:
+      name: eventId
+      in: path
+      description: ID of the Event to get
+      required: true
+      schema:
+        $ref: "#/components/schemas/ObjectId"

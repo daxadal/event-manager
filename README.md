@@ -45,7 +45,7 @@ Tests on the API (powered by `jest`) can be performed by executing `npm test`.
 ## Documentation
 
 OpenAPI documentation is generated every time `npm start` is executed.
-It can be found at `<rootDir>/docs/event-manager-api.openapi.json`.
+It can be found at `<rootDir>/src/docs/event-manager-api.openapi.json`.
 This documentation can also be manually generated using `npm run docs`.
 
 If the server is executed, this documentation is also served as HTML at `localhost:3000/docs`, and can be used to interact with the running server.

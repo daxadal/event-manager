@@ -1,17 +1,13 @@
-/* global describe xdescribe it before beforeEach after afterEach */
+import { Socket } from "socket.io-client";
 
-import assert from "assert";
-import request from "supertest";
-import { mocked } from "ts-jest/utils";
-
-import * as config from "@/config";
 import { MINUTES_AHEAD } from "@/services/utils";
 import { EventDocument, EventState, UserDocument } from "@/services/db";
-import { createToken, decodeToken } from "@/services/auth";
+import { createToken } from "@/services/auth";
 import { closeConnection, createConnection } from "@/services/db/setup";
+import bree from "@/scheduler";
+import { pingAll, sendReminders } from "@/socket";
 
 const API = require("@/services/api")();
-import { generateTokens, generateEvents } from "test/utils";
 import { createSocketClient } from "test/mocks/socket-client";
 import {
   clearDatabase,
@@ -19,7 +15,6 @@ import {
   createMockUser,
   createMockUsers,
 } from "test/mocks/db";
-import { Socket } from "socket.io-client";
 
 jest.mock("@/services/auth", () => {
   const module =
@@ -32,18 +27,14 @@ jest.mock("@/services/auth", () => {
   };
 });
 
-const mockedDecodeToken = mocked(decodeToken, true);
-
 const sleep = (millis) => new Promise((resolve) => setTimeout(resolve, millis));
-
-const mdescribe = config.api.DEV ? describe : xdescribe;
 
 xdescribe("Sockets", () => {
   beforeAll(createConnection);
 
   afterAll(closeConnection);
 
-  mdescribe("Connection (DEV API required)", () => {
+  describe("Connection", () => {
     it("PING all", async () => {
       const sockets = Array(8).map(createSocketClient);
 
@@ -59,7 +50,7 @@ xdescribe("Sockets", () => {
             });
           })
       );
-      await API.Dev.ping();
+      await pingAll();
       await Promise.all(promises);
     });
   });
@@ -124,7 +115,7 @@ xdescribe("Sockets", () => {
     });
   });
 
-  mdescribe("Reminder (DEV API required)", () => {
+  describe("Reminder", () => {
     const AMOUNT_OF_USERS = 4;
     const AMOUNT_OF_EVENTS = 4;
     let events: EventDocument[];
@@ -175,8 +166,8 @@ xdescribe("Sockets", () => {
     });
 
     it("Remind (direct call)", async () => {
-      const response = await API.Dev.remind();
-      assert.strictEqual(response.status, 200);
+      await sendReminders(events);
+
       const promises = sockets.map(
         (socket) =>
           new Promise((resolve, reject) => {
@@ -188,8 +179,8 @@ xdescribe("Sockets", () => {
     });
 
     it("Remind (using bree)", async () => {
-      const response = await API.Dev.remindBree();
-      assert.strictEqual(response.status, 200);
+      bree.run("remind");
+
       const promises = sockets.map(
         (socket) =>
           new Promise((resolve, reject) => {

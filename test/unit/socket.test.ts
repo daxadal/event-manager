@@ -64,15 +64,13 @@ xdescribe("Sockets", () => {
   });
 
   describe("Sign in & sign out", () => {
-    let socket;
-    beforeAll(async () => {
-      await API.Users.signup({
-        name: "socket",
-        email: "socket@example.com",
-        password: "pass",
-      });
-    });
-    beforeEach(() => {
+    let socket: Socket;
+    let user: UserDocument;
+    beforeEach(async () => {
+      user = await createMockUser();
+      user.sessionToken = createToken(user);
+      await user.save();
+
       socket = createSocketClient();
     });
 
@@ -87,9 +85,7 @@ xdescribe("Sockets", () => {
       });
     });
     it("OK - Valid sign in", (done) => {
-      API.Users.signin("socket@example.com", "pass").then((response) =>
-        socket.emit("sign-in", response.data.token)
-      );
+      socket.emit("sign-in", user.sessionToken);
 
       socket.on("sign-in-ok", () => {
         done();
@@ -99,10 +95,8 @@ xdescribe("Sockets", () => {
       });
     });
     it("FAIL - Token not valid on sign out", (done) => {
-      API.Users.signin("socket@example.com", "pass")
-        .then((response) => socket.emit("sign-in", response.data.token))
-        .then(() => sleep(200))
-        .then(() => socket.emit("sign-out", "token.not.valid"));
+      socket.emit("sign-in", user.sessionToken);
+      sleep(200).then(() => socket.emit("sign-out", "token.not.valid"));
 
       socket.on("sign-out-ok", () => {
         done(new Error("Signed out successfully"));
@@ -112,10 +106,8 @@ xdescribe("Sockets", () => {
       });
     });
     it("OK - Valid sign out", (done) => {
-      API.Users.signin("socket@example.com", "pass").then((response) => {
-        socket.emit("sign-in", response.data.token);
-        sleep(200).then(() => socket.emit("sign-out", response.data.token));
-      });
+      socket.emit("sign-in", user.sessionToken);
+      sleep(200).then(() => socket.emit("sign-out", user.sessionToken));
 
       socket.on("sign-out-ok", () => {
         done();

@@ -1,12 +1,13 @@
 /* global describe xdescribe it before beforeEach after afterEach */
 
-const assert = require("assert");
+import assert from "assert";
 
 const API = require("@/services/api")();
-const { createSocketClient } = require("./mocks/socket-client");
-const config = require("@/config");
-const { MINUTES_AHEAD } = require("@/services/utils");
-const { generateTokens, generateEvents } = require("./utils");
+import { createSocketClient } from "../mocks/socket-client";
+import * as config from "@/config";
+import { MINUTES_AHEAD } from "@/services/utils";
+import { generateTokens, generateEvents } from "../utils";
+import { EventState } from "@/services/db";
 
 const sleep = (millis) => new Promise((resolve) => setTimeout(resolve, millis));
 
@@ -22,7 +23,7 @@ xdescribe("Sockets", () => {
           new Promise((resolve, reject) => {
             socket.on("PING", () => {
               socket.disconnect();
-              resolve();
+              resolve(undefined);
             });
             sleep(1000).then(() => {
               reject();
@@ -36,7 +37,7 @@ xdescribe("Sockets", () => {
 
   describe("Sign in & sign out", () => {
     let socket;
-    before(async () => {
+    beforeAll(async () => {
       await API.Users.signup({
         name: "socket",
         email: "socket@example.com",
@@ -44,7 +45,7 @@ xdescribe("Sockets", () => {
       });
     });
     beforeEach(() => {
-      socket = Socket.new();
+      socket = createSocketClient();
     });
 
     it("FAIL - Token not valid on sign in", (done) => {
@@ -106,8 +107,8 @@ xdescribe("Sockets", () => {
     let tokens;
     let events;
 
-    before(async () => {
-      sockets = { A: Socket.new(), B: Socket.new(), C: Socket.new() };
+    beforeAll(async () => {
+      sockets = { A: createSocketClient(), B: createSocketClient(), C: createSocketClient() };
 
       tokens = await generateTokens("socket", ["O", "A", "B", "C"]);
 
@@ -166,7 +167,7 @@ xdescribe("Sockets", () => {
       await Promise.all(promises);
     });
 
-    after(() => {
+    afterAll(() => {
       sockets.A.disconnect();
       sockets.B.disconnect();
       sockets.C.disconnect();

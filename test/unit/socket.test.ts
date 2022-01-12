@@ -41,10 +41,6 @@ const mdescribe = config.api.DEV ? describe : xdescribe;
 xdescribe("Sockets", () => {
   beforeAll(createConnection);
 
-  beforeEach(jest.clearAllMocks);
-
-  afterEach(clearDatabase);
-
   afterAll(closeConnection);
 
   mdescribe("Connection (DEV API required)", () => {
@@ -71,12 +67,17 @@ xdescribe("Sockets", () => {
   describe("Sign in & sign out", () => {
     let socket: Socket;
     let user: UserDocument;
-    beforeEach(async () => {
+    beforeAll(async () => {
       user = await createMockUser();
       user.sessionToken = createToken(user);
       await user.save();
 
       socket = createSocketClient();
+    });
+
+    afterAll(async () => {
+      await clearDatabase();
+      socket.disconnect();
     });
 
     it("FAIL - Token not valid on sign in", (done) => {
@@ -121,10 +122,6 @@ xdescribe("Sockets", () => {
         done(new Error("Sign out error"));
       });
     });
-
-    afterEach(() => {
-      socket.disconnect();
-    });
   });
 
   mdescribe("Reminder (DEV API required)", () => {
@@ -135,7 +132,7 @@ xdescribe("Sockets", () => {
     let sockets: Socket[];
     let users: UserDocument[];
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       users = await createMockUsers(AMOUNT_OF_USERS);
       users.forEach((user) => {
         user.sessionToken = createToken(user);
@@ -172,6 +169,11 @@ xdescribe("Sockets", () => {
       await API.Events.subscribe(events[2].id);
     });
 
+    afterAll(async () => {
+      await clearDatabase();
+      sockets.map((socket) => socket.disconnect());
+    });
+
     it("Remind (direct call)", async () => {
       const response = await API.Dev.remind();
       assert.strictEqual(response.status, 200);
@@ -197,10 +199,6 @@ xdescribe("Sockets", () => {
       );
 
       await Promise.all(promises);
-    });
-
-    afterEach(() => {
-      sockets.map((socket) => socket.disconnect());
     });
   });
 });

@@ -6,14 +6,19 @@ import { mocked } from "ts-jest/utils";
 
 import * as config from "@/config";
 import { MINUTES_AHEAD } from "@/services/utils";
-import { EventState, UserDocument } from "@/services/db";
+import { EventDocument, EventState, UserDocument } from "@/services/db";
 import { createToken, decodeToken } from "@/services/auth";
 import { closeConnection, createConnection } from "@/services/db/setup";
 
 const API = require("@/services/api")();
 import { generateTokens, generateEvents } from "test/utils";
 import { createSocketClient } from "test/mocks/socket-client";
-import { clearDatabase, createMockUser } from "test/mocks/db";
+import {
+  clearDatabase,
+  createMockEvents,
+  createMockUser,
+  createMockUsers,
+} from "test/mocks/db";
 import { Socket } from "socket.io-client";
 
 jest.mock("@/services/auth", () => {
@@ -123,47 +128,54 @@ xdescribe("Sockets", () => {
   });
 
   mdescribe("Reminder (DEV API required)", () => {
-    let sockets;
-    let tokens;
-    let events;
+    const AMOUNT_OF_USERS = 4;
+    const AMOUNT_OF_EVENTS = 4;
+    let events: EventDocument[];
 
-    beforeAll(async () => {
-      sockets = { A: createSocketClient(), B: createSocketClient(), C: createSocketClient() };
+    let sockets: Socket[];
+    let users: UserDocument[];
 
-      tokens = await generateTokens("socket", ["O", "A", "B", "C"]);
+    beforeEach(async () => {
+      users = await createMockUsers(AMOUNT_OF_USERS);
+      users.forEach((user) => {
+        user.sessionToken = createToken(user);
+        return user.save();
+      });
 
       const date = new Date();
       date.setMinutes(date.getMinutes() + MINUTES_AHEAD);
 
-      events = await generateEvents({
-        length: 4,
+      events = await createMockEvents(AMOUNT_OF_EVENTS, {
         startDate: date,
         state: EventState.PRIVATE,
-        token: tokens.O,
+        creatorId: users[AMOUNT_OF_USERS - 1].id,
       });
 
-      sockets.A.emit("sign-in", tokens.A);
-      sockets.B.emit("sign-in", tokens.B);
-      sockets.C.emit("sign-in", tokens.C);
+      sockets = users.slice(0, AMOUNT_OF_USERS - 1).map((user) => {
+        const socket = createSocketClient();
+        socket.emit("sign-in", user.sessionToken);
+        return socket;
+      });
 
-      API.setToken(tokens.A);
+      API.setToken(users[0].sessionToken);
       await API.Events.subscribe(events[0].id);
       await API.Events.subscribe(events[1].id);
       await API.Events.subscribe(events[2].id);
       await API.Events.subscribe(events[3].id);
 
-      API.setToken(tokens.B);
+      API.setToken(users[1].sessionToken);
       await API.Events.subscribe(events[0].id);
       await API.Events.subscribe(events[1].id);
 
-      API.setToken(tokens.C);
+      API.setToken(users[2].sessionToken);
       await API.Events.subscribe(events[0].id);
       await API.Events.subscribe(events[2].id);
     });
+
     it("Remind (direct call)", async () => {
       const response = await API.Dev.remind();
       assert.strictEqual(response.status, 200);
-      const promises = [sockets.A, sockets.B, sockets.C].map(
+      const promises = sockets.map(
         (socket) =>
           new Promise((resolve, reject) => {
             socket.on("reminder", resolve);
@@ -176,7 +188,7 @@ xdescribe("Sockets", () => {
     it("Remind (using bree)", async () => {
       const response = await API.Dev.remindBree();
       assert.strictEqual(response.status, 200);
-      const promises = [sockets.A, sockets.B, sockets.C].map(
+      const promises = sockets.map(
         (socket) =>
           new Promise((resolve, reject) => {
             socket.on("reminder", resolve);
@@ -187,10 +199,8 @@ xdescribe("Sockets", () => {
       await Promise.all(promises);
     });
 
-    afterAll(() => {
-      sockets.A.disconnect();
-      sockets.B.disconnect();
-      sockets.C.disconnect();
+    afterEach(() => {
+      sockets.map((socket) => socket.disconnect());
     });
   });
 });

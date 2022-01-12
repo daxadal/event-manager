@@ -1,19 +1,47 @@
 /* global describe xdescribe it before beforeEach after afterEach */
 
 import assert from "assert";
+import request from "supertest";
+import { mocked } from "ts-jest/utils";
 
-const API = require("@/services/api")();
-import { createSocketClient } from "../mocks/socket-client";
 import * as config from "@/config";
 import { MINUTES_AHEAD } from "@/services/utils";
-import { generateTokens, generateEvents } from "../utils";
-import { EventState } from "@/services/db";
+import { EventState, UserDocument } from "@/services/db";
+import { createToken, decodeToken } from "@/services/auth";
+import { closeConnection, createConnection } from "@/services/db/setup";
+
+const API = require("@/services/api")();
+import { generateTokens, generateEvents } from "test/utils";
+import { createSocketClient } from "test/mocks/socket-client";
+import { clearDatabase, createMockUser } from "test/mocks/db";
+import { Socket } from "socket.io-client";
+
+jest.mock("@/services/auth", () => {
+  const module =
+    jest.requireActual<typeof import("@/services/auth")>("@/services/auth");
+
+  return {
+    ...module,
+    decodeToken: jest.fn((req, res, next) => next()),
+    verifyToken: jest.fn((req, res, next) => next()),
+  };
+});
+
+const mockedDecodeToken = mocked(decodeToken, true);
 
 const sleep = (millis) => new Promise((resolve) => setTimeout(resolve, millis));
 
 const mdescribe = config.api.DEV ? describe : xdescribe;
 
 xdescribe("Sockets", () => {
+  beforeAll(createConnection);
+
+  beforeEach(jest.clearAllMocks);
+
+  afterEach(clearDatabase);
+
+  afterAll(closeConnection);
+
   mdescribe("Connection (DEV API required)", () => {
     it("PING all", async () => {
       const sockets = Array(8).map(createSocketClient);

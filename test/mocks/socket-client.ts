@@ -1,8 +1,8 @@
-const { io } = require("socket.io-client");
+import { io } from "socket.io-client";
 
-const config = require("@/config");
+import * as config from "@/config";
 
-module.exports.new = () => {
+export const createSocketClient = () => {
   const socket = io(`http://localhost:${config.socket.PORT}`);
 
   if (config.mocha.SOCKET_VERBOSE) {

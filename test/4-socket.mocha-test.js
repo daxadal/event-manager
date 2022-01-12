@@ -3,7 +3,7 @@
 const assert = require("assert");
 
 const API = require("@/services/api")();
-const Socket = require("./socket");
+const { createSocketClient } = require("./mocks/socket-client");
 const config = require("@/config");
 const { MINUTES_AHEAD } = require("@/services/utils");
 const { generateTokens, generateEvents } = require("./utils");
@@ -15,7 +15,7 @@ const mdescribe = config.api.DEV ? describe : xdescribe;
 xdescribe("Sockets", () => {
   mdescribe("Connection (DEV API required)", () => {
     it("PING all", async () => {
-      const sockets = Array(8).map(() => Socket.new());
+      const sockets = Array(8).map(createSocketClient);
 
       const promises = sockets.map(
         (socket) =>

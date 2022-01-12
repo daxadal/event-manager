@@ -1,13 +1,17 @@
 import { Socket } from "socket.io-client";
 
 import { MINUTES_AHEAD } from "@/services/utils";
-import { EventDocument, EventState, UserDocument } from "@/services/db";
+import {
+  EventDocument,
+  EventState,
+  Subscription,
+  UserDocument,
+} from "@/services/db";
 import { createToken } from "@/services/auth";
 import { closeConnection, createConnection } from "@/services/db/setup";
 import bree from "@/scheduler";
 import { pingAll, sendReminders } from "@/socket";
 
-const API = require("@/services/api")();
 import { createSocketClient } from "test/mocks/socket-client";
 import {
   clearDatabase,
@@ -117,7 +121,7 @@ xdescribe("Sockets", () => {
 
   describe("Reminder", () => {
     const AMOUNT_OF_USERS = 4;
-    const AMOUNT_OF_EVENTS = 4;
+    const AMOUNT_OF_EVENTS = AMOUNT_OF_USERS - 1;
     let events: EventDocument[];
 
     let sockets: Socket[];
@@ -139,25 +143,23 @@ xdescribe("Sockets", () => {
         creatorId: users[AMOUNT_OF_USERS - 1].id,
       });
 
-      sockets = users.slice(0, AMOUNT_OF_USERS - 1).map((user) => {
+      const subscribers = users.slice(0, AMOUNT_OF_USERS - 1);
+
+      sockets = subscribers.map((user) => {
         const socket = createSocketClient();
         socket.emit("sign-in", user.sessionToken);
         return socket;
       });
 
-      API.setToken(users[0].sessionToken);
-      await API.Events.subscribe(events[0].id);
-      await API.Events.subscribe(events[1].id);
-      await API.Events.subscribe(events[2].id);
-      await API.Events.subscribe(events[3].id);
+      const subscriptionPromises = subscribers.map((user, i) =>
+        new Subscription({
+          eventId: events[i].id,
+          subscriberId: user.id,
+          subscriptionDate: Date.now(),
+        }).save()
+      );
 
-      API.setToken(users[1].sessionToken);
-      await API.Events.subscribe(events[0].id);
-      await API.Events.subscribe(events[1].id);
-
-      API.setToken(users[2].sessionToken);
-      await API.Events.subscribe(events[0].id);
-      await API.Events.subscribe(events[2].id);
+      await Promise.all(subscriptionPromises);
     });
 
     afterAll(async () => {

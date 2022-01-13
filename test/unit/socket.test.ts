@@ -31,9 +31,10 @@ jest.mock("@/services/auth", () => {
   };
 });
 
-const sleep = (millis) => new Promise((resolve) => setTimeout(resolve, millis));
+const sleep = (millis: number) =>
+  new Promise((resolve) => setTimeout(resolve, millis));
 
-xdescribe("Sockets", () => {
+describe("Sockets", () => {
   beforeAll(createConnection);
 
   afterAll(closeConnection);
@@ -49,7 +50,7 @@ xdescribe("Sockets", () => {
               socket.disconnect();
               resolve(undefined);
             });
-            sleep(1000).then(() => {
+            sleep(100).then(() => {
               reject();
             });
           })
@@ -76,46 +77,46 @@ xdescribe("Sockets", () => {
     });
 
     it("FAIL - Token not valid on sign in", (done) => {
-      socket.emit("sign-in", "token.not.valid");
-
       socket.on("sign-in-ok", () => {
         done(new Error("Signed in successfully"));
       });
       socket.on("sign-in-error", () => {
         done();
       });
+
+      socket.emit("sign-in", "token.not.valid");
     });
     it("OK - Valid sign in", (done) => {
-      socket.emit("sign-in", user.sessionToken);
-
       socket.on("sign-in-ok", () => {
         done();
       });
       socket.on("sign-in-error", () => {
         done(new Error("Sign in error"));
       });
+
+      socket.emit("sign-in", user.sessionToken);
     });
     it("FAIL - Token not valid on sign out", (done) => {
-      socket.emit("sign-in", user.sessionToken);
-      sleep(200).then(() => socket.emit("sign-out", "token.not.valid"));
-
       socket.on("sign-out-ok", () => {
         done(new Error("Signed out successfully"));
       });
       socket.on("sign-out-error", () => {
         done();
       });
+
+      socket.emit("sign-in", user.sessionToken);
+      sleep(100).then(() => socket.emit("sign-out", "token.not.valid"));
     });
     it("OK - Valid sign out", (done) => {
-      socket.emit("sign-in", user.sessionToken);
-      sleep(200).then(() => socket.emit("sign-out", user.sessionToken));
-
       socket.on("sign-out-ok", () => {
         done();
       });
       socket.on("sign-out-error", () => {
         done(new Error("Sign out error"));
       });
+
+      socket.emit("sign-in", user.sessionToken);
+      sleep(100).then(() => socket.emit("sign-out", user.sessionToken));
     });
   });
 
@@ -174,7 +175,7 @@ xdescribe("Sockets", () => {
         (socket) =>
           new Promise((resolve, reject) => {
             socket.on("reminder", resolve);
-            sleep(2000).then(reject);
+            sleep(100).then(reject);
           })
       );
       await Promise.all(promises);
@@ -187,7 +188,7 @@ xdescribe("Sockets", () => {
         (socket) =>
           new Promise((resolve, reject) => {
             socket.on("reminder", resolve);
-            sleep(2000).then(reject);
+            sleep(100).then(reject);
           })
       );
 

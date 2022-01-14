@@ -253,7 +253,7 @@ describe("The /events API", () => {
       expect(response.body.message).toEqual("Event not found");
     });
 
-    it("Returns 400 if the authenticated user is not the creator of the event", async () => {
+    it("Returns 403 if the authenticated user is not the creator of the event", async () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
@@ -271,7 +271,7 @@ describe("The /events API", () => {
       const response = await request(app).put(`/events/${eventId}`).send(body);
 
       // then
-      expect(response.status).toEqual(400);
+      expect(response.status).toEqual(403);
       expect(response.body).toBeDefined();
       expect(response.body.message).toEqual(
         "Events can only be edited by their creator"
@@ -324,7 +324,7 @@ describe("The /events API", () => {
       expect(response.body.message).toEqual("Event not found");
     });
 
-    it("Returns 400 if the event does not belong to the user", async () => {
+    it("Returns 403 if the event does not belong to the user", async () => {
       // given
       const event = await createMockEvent({
         creatorId: otherUser._id,
@@ -336,7 +336,7 @@ describe("The /events API", () => {
       const response = await request(app).del(`/events/${eventId}`);
 
       // then
-      expect(response.status).toEqual(400);
+      expect(response.status).toEqual(403);
       expect(response.body).toBeDefined();
       expect(response.body.message).toEqual(
         "Events can only be deleted by their creator"

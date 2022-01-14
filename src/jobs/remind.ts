@@ -1,28 +1,36 @@
-import { sendReminders } from "../socket";
+import { sendReminders } from "@/socket";
 import { Event } from "@/services/db";
+import { getLogger } from "@/services/winston";
 
 export const MINUTES_AHEAD = 1440;
 
-export function getMinuteInterval(now = new Date()) {
-  const start = new Date(now);
+const logger = getLogger("cron");
+
+export function getMinuteInterval() {
+  const start = new Date();
   start.setSeconds(0, 0);
   start.setMinutes(start.getMinutes() + MINUTES_AHEAD);
 
-  const end = new Date(now);
-  end.setSeconds(0, 0);
-  end.setMinutes(end.getMinutes() + MINUTES_AHEAD + 1);
-  return { start, end, now };
+  const end = new Date(start);
+  end.setMinutes(end.getMinutes() + 1);
+  return { start, end };
 }
 
 export async function remindEvents() {
+  logger.info("Start remind events");
   const { start, end } = getMinuteInterval();
 
   const events = await Event.find({
     startDate: { $gte: start, $lte: end },
   });
-  sendReminders(events);
+  logger.info(`Send reminders for ${events.length} events`);
+  await sendReminders(events);
+  logger.info("Remind events - Reminders sent");
 }
 export async function remindAllEvents() {
+  logger.info("Start remind all events");
   const events = await Event.find();
-  sendReminders(events);
+  logger.info(`Send reminders for ${events.length} events`);
+  await sendReminders(events);
+  logger.info("Remind events - Reminders sent");
 }

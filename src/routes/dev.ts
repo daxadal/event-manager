@@ -2,7 +2,6 @@ import { Router } from "express";
 import { Logger } from "winston";
 
 import { pingAll } from "../socket";
-import bree from "../scheduler";
 import { getLoggerMiddleware } from "@/services/winston";
 import { remindEvents, remindAllEvents } from "../jobs/remind";
 
@@ -36,16 +35,6 @@ router.post("/remind", async (req, res) => {
     );
     res.status(500).send({ message: "Internal server error" });
   }
-});
-
-router.post("/remind-bree", async (req, res) => {
-  bree.run("remind");
-  res.status(200).send({ message: "Reminders sent" });
-});
-
-router.post("/remind-all-bree", async (req, res) => {
-  bree.run("remind-all");
-  res.status(200).send({ message: "Reminders sent" });
 });
 
 router.post("/remind-all", async (req, res) => {

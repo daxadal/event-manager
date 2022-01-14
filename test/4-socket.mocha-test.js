@@ -151,21 +151,6 @@ xdescribe("Sockets", () => {
       );
       await Promise.all(promises);
     });
-
-    it("Remind (using bree)", async () => {
-      const response = await API.Dev.remindBree();
-      assert.strictEqual(response.status, 200);
-      const promises = [sockets.A, sockets.B, sockets.C].map(
-        (socket) =>
-          new Promise((resolve, reject) => {
-            socket.on("reminder", resolve);
-            sleep(2000).then(reject);
-          })
-      );
-
-      await Promise.all(promises);
-    });
-
     after(() => {
       sockets.A.disconnect();
       sockets.B.disconnect();

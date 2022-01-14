@@ -45,5 +45,5 @@ logger.info(`DEV API is ${api.DEV ? "active" : "NOT available"}`);
 logger.info(`Bree job is ${breeConfig.START ? "active" : "NOT available"}`);
 
 if (breeConfig.START) {
-  new CronJob("*/3 * * * *", remindEvents, null, true);
+  new CronJob("* * * * *", remindEvents, null, true);
 }

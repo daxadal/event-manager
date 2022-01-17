@@ -2,10 +2,8 @@ import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import { Logger } from "winston";
 
-import { sendReminders } from "@/socket";
-import { Event } from "@/services/db";
-import { checkBreeToken } from "@/services/auth";
 import { getLoggerMiddleware } from "@/services/winston";
+import { remindEvents } from "@/jobs/remind";
 
 export const MAIN_RPM = 10;
 
@@ -21,16 +19,10 @@ router.use(
   })
 );
 
-router.post("/remind", checkBreeToken, async (req: any, res) => {
+router.post("/remind", async (req: any, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
-    logger.info("Remind:", req.dates);
-    const { start, end } = req.dates;
-
-    const events = await Event.find({
-      startDate: { $gte: start, $lte: end },
-    });
-    await sendReminders(events);
+    await remindEvents();
     res.status(200).send({ message: "Reminders sent" });
   } catch (error) {
     logger.error(

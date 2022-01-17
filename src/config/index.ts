@@ -31,7 +31,6 @@ export const jwt = {
 };
 
 export const bree = {
-  BREE_SECRET: parseEnvString("BREE_SECRET", parsingErrors),
   START: parseBoolean("START_REMINDERS", parsingErrors),
 };
 

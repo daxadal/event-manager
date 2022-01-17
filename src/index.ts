@@ -1,11 +1,12 @@
 import "module-alias/register";
 
 import { api, bree as breeConfig, configDebug, socket } from "@/config";
-import bree from "@/scheduler";
 import socketServer from "@/socket";
 import app from "@/app";
 import { createConnection } from "@/services/db/setup";
 import { getLogger } from "@/services/winston";
+import { CronJob } from "cron";
+import { remindEvents } from "./jobs/remind";
 
 const logger = getLogger("server-startup");
 
@@ -44,5 +45,5 @@ logger.info(`DEV API is ${api.DEV ? "active" : "NOT available"}`);
 logger.info(`Bree job is ${breeConfig.START ? "active" : "NOT available"}`);
 
 if (breeConfig.START) {
-  bree.start();
+  new CronJob("* * * * *", remindEvents, null, true);
 }

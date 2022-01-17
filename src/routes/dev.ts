@@ -1,11 +1,9 @@
 import { Router } from "express";
 import { Logger } from "winston";
 
-import { sendReminders, pingAll } from "../socket";
-import { getMinuteInterval } from "@/services/utils";
-import bree from "../scheduler";
-import * as DB from "@/services/db";
+import { pingAll } from "../socket";
 import { getLoggerMiddleware } from "@/services/winston";
+import { remindEvents, remindAllEvents } from "../jobs/remind";
 
 const router = Router();
 
@@ -28,12 +26,7 @@ router.post("/ping", async (req, res) => {
 router.post("/remind", async (req, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
-    const { start, end } = getMinuteInterval();
-
-    const events = await DB.Event.find({
-      startDate: { $gte: start, $lte: end },
-    });
-    sendReminders(events);
+    await remindEvents();
     res.status(200).send({ message: "Reminders sent" });
   } catch (error) {
     logger.error(
@@ -44,21 +37,10 @@ router.post("/remind", async (req, res) => {
   }
 });
 
-router.post("/remind-bree", async (req, res) => {
-  bree.run("remind");
-  res.status(200).send({ message: "Reminders sent" });
-});
-
-router.post("/remind-all-bree", async (req, res) => {
-  bree.run("remind-all");
-  res.status(200).send({ message: "Reminders sent" });
-});
-
 router.post("/remind-all", async (req, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
-    const events = await DB.Event.find();
-    sendReminders(events);
+    await remindAllEvents();
     res.status(200).send({ message: "Reminders sent" });
   } catch (error) {
     logger.error(

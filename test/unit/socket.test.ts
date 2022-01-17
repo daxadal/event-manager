@@ -1,6 +1,6 @@
 import { Socket } from "socket.io-client";
 
-import { MINUTES_AHEAD } from "@/services/utils";
+import { MINUTES_AHEAD } from "@/jobs/remind";
 import {
   EventDocument,
   EventState,
@@ -9,7 +9,6 @@ import {
 } from "@/services/db";
 import { createToken } from "@/services/auth";
 import { closeConnection, createConnection } from "@/services/db/setup";
-import bree from "@/scheduler";
 import { pingAll, sendReminders } from "@/socket";
 
 import { createSocketClient } from "test/mocks/socket-client";
@@ -178,20 +177,6 @@ describe("Sockets", () => {
             sleep(100).then(reject);
           })
       );
-      await Promise.all(promises);
-    });
-
-    it("Remind (using bree)", async () => {
-      bree.run("remind");
-
-      const promises = sockets.map(
-        (socket) =>
-          new Promise((resolve, reject) => {
-            socket.on("reminder", resolve);
-            sleep(100).then(reject);
-          })
-      );
-
       await Promise.all(promises);
     });
   });

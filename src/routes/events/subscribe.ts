@@ -21,6 +21,8 @@ const router = Router();
  *     tags:
  *       - subscriptions
  *     description: Subscribes the authenticated user to an event
+ *     parameters:
+ *       - $ref: '#/components/parameters/eventId'
  *     requestBody:
  *       description: Comment to attach to the subscription
  *       content:

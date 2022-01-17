@@ -8,6 +8,7 @@ import {
   EventDocument,
   EventState,
   format,
+  loadEvent,
   Subscription,
   UserDocument,
 } from "@/services/db";
@@ -38,36 +39,6 @@ router.use(
     message: "Too many requests",
   })
 );
-
-function isVisible(event: EventDocument, user: UserDocument) {
-  switch (event.state) {
-    case EventState.PUBLIC:
-      return true;
-    case EventState.PRIVATE:
-      return Boolean(user);
-    case EventState.DRAFT:
-      return Boolean(user) && user.id === String(event.creatorId);
-    default:
-      throw new Error("Event has an unexpected state");
-  }
-}
-
-const loadEvent: RequestHandler = async (req: any, res, next) => {
-  const logger: Logger | Console = (req as any).logger || console;
-  const { eventId } = req.params;
-  try {
-    req.event = await Event.findById(eventId).exec();
-
-    if (req.event && isVisible(req.event, req.user)) next();
-    else res.status(400).send({ message: "Event not found" });
-  } catch (error) {
-    logger.error(
-      `Internal server error at ${req.method} ${req.originalUrl}`,
-      error
-    );
-    res.status(500).send({ message: "Internal server error" });
-  }
-};
 
 router
   .route("/")

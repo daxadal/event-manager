@@ -12,7 +12,6 @@ import {
 
 export const MAX_SUBSCRIPTIONS = 3;
 
-// EVENTS
 const router = Router();
 
 /**

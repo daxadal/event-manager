@@ -6,12 +6,6 @@ import { Event, EventState, format } from "@/services/db";
 import { verifyToken, decodeToken } from "@/services/auth";
 import { validateBody } from "@/services/validations";
 
-export const EVENT_SIZE = "1kb";
-export const EVENT_RPM = 100;
-
-export const MAX_SUBSCRIPTIONS = 3;
-
-// EVENTS
 const router = Router();
 
 router

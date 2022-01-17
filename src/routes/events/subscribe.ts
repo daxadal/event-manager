@@ -66,7 +66,7 @@ const router = Router();
  *       500:
  *         $ref: '#/components/responses/500'
  */
- router.route("/:eventId(\\w+)/subscribe").post(
+router.route("/:eventId(\\w+)/subscribe").post(
   decodeToken,
   verifyToken,
   validatePath(
@@ -131,6 +131,5 @@ const router = Router();
     }
   }
 );
-
 
 export default router;

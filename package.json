@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "docs": "ts-node ./src/docs/generator.ts",
+    "lint": "eslint ./src ./test",
     "start": "npm run docs && npm run tsc && node dist/index.js",
     "watch": "nodemon",
     "reset": "node scripts/reset.js",
@@ -54,6 +55,7 @@
     "eslint": "^7.27.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-typescript": "^2.5.0",
     "eslint-plugin-import": "^2.23.3",
     "eslint-plugin-prettier": "^3.4.0",
     "jest": "^27.4.3",

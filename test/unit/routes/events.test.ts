@@ -7,7 +7,6 @@ import { EVENT_RPM, EVENT_SIZE } from "@/routes/events";
 import { addUserToRequest } from "@/services/auth";
 import {
   Event,
-  EventDocument,
   EventState,
   EventType,
   format,
@@ -186,13 +185,12 @@ describe("The /events API", () => {
   describe("GET /events endpoint", () => {
     let creatorUser: UserDocument;
     let otherUser: UserDocument;
-    let events: Array<EventDocument>;
 
     beforeEach(async () => {
       creatorUser = await createMockUser({ email: "creator@doe.com" });
       otherUser = await createMockUser({ email: "other@doe.com" });
 
-      events = await createMockEvents(AMOUNT_OF_EVENTS, {
+      await createMockEvents(AMOUNT_OF_EVENTS, {
         creatorId: creatorUser._id,
         state: (i) => {
           switch (i % 3) {
@@ -302,9 +300,9 @@ describe("The /events API", () => {
       // given
 
       // when
-      const requestPromises = new Array(EVENT_RPM + 1)
-        .fill(undefined)
-        .map((_, i) => request(app).get("/events"));
+      const requestPromises = Array(EVENT_RPM + 1).map(() =>
+        request(app).get("/events")
+      );
       const responses = await Promise.all(requestPromises);
 
       // then

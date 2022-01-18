@@ -1,17 +1,9 @@
 import request from "supertest";
-import { Document } from "mongoose";
 import { mocked } from "ts-jest/utils";
 
 import app from "@/app";
 import { addUserToRequest } from "@/services/auth";
-import {
-  Event,
-  EventState,
-  format,
-  Subscription,
-  UserDocument,
-  UserType,
-} from "@/services/db";
+import { EventState, format, Subscription, UserDocument } from "@/services/db";
 import { closeConnection, createConnection } from "@/services/db/setup";
 
 import {
@@ -138,8 +130,6 @@ describe("The /events API", () => {
         .send(body);
 
       // then
-      const createdEvent = await Event.findOne({});
-
       expect(response.status).toEqual(200);
       expect(response.body).toBeDefined();
       expect(response.body.message).toEqual("Subscribed successfully");
@@ -162,8 +152,6 @@ describe("The /events API", () => {
         .send(body);
 
       // then
-      const createdEvent = await Event.findOne({});
-
       expect(response.status).toEqual(200);
       expect(response.body).toBeDefined();
       expect(response.body.message).toEqual("Subscribed successfully");
@@ -172,8 +160,6 @@ describe("The /events API", () => {
 
     it("Returns 400 and the previous subscription is the user is already subscribed to this event", async () => {
       // given
-      const MAX_SUBSCRIPTIONS = 3;
-
       const event = await createMockEvent({
         creatorId: otherUser._id,
         state: EventState.PUBLIC,

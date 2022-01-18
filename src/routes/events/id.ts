@@ -212,33 +212,38 @@ router
    *       500:
    *         $ref: '#/components/responses/500'
    */
-  .delete(addUserToRequest, ensureLoggedIn, loadEvent, async (req: any, res) => {
-    const logger: Logger | Console = (req as any).logger || console;
-    try {
-      const user: UserDocument = (req as any).user;
-      const event: EventDocument = (req as any).event;
+  .delete(
+    addUserToRequest,
+    ensureLoggedIn,
+    loadEvent,
+    async (req: any, res) => {
+      const logger: Logger | Console = (req as any).logger || console;
+      try {
+        const user: UserDocument = (req as any).user;
+        const event: EventDocument = (req as any).event;
 
-      if (String(event.creatorId) !== user.id) {
-        logger.info("Events can only be deleted by their creator");
-        res
-          .status(403)
-          .send({ message: "Events can only be deleted by their creator" });
-        return;
+        if (String(event.creatorId) !== user.id) {
+          logger.info("Events can only be deleted by their creator");
+          res
+            .status(403)
+            .send({ message: "Events can only be deleted by their creator" });
+          return;
+        }
+
+        await event.delete();
+
+        await Subscription.deleteMany({ eventId: event.id }).exec();
+
+        logger.info("Event deleted");
+        res.status(200).send({ message: "Event deleted" });
+      } catch (error) {
+        logger.error(
+          `Internal server error at ${req.method} ${req.originalUrl}`,
+          error
+        );
+        res.status(500).send({ message: "Internal server error" });
       }
-
-      await event.delete();
-
-      await Subscription.deleteMany({ eventId: event.id }).exec();
-
-      logger.info("Event deleted");
-      res.status(200).send({ message: "Event deleted" });
-    } catch (error) {
-      logger.error(
-        `Internal server error at ${req.method} ${req.originalUrl}`,
-        error
-      );
-      res.status(500).send({ message: "Internal server error" });
     }
-  });
+  );
 
 export default router;

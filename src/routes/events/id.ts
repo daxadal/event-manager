@@ -4,10 +4,12 @@ import { Logger } from "winston";
 
 import {
   Event,
+  EventDocument,
   EventState,
   format,
   loadEvent,
   Subscription,
+  UserDocument,
 } from "@/services/db";
 import { verifyToken, decodeToken } from "@/services/auth";
 import {
@@ -61,7 +63,8 @@ router
   .get(decodeToken, loadEvent, async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
-      res.status(200).send({ event: format(req.event) });
+      const event: EventDocument = (req as any).event;
+      res.status(200).send({ event: format(event) });
     } catch (error) {
       logger.error(
         `Internal server error at ${req.method} ${req.originalUrl}`,
@@ -135,9 +138,12 @@ router
     async (req: any, res) => {
       const logger: Logger | Console = (req as any).logger || console;
       try {
+        const user: UserDocument = (req as any).user;
+        const event: EventDocument = (req as any).event;
         const newEvent = req.body;
 
-        if (String(req.event.creatorId) !== req.user.id) {
+        if (String(event.creatorId) !== user.id) {
+          logger.info("Events can only be edited by their creator");
           res
             .status(403)
             .send({ message: "Events can only be edited by their creator" });
@@ -145,32 +151,32 @@ router
         }
 
         if (
-          req.event.state !== EventState.PUBLIC &&
+          event.state !== EventState.PUBLIC &&
           newEvent.state === EventState.PUBLIC
         ) {
           const events = await Event.find({
             state: EventState.PUBLIC,
-            creatorId: req.user.id,
+            creatorId: user.id,
           });
 
           if (events.length > 0) {
+            logger.info("Public events limit exceeded");
             res.status(400).send({ message: "Public events limit exceeded" });
           }
         }
 
-        if (newEvent.headline) req.event.headline = newEvent.headline;
-        if (newEvent.description) req.event.description = newEvent.description;
-        if (newEvent.startDate) req.event.startDate = newEvent.startDate;
-        if (newEvent.location) req.event.location = newEvent.location;
-        if (newEvent.state) req.event.state = newEvent.state;
+        if (newEvent.headline) event.headline = newEvent.headline;
+        if (newEvent.description) event.description = newEvent.description;
+        if (newEvent.startDate) event.startDate = newEvent.startDate;
+        if (newEvent.location) event.location = newEvent.location;
+        if (newEvent.state) event.state = newEvent.state;
 
-        req.event = await req.event.save();
+        await event.save();
 
-        if (req.event)
-          res
-            .status(200)
-            .send({ message: "Event updated", event: format(req.event) });
-        else res.status(400).send({ message: "Event not found" });
+        logger.info("Event updated");
+        res
+          .status(200)
+          .send({ message: "Event updated", event: format(event) });
       } catch (error) {
         logger.error(
           `Internal server error at ${req.method} ${req.originalUrl}`,
@@ -209,19 +215,23 @@ router
   .delete(decodeToken, verifyToken, loadEvent, async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
-      if (String(req.event.creatorId) !== req.user.id) {
+      const user: UserDocument = (req as any).user;
+      const event: EventDocument = (req as any).event;
+
+      if (String(event.creatorId) !== user.id) {
+        logger.info("Events can only be deleted by their creator");
         res
           .status(403)
           .send({ message: "Events can only be deleted by their creator" });
         return;
       }
 
-      await req.event.delete();
+      await event.delete();
 
-      await Subscription.deleteMany({ eventId: req.event.id }).exec();
+      await Subscription.deleteMany({ eventId: event.id }).exec();
 
-      if (req.event) res.status(200).send({ message: "Event deleted" });
-      else res.status(400).send({ message: "Event not found" });
+      logger.info("Event deleted");
+      res.status(200).send({ message: "Event deleted" });
     } catch (error) {
       logger.error(
         `Internal server error at ${req.method} ${req.originalUrl}`,

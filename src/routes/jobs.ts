@@ -19,7 +19,7 @@ router.use(
   })
 );
 
-router.post("/remind", async (req: any, res) => {
+router.post("/remind", async (req, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
     await remindEvents();

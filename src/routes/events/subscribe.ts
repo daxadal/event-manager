@@ -2,7 +2,13 @@ import { Router } from "express";
 import Joi from "joi";
 import { Logger } from "winston";
 
-import { format, loadEvent, Subscription } from "@/services/db";
+import {
+  EventDocument,
+  format,
+  loadEvent,
+  Subscription,
+  UserDocument,
+} from "@/services/db";
 import { verifyToken, decodeToken } from "@/services/auth";
 import {
   OBJECT_ID_REGEX,
@@ -80,12 +86,15 @@ router.route("/:eventId(\\w+)/subscribe").post(
     }).optional()
   ),
   loadEvent,
-  async (req: any, res) => {
+  async (req, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
+      const user: UserDocument = (req as any).user;
+      const event: EventDocument = (req as any).event;
       const params = req.body;
 
-      if (String(req.event.creatorId) === req.user.id) {
+      if (String(event.creatorId) === user.id) {
+        logger.info("You can't subscribe to your own events");
         res
           .status(400)
           .send({ message: "You can't subscribe to your own events" });
@@ -93,30 +102,33 @@ router.route("/:eventId(\\w+)/subscribe").post(
       }
 
       const subscriptions = await Subscription.find({
-        subscriberId: req.user.id,
+        subscriberId: user.id,
       });
 
       const oldSubscription = subscriptions.find(
-        (sub) => String(sub.eventId) === req.event.id
+        (sub) => String(sub.eventId) === event.id
       );
 
       if (oldSubscription) {
+        logger.info("You already have subscribed to this event");
         res.status(400).send({
           message: "You already have subscribed to this event",
           subscription: format(oldSubscription),
         });
       } else if (subscriptions.length >= MAX_SUBSCRIPTIONS) {
+        logger.info("Subscribed events limit exceeded");
         res.status(400).send({
           message: "Subscribed events limit exceeded",
         });
       } else {
         const subscription = await new Subscription({
-          eventId: req.event.id,
-          subscriberId: req.user.id,
+          eventId: event.id,
+          subscriberId: user.id,
           subscriptionDate: Date.now(),
           comment: params.comment,
         }).save();
 
+        logger.info("Subscribed successfully");
         res.status(200).send({
           message: "Subscribed successfully",
           subscription: format(subscription),

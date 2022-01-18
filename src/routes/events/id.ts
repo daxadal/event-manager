@@ -11,7 +11,7 @@ import {
   Subscription,
   UserDocument,
 } from "@/services/db";
-import { verifyToken, decodeToken } from "@/services/auth";
+import { ensureLoggedIn, addUserToRequest } from "@/services/auth";
 import {
   OBJECT_ID_REGEX,
   validateBody,
@@ -60,7 +60,7 @@ router
    *       500:
    *         $ref: '#/components/responses/500'
    */
-  .get(decodeToken, loadEvent, async (req: any, res) => {
+  .get(addUserToRequest, loadEvent, async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
       const event: EventDocument = (req as any).event;
@@ -117,8 +117,8 @@ router
    *         $ref: '#/components/responses/500'
    */
   .put(
-    decodeToken,
-    verifyToken,
+    addUserToRequest,
+    ensureLoggedIn,
     validateBody(
       Joi.object({
         headline: Joi.string().min(5).max(100),
@@ -212,7 +212,7 @@ router
    *       500:
    *         $ref: '#/components/responses/500'
    */
-  .delete(decodeToken, verifyToken, loadEvent, async (req: any, res) => {
+  .delete(addUserToRequest, ensureLoggedIn, loadEvent, async (req: any, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
       const user: UserDocument = (req as any).user;

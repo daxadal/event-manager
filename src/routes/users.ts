@@ -5,7 +5,7 @@ import Joi from "joi";
 import { Logger } from "winston";
 
 import { User, UserDocument } from "@/services/db";
-import { createToken, decodeToken, verifyToken } from "@/services/auth";
+import { createToken, addUserToRequest, ensureLoggedIn } from "@/services/auth";
 import { validateBody } from "@/services/validations";
 import { getLoggerMiddleware } from "@/services/winston";
 
@@ -92,7 +92,7 @@ router.post(
         hashedPassword: await hash(password, HASH_ROUNDS),
       }).save();
 
-      const token = createToken(user);
+      const token = createToken(user.id);
 
       user.sessionToken = token;
       await user.save();
@@ -166,7 +166,7 @@ router.post(
         return;
       }
 
-      const token = createToken(user);
+      const token = createToken(user.id);
 
       user.sessionToken = token;
       await user.save();
@@ -206,7 +206,7 @@ router.post(
  *       500:
  *         $ref: '#/components/responses/500'
  */
-router.post("/sign-out", decodeToken, verifyToken, async (req, res) => {
+router.post("/sign-out", addUserToRequest, ensureLoggedIn, async (req, res) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
     const user: UserDocument = (req as any).user;

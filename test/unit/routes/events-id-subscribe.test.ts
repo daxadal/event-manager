@@ -3,7 +3,7 @@ import { Document } from "mongoose";
 import { mocked } from "ts-jest/utils";
 
 import app from "@/app";
-import { decodeToken } from "@/services/auth";
+import { addUserToRequest } from "@/services/auth";
 import {
   Event,
   EventState,
@@ -31,7 +31,7 @@ jest.mock("@/services/auth", () => {
   };
 });
 
-const mockedDecodeToken = mocked(decodeToken, true);
+const mockedAddUserToRequest = mocked(addUserToRequest, true);
 
 describe("The /events API", () => {
   beforeAll(createConnection);
@@ -50,7 +50,7 @@ describe("The /events API", () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
       otherUser = await createMockUser({ email: "other@doe.com" });
 
-      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
         req.token = "token";
         req.user = callerUser;
         next();

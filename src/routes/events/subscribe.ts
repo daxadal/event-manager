@@ -9,7 +9,7 @@ import {
   Subscription,
   UserDocument,
 } from "@/services/db";
-import { verifyToken, decodeToken } from "@/services/auth";
+import { ensureLoggedIn, addUserToRequest } from "@/services/auth";
 import {
   OBJECT_ID_REGEX,
   validateBody,
@@ -73,8 +73,8 @@ const router = Router();
  *         $ref: '#/components/responses/500'
  */
 router.route("/:eventId(\\w+)/subscribe").post(
-  decodeToken,
-  verifyToken,
+  addUserToRequest,
+  ensureLoggedIn,
   validatePath(
     Joi.object({
       eventId: Joi.string().pattern(OBJECT_ID_REGEX),

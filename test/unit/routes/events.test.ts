@@ -4,7 +4,7 @@ import { mocked } from "ts-jest/utils";
 
 import app from "@/app";
 import { EVENT_RPM, EVENT_SIZE } from "@/routes/events";
-import { decodeToken } from "@/services/auth";
+import { addUserToRequest } from "@/services/auth";
 import {
   Event,
   EventDocument,
@@ -28,7 +28,7 @@ jest.mock("@/services/auth", () => {
   };
 });
 
-const mockedDecodeToken = mocked(decodeToken, true);
+const mockedAddUserToRequest = mocked(addUserToRequest, true);
 
 const AMOUNT_OF_EVENTS = 12;
 
@@ -47,7 +47,7 @@ describe("The /events API", () => {
     beforeEach(async () => {
       user = await createMockUser();
 
-      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
         req.token = "token";
         req.user = user;
         next();
@@ -209,7 +209,7 @@ describe("The /events API", () => {
 
     it("Returns 200 and all public events if the user is not authenticated", async () => {
       // given
-      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
         next();
       });
 
@@ -229,7 +229,7 @@ describe("The /events API", () => {
 
     it("Returns 200 and all public and private events if the user has no events", async () => {
       // given
-      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
         req.token = "token";
         req.user = otherUser;
         next();
@@ -251,7 +251,7 @@ describe("The /events API", () => {
 
     it("Returns 200 and all public, private and owned events if the user has events", async () => {
       // given
-      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
         req.token = "token";
         req.user = creatorUser;
         next();

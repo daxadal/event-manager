@@ -7,7 +7,7 @@ import { User, UserDocument } from "@/services/db";
 
 const TOKEN_EXPIRATION = "8h";
 
-export const decodeToken: RequestHandler = async (req, res, next) => {
+export const addUserToRequest: RequestHandler = async (req, res, next) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
     const bearerHeader = req.get("Authorization");
@@ -60,7 +60,7 @@ export const decodeToken: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const verifyToken: RequestHandler = async (req: any, res, next) => {
+export const ensureLoggedIn: RequestHandler = async (req: any, res, next) => {
   if (!req.user) {
     const logger: Logger | Console = (req as any).logger || console;
     logger.info("Session token expired");
@@ -68,8 +68,8 @@ export const verifyToken: RequestHandler = async (req: any, res, next) => {
   } else next();
 };
 
-export function createToken(user: UserDocument) {
-  return jwt.sign({ id: String(user.id) }, jwtConfig.TOKEN_SECRET, {
+export function createToken(userId: string) {
+  return jwt.sign({ id: userId }, jwtConfig.TOKEN_SECRET, {
     expiresIn: TOKEN_EXPIRATION,
   });
 }

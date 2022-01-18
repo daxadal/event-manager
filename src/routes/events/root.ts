@@ -9,7 +9,7 @@ import {
   format,
   UserDocument,
 } from "@/services/db";
-import { verifyToken, decodeToken } from "@/services/auth";
+import { ensureLoggedIn, addUserToRequest } from "@/services/auth";
 import { validateBody } from "@/services/validations";
 
 const router = Router();
@@ -58,8 +58,8 @@ router
    *         $ref: '#/components/responses/500'
    */
   .post(
-    decodeToken,
-    verifyToken,
+    addUserToRequest,
+    ensureLoggedIn,
     validateBody(
       Joi.object({
         headline: Joi.string().min(5).max(100).required(),
@@ -146,7 +146,7 @@ router
    *       500:
    *         $ref: '#/components/responses/500'
    */
-  .get(decodeToken, async (req, res) => {
+  .get(addUserToRequest, async (req, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
       const user: UserDocument = (req as any).user;

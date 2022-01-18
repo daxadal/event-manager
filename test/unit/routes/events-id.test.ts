@@ -5,7 +5,7 @@ import { mocked } from "ts-jest/utils";
 
 import app from "@/app";
 import { EVENT_RPM, EVENT_SIZE } from "@/routes/events";
-import { decodeToken } from "@/services/auth";
+import { addUserToRequest } from "@/services/auth";
 import {
   Event,
   EventState,
@@ -28,8 +28,8 @@ jest.mock("@/services/auth", () => {
     verifyToken: jest.fn((req, res, next) => next()),
   };
 });
-decodeToken;
-const mockedDecodeToken = mocked(decodeToken, true);
+
+const mockedAddUserToRequest = mocked(addUserToRequest, true);
 
 describe("The /events API", () => {
   beforeAll(createConnection);
@@ -51,7 +51,7 @@ describe("The /events API", () => {
 
     it("Returns 400 if the event does not exist", async () => {
       // given
-      mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce(async (req: any, res, next) => {
         const user = await User.findOne({ email: "creator@doe.com" });
         req.token = user ? "token" : undefined;
         req.user = user;
@@ -75,7 +75,7 @@ describe("The /events API", () => {
       ${undefined}       | ${EventState.PRIVATE} | ${"the event is private and the caller is NOT authenticated"}
     `("Returns 400 if $reason", async ({ authUser, state }) => {
       // given
-      mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce(async (req: any, res, next) => {
         if (authUser) {
           const user = await User.findOne({ email: authUser });
           req.token = user ? "token" : undefined;
@@ -105,7 +105,7 @@ describe("The /events API", () => {
       ${undefined}         | ${EventState.PUBLIC}  | ${"the event is public"}
     `("Returns 200 and an event if $reason", async ({ authUser, state }) => {
       // given
-      mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce(async (req: any, res, next) => {
         if (authUser) {
           const user = await User.findOne({ email: authUser });
           req.token = user ? "token" : undefined;
@@ -139,7 +139,7 @@ describe("The /events API", () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
       otherUser = await createMockUser({ email: "other@doe.com" });
 
-      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
         req.token = "token";
         req.user = callerUser;
         next();
@@ -287,7 +287,7 @@ describe("The /events API", () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
       otherUser = await createMockUser({ email: "other@doe.com" });
 
-      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
         req.token = "token";
         req.user = callerUser;
         next();
@@ -366,7 +366,7 @@ describe("The /events API", () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
       otherUser = await createMockUser({ email: "other@doe.com" });
 
-      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
         req.token = "token";
         req.user = callerUser;
         next();

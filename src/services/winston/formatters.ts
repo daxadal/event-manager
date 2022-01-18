@@ -16,7 +16,6 @@ export const extractAxios: FormatWrap = format((info) => {
     info.axios = {
       status: info.meta.response.status,
       data: info.meta.response.data,
-      headers: info.meta.response.headers,
     };
     info.meta = {};
   } else if (info.meta.isAxiosError) {
@@ -26,7 +25,6 @@ export const extractAxios: FormatWrap = format((info) => {
     info.axios = {
       status: info.meta.status,
       data: info.meta.data,
-      headers: info.meta.headers,
     };
     info.meta = {};
   }

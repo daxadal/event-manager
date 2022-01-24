@@ -185,7 +185,7 @@ describe("Sockets", () => {
         (socket) =>
           new Promise((resolve, reject) => {
             socket.on("reminder", resolve);
-            sleep(100).then(reject);
+            sleep(1000).then(() => reject("Reminder not received"));
           })
       );
       await Promise.all(promises);

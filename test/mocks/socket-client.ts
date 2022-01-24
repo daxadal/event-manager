@@ -16,11 +16,6 @@ export const createSocketClient = () => {
     logger.debug("Client: disconnected");
   });
 
-  socket.on("PING", () => {
-    logger.debug("Client PING", socket.id);
-    socket.emit("PONG", socket.id);
-  });
-
   socket.on("reminder", (reminder) => {
     logger.debug("Client reminder: ", reminder.message);
   });

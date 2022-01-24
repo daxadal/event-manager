@@ -5,7 +5,7 @@ import * as DB from "@/services/db";
 import { getLogger } from "@/services/winston";
 
 const httpServer = http.createServer();
-const io = new Server(httpServer);
+export const io = new Server(httpServer);
 
 const logger = getLogger("socket-server");
 
@@ -14,10 +14,6 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     logger.debug("Server: user disconnected");
-  });
-
-  socket.on("PONG", () => {
-    logger.debug(`Server PONG: ${socket.id}`);
   });
 
   socket.on("sign-in", async (sessionToken) => {
@@ -53,8 +49,6 @@ io.on("connection", (socket) => {
       socket.emit("sign-out-error");
     }
   });
-
-  // socket.emit('PING', socket.id);
 });
 
 function format(event, user, sub) {
@@ -90,10 +84,6 @@ export async function sendReminders(events) {
     const sockets = await io.in(user.socketId).fetchSockets();
     sockets.map((socket) => socket.emit("reminder", format(event, user, sub)));
   });
-}
-
-export async function pingAll() {
-  io.emit("PING");
 }
 
 export default httpServer;

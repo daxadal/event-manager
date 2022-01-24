@@ -9,7 +9,7 @@ import {
 } from "@/services/db";
 import { createToken } from "@/services/auth";
 import { closeConnection, createConnection } from "@/services/db/setup";
-import socketServer, { pingAll, sendReminders } from "@/socket";
+import socketServer, { io, sendReminders } from "@/socket";
 
 import { createSocketClient } from "test/mocks/socket-client";
 import {
@@ -65,7 +65,7 @@ describe("Sockets", () => {
             });
           })
       );
-      await pingAll();
+      io.emit("PING");
       await Promise.all(promises);
     });
   });

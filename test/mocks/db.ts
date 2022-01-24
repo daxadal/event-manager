@@ -53,9 +53,9 @@ export async function createMockUsers(
   amount: number,
   fieldsToOverride: Dynamic<Partial<UserType>> = {}
 ): Promise<UserDocument[]> {
-  const promises = Array(amount).map((_, i) =>
-    createMockUser(fieldsToOverride, i)
-  );
+  const promises = new Array(amount)
+    .fill(undefined)
+    .map((_, i) => createMockUser(fieldsToOverride, i));
   return Promise.all(promises);
 }
 

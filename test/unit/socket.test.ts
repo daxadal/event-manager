@@ -39,7 +39,7 @@ describe("Sockets", () => {
 
   afterAll(closeConnection);
 
-  describe("Connection", () => {
+  describe("Connection test", () => {
     beforeAll(async () => {
       await createConnection();
       socketServer.listen(socket.PORT);
@@ -50,7 +50,7 @@ describe("Sockets", () => {
       await closeConnection();
     });
 
-    it("PING all", async () => {
+    it("PING-PONG communication", async () => {
       const sockets = Array(8).map(createSocketClient);
 
       const promises = sockets.map(
@@ -86,9 +86,9 @@ describe("Sockets", () => {
       socket.disconnect();
     });
 
-    it("FAIL - Token not valid on sign in", (done) => {
+    it("If the client sends a 'sign-in' with an invalid token, server reponds a 'sign-in-error' message", (done) => {
       socket.on("sign-in-ok", () => {
-        done(new Error("Signed in successfully"));
+        done(new Error("Signed in successfully instead of failing"));
       });
       socket.on("sign-in-error", () => {
         done();
@@ -96,19 +96,19 @@ describe("Sockets", () => {
 
       socket.emit("sign-in", "token.not.valid");
     });
-    it("OK - Valid sign in", (done) => {
+    it("If the client sends a 'sign-in' with a valid token, server reponds a 'sign-in-ok' message", (done) => {
       socket.on("sign-in-ok", () => {
         done();
       });
       socket.on("sign-in-error", () => {
-        done(new Error("Sign in error"));
+        done(new Error("Sign in error instead of success"));
       });
 
       socket.emit("sign-in", user.sessionToken);
     });
-    it("FAIL - Token not valid on sign out", (done) => {
+    it("If the client sends a 'sign-out' with an invalid token, server reponds a 'sign-out-error' message", (done) => {
       socket.on("sign-out-ok", () => {
-        done(new Error("Signed out successfully"));
+        done(new Error("Signed out successfully instead of failing"));
       });
       socket.on("sign-out-error", () => {
         done();
@@ -117,12 +117,12 @@ describe("Sockets", () => {
       socket.emit("sign-in", user.sessionToken);
       sleep(100).then(() => socket.emit("sign-out", "token.not.valid"));
     });
-    it("OK - Valid sign out", (done) => {
+    it("If the client sends a 'sign-out' with a valid token, server reponds a 'sign-out-ok' message", (done) => {
       socket.on("sign-out-ok", () => {
         done();
       });
       socket.on("sign-out-error", () => {
-        done(new Error("Sign out error"));
+        done(new Error("Sign out error instead of success"));
       });
 
       socket.emit("sign-in", user.sessionToken);
@@ -178,7 +178,7 @@ describe("Sockets", () => {
       sockets.map((socket) => socket.disconnect());
     });
 
-    it("Remind (direct call)", async () => {
+    it("Send a 'reminder' message to each user for each event", async () => {
       await sendReminders(events);
 
       const promises = sockets.map(

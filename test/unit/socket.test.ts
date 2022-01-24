@@ -9,7 +9,7 @@ import {
 } from "@/services/db";
 import { createToken } from "@/services/auth";
 import { closeConnection, createConnection } from "@/services/db/setup";
-import { pingAll, sendReminders } from "@/socket";
+import socketServer, { pingAll, sendReminders } from "@/socket";
 
 import { createSocketClient } from "test/mocks/socket-client";
 import {
@@ -18,6 +18,7 @@ import {
   createMockUser,
   createMockUsers,
 } from "test/mocks/db";
+import { socket } from "@/config";
 
 jest.mock("@/services/auth", () => {
   const module =
@@ -39,6 +40,16 @@ describe("Sockets", () => {
   afterAll(closeConnection);
 
   describe("Connection", () => {
+    beforeAll(async () => {
+      await createConnection();
+      socketServer.listen(socket.PORT);
+    });
+
+    afterAll(async () => {
+      socketServer.close();
+      await closeConnection();
+    });
+
     it("PING all", async () => {
       const sockets = Array(8).map(createSocketClient);
 

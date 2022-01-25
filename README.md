@@ -49,12 +49,6 @@ This documentation can also be manually generated using `npm run docs`.
 
 If the server is executed, this documentation is also served as HTML at `localhost:3000/docs`, and can be used to interact with the running server.
 
-### Important notices
-
-#### Dev API
-For some specific tests, Dev API is expected to be mounted.
-If Dev API is not mounted, those specific tests will be marked as pending.
-
 ## Socket events summary
 
 ### Client to server

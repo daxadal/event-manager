@@ -7,7 +7,6 @@
     "docs": "ts-node ./src/docs/generator.ts",
     "start": "npm run docs && npm run tsc && node dist/index.js",
     "watch": "nodemon",
-    "reset": "node scripts/reset.js",
     "test": "jest --runInBand",
     "tsc": "rm -rf dist && tsc --project tsconfig.compile.json",
     "mocha": "mocha"

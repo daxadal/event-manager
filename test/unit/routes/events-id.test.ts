@@ -1,6 +1,5 @@
 import request from "supertest";
 import crypto from "crypto";
-import { Document } from "mongoose";
 import { mocked } from "ts-jest/utils";
 
 import app from "@/app";
@@ -28,7 +27,7 @@ jest.mock("@/services/auth", () => {
     verifyToken: jest.fn((req, res, next) => next()),
   };
 });
-decodeToken;
+
 const mockedDecodeToken = mocked(decodeToken, true);
 
 describe("The /events API", () => {

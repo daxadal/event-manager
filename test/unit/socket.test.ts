@@ -39,7 +39,7 @@ describe("Sockets", () => {
 
   afterAll(closeConnection);
 
-  describe("Connection test", () => {
+  xdescribe("Connection test", () => {
     beforeAll(() => {
       socketServer.listen(socketConfig.PORT);
     });

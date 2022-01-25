@@ -39,7 +39,6 @@ The server can be started using `npm start` script. The server also can be execu
 
 ## Cleanup and test
 
-The database can be purged using the `npm run reset`.
 Tests on the API (powered by `jest`) can be performed by executing `npm test`.
 
 ## Documentation

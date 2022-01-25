@@ -49,22 +49,14 @@ This documentation can also be manually generated using `npm run docs`.
 
 If the server is executed, this documentation is also served as HTML at `localhost:3000/docs`, and can be used to interact with the running server.
 
-### Important notices
-
-#### Dev API
-For some specific tests, Dev API is expected to be mounted.
-If Dev API is not mounted, those specific tests will be marked as pending.
-
 ## Socket events summary
 
 ### Client to server
 * `sign-in`: Sends the session token to the socket server to **bind** this socket to the user. This event should be sent **after** signing in or signing up through API and/or **after** creating a new socket for the user.
 * `sign-out`: Sends the session token to the socket server to **unbind** this socket from the user. This event should be sent **before** signing out through API and/or **before** disconnecting the user's socket.
-* `PONG`: response to server's `PING`.
 
 ### Server to client
 * `reminder`: Sends a reminder to the user about an upcoming event. The message containes a user-friendly message and additional "raw" details
-* `PING`: Pings a socket
 * `sign-in-ok`: Response to client's `sign-in` upon success
 * `sign-in-error`: Response to client's `sign-in` upon error
 * `sign-out-ok`:  Response to client's `sign-out` upon success

@@ -26,8 +26,8 @@ jest.mock("@/services/auth", () => {
 
   return {
     ...module,
-    decodeToken: jest.fn((req, res, next) => next()),
-    verifyToken: jest.fn((req, res, next) => next()),
+    addUserToRequest: jest.fn((req, res, next) => next()),
+    ensureLoggedIn: jest.fn((req, res, next) => next()),
   };
 });
 
@@ -39,7 +39,7 @@ describe("Sockets", () => {
 
   afterAll(closeConnection);
 
-  describe("Connection test", () => {
+  xdescribe("Connection test", () => {
     beforeAll(() => {
       socketServer.listen(socketConfig.PORT);
     });
@@ -48,8 +48,8 @@ describe("Sockets", () => {
       socketServer.close();
     });
 
-    it("PING-PONG communication", async () => {
-      const sockets = Array(8).map(createSocketClient);
+    it("The server can send a message to the clients", async () => {
+      const sockets = new Array(8).fill(undefined).map(createSocketClient);
 
       const promises = sockets.map(
         (socket) =>
@@ -59,7 +59,7 @@ describe("Sockets", () => {
               resolve(undefined);
             });
             sleep(100).then(() => {
-              reject();
+              reject(new Error("PING not recieved"));
             });
           })
       );
@@ -75,7 +75,7 @@ describe("Sockets", () => {
       socketServer.listen(socketConfig.PORT);
 
       user = await createMockUser();
-      user.sessionToken = createToken(user);
+      user.sessionToken = createToken(user.id);
       await user.save();
 
       socket = createSocketClient();
@@ -144,7 +144,7 @@ describe("Sockets", () => {
 
       users = await createMockUsers(AMOUNT_OF_USERS);
       users.forEach((user) => {
-        user.sessionToken = createToken(user);
+        user.sessionToken = createToken(user.id);
         return user.save();
       });
 

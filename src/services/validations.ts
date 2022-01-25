@@ -14,7 +14,7 @@ const validate =
     });
     if (error) {
       logger.info(
-        `"${req.originalUrl}": ${fieldToValidate} failed validation:\n -  Error: ${error.message}`
+        `"${req.method} ${req.originalUrl}": ${fieldToValidate} failed validation:\n -  Error: ${error.message}`
       );
       logger.debug(`Full Joi error:`, error);
       res.status(400).send({ message: error.message });

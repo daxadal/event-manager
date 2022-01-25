@@ -6,7 +6,7 @@ import { mocked } from "ts-jest/utils";
 import app from "@/app";
 import { User } from "@/services/db";
 import { closeConnection, createConnection } from "@/services/db/setup";
-import { decodeToken } from "@/services/auth";
+import { addUserToRequest } from "@/services/auth";
 import { HASH_ROUNDS, USER_RPM, USER_SIZE } from "@/routes/users";
 
 import { clearDatabase } from "test/mocks/db";
@@ -18,13 +18,13 @@ jest.mock("@/services/auth", () => {
   return {
     ...module,
 
-    decodeToken: jest.fn(),
-    verifyToken: jest.fn((req, res, next) => next()),
+    addUserToRequest: jest.fn(),
+    ensureLoggedIn: jest.fn((req, res, next) => next()),
     createToken: jest.fn(() => "token"),
   };
 });
 
-const mockedDecodeToken = mocked(decodeToken, true);
+const mockedAddUserToRequest = mocked(addUserToRequest, true);
 
 describe("The /users API", () => {
   beforeAll(createConnection);
@@ -115,7 +115,7 @@ describe("The /users API", () => {
         hashedPassword: await hash("password", HASH_ROUNDS),
       }).save();
 
-      mockedDecodeToken.mockImplementation((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementation((req: any, res, next) => {
         req.token = "token";
         req.user = user;
         next();
@@ -174,7 +174,7 @@ describe("The /users API", () => {
         hashedPassword: await hash("password", HASH_ROUNDS),
       }).save();
 
-      mockedDecodeToken.mockImplementation((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementation((req: any, res, next) => {
         req.token = "token";
         req.user = user;
         next();

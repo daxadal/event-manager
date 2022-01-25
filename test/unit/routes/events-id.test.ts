@@ -4,7 +4,7 @@ import { mocked } from "ts-jest/utils";
 
 import app from "@/app";
 import { EVENT_RPM, EVENT_SIZE } from "@/routes/events";
-import { decodeToken } from "@/services/auth";
+import { addUserToRequest } from "@/services/auth";
 import {
   Event,
   EventState,
@@ -23,12 +23,12 @@ jest.mock("@/services/auth", () => {
 
   return {
     ...module,
-    decodeToken: jest.fn((req, res, next) => next()),
-    verifyToken: jest.fn((req, res, next) => next()),
+    addUserToRequest: jest.fn((req, res, next) => next()),
+    ensureLoggedIn: jest.fn((req, res, next) => next()),
   };
 });
 
-const mockedDecodeToken = mocked(decodeToken, true);
+const mockedAddUserToRequest = mocked(addUserToRequest, true);
 
 describe("The /events API", () => {
   beforeAll(createConnection);
@@ -41,22 +41,26 @@ describe("The /events API", () => {
 
   describe("GET /events/{eventId} endpoint", () => {
     let creatorUser: UserDocument;
-    let otherUser: UserDocument;
+
+    const CREATOR_EMAIL = "creator@doe.com";
+    const OTHER_EMAIL = "other@doe.com";
 
     beforeEach(async () => {
-      creatorUser = await createMockUser({ email: "creator@doe.com" });
-      otherUser = await createMockUser({ email: "other@doe.com" });
+      creatorUser = await createMockUser({ email: CREATOR_EMAIL });
+      await createMockUser({ email: OTHER_EMAIL });
     });
 
     it("Returns 400 if the event does not exist", async () => {
       // given
-      mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
-        const user = await User.findOne({ email: "creator@doe.com" });
-        req.token = user ? "token" : undefined;
-        req.user = user;
+      mockedAddUserToRequest.mockImplementationOnce(
+        async (req: any, res, next) => {
+          const user = await User.findOne({ email: "creator@doe.com" });
+          req.token = user ? "token" : undefined;
+          req.user = user;
 
-        next();
-      });
+          next();
+        }
+      );
       const eventId = "60123456789abcdef1234567";
 
       // when
@@ -69,19 +73,21 @@ describe("The /events API", () => {
     });
 
     it.each`
-      authUser           | state                 | reason
-      ${"other@doe.com"} | ${EventState.DRAFT}   | ${"the event is draft and the caller is NOT the creator"}
-      ${undefined}       | ${EventState.PRIVATE} | ${"the event is private and the caller is NOT authenticated"}
+      authUser       | state                 | reason
+      ${OTHER_EMAIL} | ${EventState.DRAFT}   | ${"the event is draft and the caller is NOT the creator"}
+      ${undefined}   | ${EventState.PRIVATE} | ${"the event is private and the caller is NOT authenticated"}
     `("Returns 400 if $reason", async ({ authUser, state }) => {
       // given
-      mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
-        if (authUser) {
-          const user = await User.findOne({ email: authUser });
-          req.token = user ? "token" : undefined;
-          req.user = user;
+      mockedAddUserToRequest.mockImplementationOnce(
+        async (req: any, res, next) => {
+          if (authUser) {
+            const user = await User.findOne({ email: authUser });
+            req.token = user ? "token" : undefined;
+            req.user = user;
+          }
+          next();
         }
-        next();
-      });
+      );
       const event = await createMockEvent({
         creatorId: creatorUser._id,
         state,
@@ -98,20 +104,22 @@ describe("The /events API", () => {
     });
 
     it.each`
-      authUser             | state                 | reason
-      ${"creator@doe.com"} | ${EventState.DRAFT}   | ${"the event is draft and the caller is the creator"}
-      ${"other@doe.com"}   | ${EventState.PRIVATE} | ${"the event is private and the caller is authenticated"}
-      ${undefined}         | ${EventState.PUBLIC}  | ${"the event is public"}
+      authUser         | state                 | reason
+      ${CREATOR_EMAIL} | ${EventState.DRAFT}   | ${"the event is draft and the caller is the creator"}
+      ${OTHER_EMAIL}   | ${EventState.PRIVATE} | ${"the event is private and the caller is authenticated"}
+      ${undefined}     | ${EventState.PUBLIC}  | ${"the event is public"}
     `("Returns 200 and an event if $reason", async ({ authUser, state }) => {
       // given
-      mockedDecodeToken.mockImplementationOnce(async (req: any, res, next) => {
-        if (authUser) {
-          const user = await User.findOne({ email: authUser });
-          req.token = user ? "token" : undefined;
-          req.user = user;
+      mockedAddUserToRequest.mockImplementationOnce(
+        async (req: any, res, next) => {
+          if (authUser) {
+            const user = await User.findOne({ email: authUser });
+            req.token = user ? "token" : undefined;
+            req.user = user;
+          }
+          next();
         }
-        next();
-      });
+      );
       const event = await createMockEvent({
         creatorId: creatorUser._id,
         state,
@@ -138,7 +146,7 @@ describe("The /events API", () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
       otherUser = await createMockUser({ email: "other@doe.com" });
 
-      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
         req.token = "token";
         req.user = callerUser;
         next();
@@ -286,7 +294,7 @@ describe("The /events API", () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
       otherUser = await createMockUser({ email: "other@doe.com" });
 
-      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
         req.token = "token";
         req.user = callerUser;
         next();
@@ -359,13 +367,11 @@ describe("The /events API", () => {
 
   describe("Denial of service", () => {
     let callerUser: UserDocument;
-    let otherUser: UserDocument;
 
     beforeEach(async () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
-      otherUser = await createMockUser({ email: "other@doe.com" });
 
-      mockedDecodeToken.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
         req.token = "token";
         req.user = callerUser;
         next();
@@ -404,7 +410,8 @@ describe("The /events API", () => {
       // when
       const requestPromises = new Array(EVENT_RPM + 1)
         .fill(undefined)
-        .map((_, i) => request(app).get(`/events/${eventId}`));
+        .map(() => request(app).get(`/events/${eventId}`));
+
       const responses = await Promise.all(requestPromises);
 
       // then

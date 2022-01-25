@@ -2,8 +2,14 @@ import { Router } from "express";
 import Joi from "joi";
 import { Logger } from "winston";
 
-import { Event, EventState, format } from "@/services/db";
-import { verifyToken, decodeToken } from "@/services/auth";
+import {
+  Event,
+  EventDocument,
+  EventState,
+  format,
+  UserDocument,
+} from "@/services/db";
+import { ensureLoggedIn, addUserToRequest } from "@/services/auth";
 import { validateBody } from "@/services/validations";
 
 const router = Router();
@@ -52,8 +58,8 @@ router
    *         $ref: '#/components/responses/500'
    */
   .post(
-    decodeToken,
-    verifyToken,
+    addUserToRequest,
+    ensureLoggedIn,
     validateBody(
       Joi.object({
         headline: Joi.string().min(5).max(100).required(),
@@ -72,18 +78,20 @@ router
         ),
       })
     ),
-    async (req: any, res) => {
+    async (req, res) => {
       const logger: Logger | Console = (req as any).logger || console;
       try {
         const event = req.body;
+        const user: UserDocument = (req as any).user;
 
         if (event.state === EventState.PUBLIC) {
           const events = await Event.find({
             state: EventState.PUBLIC,
-            creatorId: req.user.id,
+            creatorId: user.id,
           });
 
           if (events.length > 0) {
+            logger.info("The user has already created a public event");
             res.status(400).send({ message: "Public events limit exceeded" });
             return;
           }
@@ -91,9 +99,10 @@ router
 
         const eventDB = await new Event({
           ...event,
-          creatorId: req.user.id,
+          creatorId: user.id,
         }).save();
 
+        logger.info("Event created");
         res
           .status(200)
           .send({ message: "Event created", event: format(eventDB) });
@@ -137,21 +146,21 @@ router
    *       500:
    *         $ref: '#/components/responses/500'
    */
-  .get(decodeToken, async (req: any, res) => {
+  .get(addUserToRequest, async (req, res) => {
     const logger: Logger | Console = (req as any).logger || console;
     try {
-      let query;
-      if (req.user)
-        query = Event.find().or([
+      const user: UserDocument = (req as any).user;
+
+      let events: EventDocument[];
+      if (user)
+        events = await Event.find().or([
           { state: { $in: [EventState.PUBLIC, EventState.PRIVATE] } },
-          { creatorId: req.user.id },
+          { creatorId: user.id },
         ]);
-      else query = Event.find({ state: EventState.PUBLIC });
+      else events = await Event.find({ state: EventState.PUBLIC });
 
-      const events = await query.exec();
-
-      if (events) res.status(200).send({ events: events.map(format) });
-      else res.status(400).send({ message: "Event not found" });
+      logger.info(`Events found: ${events.length}`);
+      res.status(200).send({ events: events.map(format) });
     } catch (error) {
       logger.error(
         `Internal server error at ${req.method} ${req.originalUrl}`,

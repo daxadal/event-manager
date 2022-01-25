@@ -44,8 +44,13 @@ export const loadEvent: RequestHandler = async (req: any, res, next) => {
   try {
     req.event = await Event.findById(eventId).exec();
 
-    if (req.event && isEventVisible(req.event, req.user)) next();
-    else res.status(400).send({ message: "Event not found" });
+    if (req.event && isEventVisible(req.event, req.user)) {
+      logger.info(`"${req.method} ${req.originalUrl}": Event found`);
+      next();
+    } else {
+      logger.error(`"${req.method} ${req.originalUrl}": Event not found`);
+      res.status(400).send({ message: "Event not found" });
+    }
   } catch (error) {
     logger.error(
       `Internal server error at ${req.method} ${req.originalUrl}`,

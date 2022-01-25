@@ -10,7 +10,7 @@ export interface EventType {
   headline: string;
   description?: string;
   startDate: Date;
-  location?: { name?: String; lat?: number; lon?: number };
+  location?: { name?: string; lat?: number; lon?: number };
   state: EventState;
   creatorId: Types.ObjectId;
 }

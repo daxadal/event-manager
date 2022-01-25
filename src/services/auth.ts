@@ -1,26 +1,24 @@
 import { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import { Logger } from "winston";
-import * as DB from "./db";
 
 import { jwt as jwtConfig } from "@/config";
+import { User, UserDocument } from "@/services/db";
 
 const TOKEN_EXPIRATION = "8h";
 
-export const decodeToken: RequestHandler = async (req: any, res, next) => {
+export const addUserToRequest: RequestHandler = async (req, res, next) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
     const bearerHeader = req.get("Authorization");
-    const match = /^[Bb]earer (.+)$/.exec(bearerHeader);
+    const match = /^Bearer (.+)$/i.exec(bearerHeader);
 
     if (!match) {
-      // No Bearer token found. No decoding necessary
       next();
     } else {
-      // eslint-disable-next-line prefer-destructuring
-      req.token = match[1];
+      const [, token] = match;
 
-      let decoded;
+      let decoded: any;
       try {
         decoded = jwt.verify(match[1], jwtConfig.TOKEN_SECRET);
       } catch (error) {
@@ -32,8 +30,9 @@ export const decodeToken: RequestHandler = async (req: any, res, next) => {
         return;
       }
 
+      let user: UserDocument;
       try {
-        req.user = await DB.User.findById(decoded.id);
+        user = await User.findById(decoded.id);
       } catch (error) {
         logger.error(
           `Internal server error at ${req.method} ${req.originalUrl}`,
@@ -43,9 +42,14 @@ export const decodeToken: RequestHandler = async (req: any, res, next) => {
         return;
       }
 
-      if (!req.user || req.user.sessionToken !== req.token)
+      if (!user || user.sessionToken !== token) {
+        logger.info("Session token expired");
         res.status(403).send({ message: "Session token expired" });
-      else next();
+      } else {
+        (req as any).token = token;
+        (req as any).user = user;
+        next();
+      }
     }
   } catch (error) {
     logger.error(
@@ -56,13 +60,16 @@ export const decodeToken: RequestHandler = async (req: any, res, next) => {
   }
 };
 
-export const verifyToken: RequestHandler = async (req: any, res, next) => {
-  if (!req.user) res.status(401).send({ message: "Unauthorized" });
-  else next();
+export const ensureLoggedIn: RequestHandler = async (req: any, res, next) => {
+  if (!req.user) {
+    const logger: Logger | Console = (req as any).logger || console;
+    logger.info("Session token expired");
+    res.status(401).send({ message: "Unauthorized" });
+  } else next();
 };
 
-export function createToken(user) {
-  return jwt.sign({ id: String(user.id) }, jwtConfig.TOKEN_SECRET, {
+export function createToken(userId: string) {
+  return jwt.sign({ id: userId }, jwtConfig.TOKEN_SECRET, {
     expiresIn: TOKEN_EXPIRATION,
   });
 }

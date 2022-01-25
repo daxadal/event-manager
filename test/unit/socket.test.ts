@@ -48,7 +48,7 @@ describe("Sockets", () => {
       socketServer.close();
     });
 
-    it("PING-PONG communication", async () => {
+    it("The server can send a message to the clients", async () => {
       const sockets = new Array(8).fill(undefined).map(createSocketClient);
 
       const promises = sockets.map(
@@ -59,7 +59,7 @@ describe("Sockets", () => {
               resolve(undefined);
             });
             sleep(100).then(() => {
-              reject();
+              reject(new Error("PING not recieved"));
             });
           })
       );

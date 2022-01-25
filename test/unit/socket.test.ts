@@ -39,15 +39,13 @@ describe("Sockets", () => {
 
   afterAll(closeConnection);
 
-  describe("Connection test", () => {
-    beforeAll(async () => {
-      await createConnection();
+  xdescribe("Connection test", () => {
+    beforeAll( () => {
       socketServer.listen(socket.PORT);
     });
 
-    afterAll(async () => {
+    afterAll( () => {
       socketServer.close();
-      await closeConnection();
     });
 
     it("PING-PONG communication", async () => {
@@ -70,7 +68,7 @@ describe("Sockets", () => {
     });
   });
 
-  describe("Sign in & sign out", () => {
+  xdescribe("Sign in & sign out", () => {
     let socket: Socket;
     let user: UserDocument;
     beforeAll(async () => {
@@ -130,7 +128,7 @@ describe("Sockets", () => {
     });
   });
 
-  describe("Reminder", () => {
+  xdescribe("Reminder", () => {
     const AMOUNT_OF_USERS = 4;
     const AMOUNT_OF_EVENTS = AMOUNT_OF_USERS - 1;
     let events: EventDocument[];

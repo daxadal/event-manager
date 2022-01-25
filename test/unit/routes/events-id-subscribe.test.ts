@@ -18,8 +18,8 @@ jest.mock("@/services/auth", () => {
     jest.requireActual<typeof import("@/services/auth")>("@/services/auth");
   return {
     ...module,
-    decodeToken: jest.fn((req, res, next) => next()),
-    verifyToken: jest.fn((req, res, next) => next()),
+    addUserToRequest: jest.fn((req, res, next) => next()),
+    ensureLoggedIn: jest.fn((req, res, next) => next()),
   };
 });
 

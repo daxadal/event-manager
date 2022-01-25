@@ -18,8 +18,8 @@ jest.mock("@/services/auth", () => {
   return {
     ...module,
 
-    decodeToken: jest.fn(),
-    verifyToken: jest.fn((req, res, next) => next()),
+    addUserToRequest: jest.fn(),
+    ensureLoggedIn: jest.fn((req, res, next) => next()),
     createToken: jest.fn(() => "token"),
   };
 });

@@ -26,8 +26,8 @@ jest.mock("@/services/auth", () => {
 
   return {
     ...module,
-    decodeToken: jest.fn((req, res, next) => next()),
-    verifyToken: jest.fn((req, res, next) => next()),
+    addUserToRequest: jest.fn((req, res, next) => next()),
+    ensureLoggedIn: jest.fn((req, res, next) => next()),
   };
 });
 
@@ -75,7 +75,7 @@ describe("Sockets", () => {
       socketServer.listen(socketConfig.PORT);
 
       user = await createMockUser();
-      user.sessionToken = createToken(user);
+      user.sessionToken = createToken(user.id);
       await user.save();
 
       socket = createSocketClient();
@@ -144,7 +144,7 @@ describe("Sockets", () => {
 
       users = await createMockUsers(AMOUNT_OF_USERS);
       users.forEach((user) => {
-        user.sessionToken = createToken(user);
+        user.sessionToken = createToken(user.id);
         return user.save();
       });
 

@@ -42,8 +42,12 @@ describe("The /events API", () => {
   describe("GET /events/{eventId} endpoint", () => {
     let creatorUser: UserDocument;
 
+    const CREATOR_EMAIL = "creator@doe.com";
+    const OTHER_EMAIL = "other@doe.com";
+
     beforeEach(async () => {
-      creatorUser = await createMockUser({ email: "creator@doe.com" });
+      creatorUser = await createMockUser({ email: CREATOR_EMAIL });
+      await createMockUser({ email: OTHER_EMAIL });
     });
 
     it("Returns 400 if the event does not exist", async () => {
@@ -69,9 +73,9 @@ describe("The /events API", () => {
     });
 
     it.each`
-      authUser           | state                 | reason
-      ${"other@doe.com"} | ${EventState.DRAFT}   | ${"the event is draft and the caller is NOT the creator"}
-      ${undefined}       | ${EventState.PRIVATE} | ${"the event is private and the caller is NOT authenticated"}
+      authUser       | state                 | reason
+      ${OTHER_EMAIL} | ${EventState.DRAFT}   | ${"the event is draft and the caller is NOT the creator"}
+      ${undefined}   | ${EventState.PRIVATE} | ${"the event is private and the caller is NOT authenticated"}
     `("Returns 400 if $reason", async ({ authUser, state }) => {
       // given
       mockedAddUserToRequest.mockImplementationOnce(
@@ -100,10 +104,10 @@ describe("The /events API", () => {
     });
 
     it.each`
-      authUser             | state                 | reason
-      ${"creator@doe.com"} | ${EventState.DRAFT}   | ${"the event is draft and the caller is the creator"}
-      ${"other@doe.com"}   | ${EventState.PRIVATE} | ${"the event is private and the caller is authenticated"}
-      ${undefined}         | ${EventState.PUBLIC}  | ${"the event is public"}
+      authUser         | state                 | reason
+      ${CREATOR_EMAIL} | ${EventState.DRAFT}   | ${"the event is draft and the caller is the creator"}
+      ${OTHER_EMAIL}   | ${EventState.PRIVATE} | ${"the event is private and the caller is authenticated"}
+      ${undefined}     | ${EventState.PUBLIC}  | ${"the event is public"}
     `("Returns 200 and an event if $reason", async ({ authUser, state }) => {
       // given
       mockedAddUserToRequest.mockImplementationOnce(

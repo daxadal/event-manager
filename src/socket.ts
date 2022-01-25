@@ -1,11 +1,18 @@
 import http from "http";
 import { Server } from "socket.io";
 
-import * as DB from "@/services/db";
 import { getLogger } from "@/services/winston";
+import {
+  EventDocument,
+  format,
+  Subscription,
+  SubscriptionDocument,
+  User,
+  UserDocument,
+} from "@/services/db";
 
 const httpServer = http.createServer();
-const io = new Server(httpServer);
+export const io = new Server(httpServer);
 
 const logger = getLogger("socket-server");
 
@@ -16,12 +23,8 @@ io.on("connection", (socket) => {
     logger.debug("Server: user disconnected");
   });
 
-  socket.on("PONG", () => {
-    logger.debug(`Server PONG: ${socket.id}`);
-  });
-
   socket.on("sign-in", async (sessionToken) => {
-    const user = await DB.User.findOne({
+    const user = await User.findOne({
       sessionToken,
     });
     if (user) {
@@ -38,7 +41,7 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("sign-out", async (sessionToken) => {
-    const user = await DB.User.findOne({
+    const user = await User.findOne({
       sessionToken,
     });
     if (user && user.socketId === socket.id) {
@@ -53,18 +56,20 @@ io.on("connection", (socket) => {
       socket.emit("sign-out-error");
     }
   });
-
-  // socket.emit('PING', socket.id);
 });
 
-function format(event, user, sub) {
+function formatReminder(
+  event: EventDocument,
+  user: UserDocument,
+  sub: SubscriptionDocument
+) {
   return {
     message: `Hi ${
       user.name
     }! You have an event at ${event.startDate.toLocaleString()}: "${
       event.headline
     }"`,
-    event: DB.format(event),
+    event: format(event),
     subscription: {
       subscriptionDate: sub.subscriptionDate,
       comment: sub.comment,
@@ -72,15 +77,15 @@ function format(event, user, sub) {
   };
 }
 
-export async function sendReminders(events) {
+export async function sendReminders(events: EventDocument[]) {
   const all = await io.fetchSockets();
   logger.info("All sockets:", { socketIds: all.map((s) => s.id) });
-  const subscriptions = await DB.Subscription.find().in(
+  const subscriptions = await Subscription.find().in(
     "eventId",
     events.map((event) => event.id)
   );
   logger.info(`subscriptions.length ${subscriptions.length}`);
-  const users = await DB.User.find().in(
+  const users = await User.find().in(
     "_id",
     subscriptions.map((sub) => sub.subscriberId)
   );
@@ -88,12 +93,10 @@ export async function sendReminders(events) {
     const event = events.find((e) => e.id === String(sub.eventId));
     const user = users.find((u) => u.id === String(sub.subscriberId));
     const sockets = await io.in(user.socketId).fetchSockets();
-    sockets.map((socket) => socket.emit("reminder", format(event, user, sub)));
+    sockets.map((socket) =>
+      socket.emit("reminder", formatReminder(event, user, sub))
+    );
   });
-}
-
-export async function pingAll() {
-  io.emit("PING");
 }
 
 export default httpServer;

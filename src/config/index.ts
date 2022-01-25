@@ -38,10 +38,6 @@ export const pass = {
   SECRET: parseEnvString("PASS_SECRET", parsingErrors),
 };
 
-export const mocha = {
-  SOCKET_VERBOSE: parseBoolean("MOCHA_SOCKET_VERBOSE", parsingErrors),
-};
-
 export const winston = {
   slack: {
     level: parseEnvLogLevel("WINSTON_SLACK_LEVEL", parsingErrors),

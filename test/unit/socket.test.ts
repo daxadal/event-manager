@@ -49,7 +49,7 @@ describe("Sockets", () => {
     });
 
     it("PING-PONG communication", async () => {
-      const sockets = Array(8).map(createSocketClient);
+      const sockets = new Array(8).fill(undefined).map(createSocketClient);
 
       const promises = sockets.map(
         (socket) =>

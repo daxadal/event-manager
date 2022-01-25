@@ -300,9 +300,10 @@ describe("The /events API", () => {
       // given
 
       // when
-      const requestPromises = Array(EVENT_RPM + 1).map(() =>
-        request(app).get("/events")
-      );
+      const requestPromises = new Array(EVENT_RPM + 1)
+        .fill(undefined)
+        .map(() => request(app).get("/events"));
+
       const responses = await Promise.all(requestPromises);
 
       // then

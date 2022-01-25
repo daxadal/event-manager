@@ -408,9 +408,10 @@ describe("The /events API", () => {
       const eventId = event._id;
 
       // when
-      const requestPromises = Array(EVENT_RPM + 1).map(() =>
-        request(app).get(`/events/${eventId}`)
-      );
+      const requestPromises = new Array(EVENT_RPM + 1)
+        .fill(undefined)
+        .map(() => request(app).get(`/events/${eventId}`));
+
       const responses = await Promise.all(requestPromises);
 
       // then

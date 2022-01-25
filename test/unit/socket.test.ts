@@ -18,7 +18,7 @@ import {
   createMockUser,
   createMockUsers,
 } from "test/mocks/db";
-import { socket } from "@/config";
+import { socket as socketConfig } from "@/config";
 
 jest.mock("@/services/auth", () => {
   const module =
@@ -39,12 +39,12 @@ describe("Sockets", () => {
 
   afterAll(closeConnection);
 
-  xdescribe("Connection test", () => {
-    beforeAll( () => {
-      socketServer.listen(socket.PORT);
+  describe("Connection test", () => {
+    beforeAll(() => {
+      socketServer.listen(socketConfig.PORT);
     });
 
-    afterAll( () => {
+    afterAll(() => {
       socketServer.close();
     });
 
@@ -72,6 +72,8 @@ describe("Sockets", () => {
     let socket: Socket;
     let user: UserDocument;
     beforeAll(async () => {
+      socketServer.listen(socketConfig.PORT);
+
       user = await createMockUser();
       user.sessionToken = createToken(user);
       await user.save();
@@ -82,6 +84,7 @@ describe("Sockets", () => {
     afterAll(async () => {
       await clearDatabase();
       socket.disconnect();
+      socketServer.close();
     });
 
     it("If the client sends a 'sign-in' with an invalid token, server reponds a 'sign-in-error' message", (done) => {
@@ -137,6 +140,8 @@ describe("Sockets", () => {
     let users: UserDocument[];
 
     beforeAll(async () => {
+      socketServer.listen(socketConfig.PORT);
+
       users = await createMockUsers(AMOUNT_OF_USERS);
       users.forEach((user) => {
         user.sessionToken = createToken(user);
@@ -174,6 +179,8 @@ describe("Sockets", () => {
     afterAll(async () => {
       await clearDatabase();
       sockets.map((socket) => socket.disconnect());
+
+      socketServer.close();
     });
 
     it("Send a 'reminder' message to each user for each event", async () => {

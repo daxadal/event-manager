@@ -15,7 +15,6 @@ const parsingErrors: string[] = [];
 
 export const api = {
   PORT: "3000",
-  DEV: parseBoolean("DEVELOPMENT_API", parsingErrors),
 };
 
 export const db = {

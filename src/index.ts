@@ -41,7 +41,6 @@ socketServer.listen(socket.PORT, () => {
   logger.info(`Socket listening on port ${socket.PORT}...`);
 });
 
-logger.info(`DEV API is ${api.DEV ? "active" : "NOT available"}`);
 logger.info(`Bree job is ${breeConfig.START ? "active" : "NOT available"}`);
 
 if (breeConfig.START) {

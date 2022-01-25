@@ -1,18 +1,14 @@
 import express, { NextFunction, Request, Response } from "express";
 import { Logger } from "winston";
 
-import { api } from "@/config";
-
 import eventsRouter from "@/routes/events";
 import usersRouter from "@/routes/users";
 import docsRouter from "@/routes/docs";
-import devRouter from "@/routes/dev";
 import jobsRouter from "@/routes/jobs";
 import { getLogger } from "@/services/winston";
 
 const app = express();
 
-if (api.DEV) app.use("/dev", devRouter);
 app.use("/docs", docsRouter);
 app.use("/events", eventsRouter);
 app.use("/users", usersRouter);

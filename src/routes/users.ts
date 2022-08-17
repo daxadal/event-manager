@@ -1,4 +1,4 @@
-import { hash, compare } from "bcrypt";
+import { hash, compare } from "bcryptjs";
 import { json, Router } from "express";
 import rateLimit from "express-rate-limit";
 import Joi from "joi";

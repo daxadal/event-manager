@@ -8,6 +8,7 @@ A notification will be sent to you via socket 24 hours before the event starts, 
 # Repositories
 
 - Main repo: https://github.com/daxadal/event-manager
+- Backup repo: https://gitlab.com/egarciadececa/event-manager
 
 # Availability
 

@@ -1,5 +1,5 @@
 import request from "supertest";
-import { mocked } from "ts-jest/utils";
+import { mocked } from "jest-mock";
 
 import app from "@/app";
 import { addUserToRequest } from "@/services/auth";

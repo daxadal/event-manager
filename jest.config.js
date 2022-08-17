@@ -7,18 +7,27 @@ const moduleNameMapper = pathsToModuleNameMapper(compilerOptions.paths, {
 });
 
 process.env.WINSTON_CONSOLE_LEVEL = "none";
-process.env.WINSTON_SLACK_LEVEL = "none";
 
 process.env.WINSTON_FILE_LEVEL = "info";
-process.env.WINSTON_FILE_PREFIX = "_jest_";
+process.env.WINSTON_FILE_PREFIX = "__jest__";
 
-process.env.DISABLE_MOCKED_WARNING = true;
+process.env.WINSTON_SLACK_LEVEL = "none";
+process.env.WINSTON_SLACK_PRIORITY_WEBHOOK = undefined;
+process.env.WINSTON_SLACK_NON_PRIORITY_WEBHOOK = undefined;
+
+let preset;
+if (process.env.CI) {
+  preset = undefined;
+  process.env.MONGO_URL = "mongodb://mongo-docker:27017/EventManager";
+} else {
+  preset = "@shelf/jest-mongodb";
+}
 
 module.exports = {
-  preset: "@shelf/jest-mongodb",
+  preset,
   reporters: ["default", "jest-junit"],
 
-  roots: ["./test"],
+  roots: ["test"],
   testMatch: ["**/?(*.)+(spec|test).+(ts|js)"],
   transform: {
     "^.+\\.(ts|js)$": "ts-jest",

@@ -1,0 +1,86 @@
+default:
+  image: node:16-bullseye-slim
+  interruptible: true
+
+# This folders are cached between builds
+cache: &cache
+  paths:
+    - node_modules/
+    - dist/
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"' # Run when requested manually
+      when: always
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' # Run on merge request
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_OPEN_MERGE_REQUESTS' # Avoid duplicated pipelines
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH' # Run on branch push
+      when: always
+    - when: never # Otherwise -> Don't pipeline
+
+stages:
+  - build
+  - test
+  - deploy
+
+compile:
+  stage: build
+  cache:
+    <<: *cache
+    policy: push
+  script:
+    - npm ci
+    - npm run docs
+    - npm run tsc
+
+jest:
+  stage: test
+  cache:
+    <<: *cache
+    policy: pull
+  services:
+    - name: mongo
+      alias: mongo-docker
+  script:
+    - cp $DOTENV_DEV .env
+    - npm run test
+  artifacts:
+    when: always
+    paths:
+      - logs/
+      - junit.xml
+    reports:
+      junit:
+        - junit.xml
+
+lint:
+  stage: test
+  cache:
+    <<: *cache
+    policy: pull
+  script:
+    - npm run lint
+
+deploy-to-server:
+  stage: deploy
+  image: instrumentisto/rsync-ssh:alpine
+  cache:
+    <<: *cache
+    policy: pull
+  environment:
+    name: development
+  script:
+    - cp $DOTENV_DEV .env
+    - cp $SERVER_KEY server_key
+    - ./deploy-pipeline.sh
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - if: "$CI_OPEN_MERGE_REQUESTS"
+      when: on_success
+    - when: manual
+      allow_failure: true

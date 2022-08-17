@@ -1,8 +1,8 @@
-# Whisbi Event Manager
+# Event Manager
 
 ## General description
 
-Whisbi Event Manager allows you to manage your upcoming events, either create your own or subscribe to events from other users. No login is required to take a look at available events, but the events you will see may be more limited. Also, login is required to create, update or delete an event, or to subscribe to any event from other users. A notification will be sent to you via socket 24 hours before the event starts, to remind you of it.
+Event Manager allows you to manage your upcoming events, either create your own or subscribe to events from other users. No login is required to take a look at available events, but the events you will see may be more limited. Also, login is required to create, update or delete an event, or to subscribe to any event from other users. A notification will be sent to you via socket 24 hours before the event starts, to remind you of it.
 
 # Stack
 

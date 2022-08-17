@@ -28,11 +28,7 @@ export function createConnection(): Promise<typeof mongoose> {
     });
   });
 
-  return mongoose.connect(dbConfig.URL, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-    useCreateIndex: true,
-  });
+  return mongoose.connect(dbConfig.URL);
 }
 
 export function closeConnection(): Promise<void> {

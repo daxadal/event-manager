@@ -10,7 +10,7 @@ ssh -o StrictHostKeyChecking=no -i server_key $SERVER_USER@$SERVER_IP \
 
 echo " === Starting secure copy... === "
 rsync -e "ssh -o StrictHostKeyChecking=no -i server_key" -r \
-  .env node_modules dist sql package.json $SERVER_USER@$SERVER_IP:$SERVER_LOCATION
+  .env node_modules dist package.json $SERVER_USER@$SERVER_IP:$SERVER_LOCATION
 
 echo " === Restarting server... === "
 ssh -o StrictHostKeyChecking=no -i server_key $SERVER_USER@$SERVER_IP \

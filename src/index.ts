@@ -1,6 +1,6 @@
 import "module-alias/register";
 
-import { api, bree as breeConfig, configDebug, socket } from "@/config";
+import { api, cron, configDebug, socket } from "@/config";
 import socketServer from "@/socket";
 import app from "@/app";
 import { createConnection } from "@/services/db/setup";
@@ -41,8 +41,8 @@ socketServer.listen(socket.PORT, () => {
   logger.info(`Socket listening on port ${socket.PORT}...`);
 });
 
-logger.info(`Bree job is ${breeConfig.START ? "active" : "NOT available"}`);
+logger.info(`Cron job is ${cron.START ? "active" : "NOT available"}`);
 
-if (breeConfig.START) {
+if (cron.START) {
   new CronJob("* * * * *", remindEvents, null, true);
 }

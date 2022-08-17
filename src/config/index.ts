@@ -29,7 +29,7 @@ export const jwt = {
   TOKEN_SECRET: parseEnvString("TOKEN_SECRET", parsingErrors),
 };
 
-export const bree = {
+export const cron = {
   START: parseBoolean("START_REMINDERS", parsingErrors),
 };
 

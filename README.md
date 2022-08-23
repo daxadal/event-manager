@@ -1,4 +1,7 @@
-# Event Manager
+# Event Manager (API)
+
+_(This project is still a work in progress.
+Functionalities might be missing or bugs might be present)_
 
 Event Manager allows you to manage your upcoming events, either create your own or subscribe to events from other users.
 No login is required to take a look at available events, but the events you will see may be more limited.

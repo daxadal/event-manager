@@ -1,7 +1,7 @@
-import { hash } from "bcrypt";
+import { hash } from "bcryptjs";
 import request from "supertest";
 import crypto from "crypto";
-import { mocked } from "ts-jest/utils";
+import { mocked } from "jest-mock";
 
 import app from "@/app";
 import { User } from "@/services/db";

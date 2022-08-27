@@ -33,8 +33,9 @@ if (configDebug.parsingErrors.length > 0) {
 
 createConnection();
 
-app.listen(api.PORT, () => {
-  logger.info(`Server listening on port ${api.PORT}...`);
+const port = process.env.PORT ? parseInt(process.env.PORT) : api.PORT;
+app.listen(port, () => {
+  logger.info(`Server listening on port ${port}...`);
 });
 
 socketServer.listen(socket.PORT, () => {

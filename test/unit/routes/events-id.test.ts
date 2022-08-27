@@ -1,6 +1,6 @@
 import request from "supertest";
 import crypto from "crypto";
-import { mocked } from "ts-jest/utils";
+import { mocked } from "jest-mock";
 
 import app from "@/app";
 import { EVENT_RPM, EVENT_SIZE } from "@/routes/events";

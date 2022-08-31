@@ -66,11 +66,6 @@ npm test
 
 Tests are powered by `jest`, and a report file (compatible with Gitlab CI/CD) is generated on each execution.
 
-Tests use the `mysql` service in the running machine.
-A test database must exist, and the configured user must have all permissions in it
-
-_(**NOTE**: If the variable `DB_AUTO_CREATE` is set to true, there's no need to create the database beforehand.
-But, in this case, the configured user must have permission to create databases)_
 
 # Socket events summary
 

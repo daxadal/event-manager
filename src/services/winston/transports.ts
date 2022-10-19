@@ -1,7 +1,7 @@
 import path from "path";
 import TransportStream from "winston-transport";
 import SlackHook from "winston-slack-webhook-transport";
-import { transports } from "winston";
+import { format, transports } from "winston";
 
 import { winston as config } from "@/config";
 import { fileAndConsoleFormatter, slackFormatter } from "./formatters";
@@ -22,7 +22,11 @@ export const getConsoleTransport = (
   level: string,
   silent = false
 ): TransportStream =>
-  new transports.Console({ level, silent, format: fileAndConsoleFormatter });
+  new transports.Console({
+    level,
+    silent,
+    format: format.combine(format.colorize(), fileAndConsoleFormatter),
+  });
 
 export const getFileTransport = (
   level: string,

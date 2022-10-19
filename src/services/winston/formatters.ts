@@ -49,7 +49,7 @@ export const fileAndConsoleFormatter: Format = format.printf(
       }
 
     //Add label
-    return `[${timestamp} ${level}]: ${msg}`;
+    return `${timestamp} [${level}]: ${msg}`;
   }
 );
 

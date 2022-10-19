@@ -5,9 +5,10 @@ import {
   parseEnvString,
   parseEnvLogLevel,
   parseOptEnvString,
+  LogLevel,
 } from "./types-helpers";
 
-export { LogLevel } from "./types-helpers";
+export { LogLevel };
 
 const { error, parsed } = dotenv.config();
 
@@ -39,7 +40,11 @@ export const pass = {
 
 export const winston = {
   slack: {
-    level: parseEnvLogLevel("WINSTON_SLACK_LEVEL", parsingErrors),
+    level: parseEnvLogLevel(
+      "WINSTON_SLACK_LEVEL",
+      LogLevel.NONE,
+      parsingErrors
+    ),
     webhooks: {
       priority: parseOptEnvString(
         "WINSTON_SLACK_PRIORITY_WEBHOOK",
@@ -52,10 +57,14 @@ export const winston = {
     },
   },
   console: {
-    level: parseEnvLogLevel("WINSTON_CONSOLE_LEVEL", parsingErrors),
+    level: parseEnvLogLevel(
+      "WINSTON_CONSOLE_LEVEL",
+      LogLevel.INFO,
+      parsingErrors
+    ),
   },
   file: {
-    level: parseEnvLogLevel("WINSTON_FILE_LEVEL", parsingErrors),
+    level: parseEnvLogLevel("WINSTON_FILE_LEVEL", LogLevel.NONE, parsingErrors),
     prefix: parseOptEnvString("WINSTON_FILE_PREFIX", parsingErrors),
   },
 };

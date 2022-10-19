@@ -39,12 +39,16 @@ export function parseOptEnvString(
   return "";
 }
 
-export function parseEnvLogLevel(name: string, errors: string[]): LogLevel {
+export function parseEnvLogLevel(
+  name: string,
+  defaultValue: LogLevel,
+  errors: string[]
+): LogLevel {
   const value = process.env[name];
 
   if (!value) {
     errors.push(`${name} must be one of: ${Object.keys(LogLevel)}`);
-    return LogLevel.NONE;
+    return defaultValue;
   }
   if (/^none$/i.test(value)) return LogLevel.NONE;
   if (/^error$/i.test(value)) return LogLevel.ERROR;
@@ -53,5 +57,5 @@ export function parseEnvLogLevel(name: string, errors: string[]): LogLevel {
   if (/^verbose$/i.test(value)) return LogLevel.VERBOSE;
 
   errors.push(`${name} must be one of: ${Object.keys(LogLevel).join(", ")}`);
-  return LogLevel.NONE;
+  return defaultValue;
 }

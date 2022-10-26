@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
+import cors from "cors";
 import { Logger } from "winston";
 
 import eventsRouter from "@/routes/events";
@@ -8,6 +9,8 @@ import jobsRouter from "@/routes/jobs";
 import { getLogger } from "@/services/winston";
 
 const app = express();
+
+app.use(cors());
 
 app.use("/docs", docsRouter);
 app.use("/events", eventsRouter);

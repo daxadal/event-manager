@@ -99,9 +99,9 @@ export const getLoggerMiddleware =
     next();
   };
 
-export const closeLogger: RequestHandler = (req, res) => {
-  if (res.locals.logger) {
-    const logger = res.locals.logger as Logger;
+export const closeLogger: RequestHandler = (req: any) => {
+  if (req.logger) {
+    const logger = req.logger as Logger;
     logger.debug("Closing logger...");
     logger.close();
   }

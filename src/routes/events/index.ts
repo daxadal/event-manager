@@ -5,7 +5,8 @@ import eventsRootRouter from "./root";
 import eventsIdRouter from "./id";
 import eventsSubscribeRouter from "./subscribe";
 
-import { getLoggerMiddleware } from "@/services/winston";
+import { closeLogger, getLoggerMiddleware } from "@/services/winston";
+import { delayAfterResponse } from "@/services/middlewares";
 
 export const EVENT_SIZE = "1kb";
 export const EVENT_RPM = 100;
@@ -13,6 +14,7 @@ export const EVENT_RPM = 100;
 const router = Router();
 
 router.use(getLoggerMiddleware("routes/events"));
+router.use(delayAfterResponse(closeLogger));
 
 router.use(json({ limit: EVENT_SIZE }));
 router.use(urlencoded({ extended: true }));

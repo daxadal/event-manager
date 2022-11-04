@@ -7,7 +7,8 @@ import { Logger } from "winston";
 import { User, UserDocument } from "@/services/db";
 import { createToken, addUserToRequest, ensureLoggedIn } from "@/services/auth";
 import { validateBody } from "@/services/validations";
-import { getLoggerMiddleware } from "@/services/winston";
+import { closeLogger, getLoggerMiddleware } from "@/services/winston";
+import { delayAfterResponse } from "@/services/middlewares";
 
 export const USER_SIZE = "512b";
 export const USER_RPM = 30;
@@ -18,6 +19,7 @@ export const HASH_ROUNDS = 10;
 const router = Router();
 
 router.use(getLoggerMiddleware("routes/users"));
+router.use(delayAfterResponse(closeLogger));
 
 router.use(json({ limit: USER_SIZE }));
 router.use(

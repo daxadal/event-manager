@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import { getLogger } from "@/services/winston";
 import {
   EventDocument,
+  EventType,
   format,
   Subscription,
   SubscriptionDocument,
@@ -64,11 +65,20 @@ io.on("connection", (socket) => {
   });
 });
 
+interface Reminder {
+  message: string;
+  event: { id: string } & EventType;
+  subscription: {
+    subscriptionDate: Date;
+    comment: string;
+  };
+}
+
 function formatReminder(
   event: EventDocument,
   user: UserDocument,
   sub: SubscriptionDocument
-) {
+): Reminder {
   return {
     message: `Hi ${
       user.name
@@ -83,7 +93,7 @@ function formatReminder(
   };
 }
 
-export async function sendReminders(events: EventDocument[]) {
+export async function sendReminders(events: EventDocument[]): Promise<void> {
   const all = await io.fetchSockets();
   logger.info("All sockets:", { socketIds: all.map((s) => s.id) });
   const subscriptions = await Subscription.find().in(

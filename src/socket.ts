@@ -10,9 +10,15 @@ import {
   User,
   UserDocument,
 } from "@/services/db";
+import { socket } from "@/config";
 
 const httpServer = http.createServer();
-export const io = new Server(httpServer);
+export const io = new Server(httpServer, {
+  cors: {
+    origin: socket.CORS_ORIGINS.split(","),
+    methods: ["GET", "POST"],
+  },
+});
 
 const logger = getLogger("socket-server");
 

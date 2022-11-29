@@ -244,7 +244,7 @@ router.post("/sign-out", addUserToRequest, ensureLoggedIn, async (req, res) => {
  *               type: object
  *               properties:
  *                 event:
- *                   $ref: '#/components/schemas/SignInData'
+ *                   $ref: '#/components/schemas/UserData'
  *       400:
  *         $ref: '#/components/responses/400'
  *       401:

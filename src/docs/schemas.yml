@@ -74,6 +74,18 @@ components:
               type: string
         - $ref: "#/components/schemas/SignInData"
 
+    UserData:
+      type: object
+      required:
+        - email
+        - name
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+
     ObjectId:
       type: string
       pattern: ^[0-9a-fA-F]{24}$

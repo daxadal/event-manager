@@ -488,7 +488,7 @@
                   "type": "object",
                   "properties": {
                     "event": {
-                      "$ref": "#/components/schemas/SignInData"
+                      "$ref": "#/components/schemas/UserData"
                     }
                   }
                 }
@@ -638,6 +638,22 @@
             "$ref": "#/components/schemas/SignInData"
           }
         ]
+      },
+      "UserData": {
+        "type": "object",
+        "required": [
+          "email",
+          "name"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
       },
       "Location": {
         "type": "object",

@@ -228,4 +228,49 @@ router.post("/sign-out", addUserToRequest, ensureLoggedIn, async (req, res) => {
   }
 });
 
+/**
+ * @openapi
+ * /users/me:
+ *   get:
+ *     tags:
+ *       - users
+ *     description: Gets the current user
+ *     responses:
+ *       200:
+ *         description: The current user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 event:
+ *                   $ref: '#/components/schemas/SignInData'
+ *       400:
+ *         $ref: '#/components/responses/400'
+ *       401:
+ *         $ref: '#/components/responses/401'
+ *       403:
+ *         $ref: '#/components/responses/403'
+ *       413:
+ *         $ref: '#/components/responses/413'
+ *       429:
+ *         $ref: '#/components/responses/429'
+ *       500:
+ *         $ref: '#/components/responses/500'
+ */
+router.get("/me", addUserToRequest, ensureLoggedIn, async (req, res) => {
+  const logger: Logger | Console = (req as any).logger || console;
+  try {
+    const user: UserDocument = (req as any).user;
+
+    res.status(200).send({ user: { name: user.name, email: user.email } });
+  } catch (error) {
+    logger.error(
+      `Internal server error at ${req.method} ${req.originalUrl}`,
+      error
+    );
+    res.status(500).send({ message: "Internal server error" });
+  }
+});
+
 export default router;

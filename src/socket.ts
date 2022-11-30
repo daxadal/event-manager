@@ -17,7 +17,7 @@ const httpServer = http.createServer();
 export const io = new Server(httpServer, {
   cors: {
     origin: socket.CORS_ORIGINS.split(","),
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
   },
 });
 

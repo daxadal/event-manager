@@ -24,6 +24,7 @@ export const db = {
 
 export const socket = {
   PORT: "40718",
+  CORS_ORIGINS: parseEnvString("CORS_ORIGINS", parsingErrors),
 };
 
 export const jwt = {

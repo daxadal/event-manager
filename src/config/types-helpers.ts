@@ -47,7 +47,7 @@ export function parseEnvLogLevel(
   const value = process.env[name];
 
   if (!value) {
-    errors.push(`${name} must be one of: ${Object.keys(LogLevel)}`);
+    errors.push(`${name} must be one of: ${Object.keys(LogLevel).join(", ")}`);
     return defaultValue;
   }
   if (/^none$/i.test(value)) return LogLevel.NONE;

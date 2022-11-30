@@ -6,7 +6,7 @@ export const MINUTES_AHEAD = 1440;
 
 const logger = getLogger("cron");
 
-export function getMinuteInterval() {
+function getMinuteInterval() {
   const start = new Date();
   start.setSeconds(0, 0);
   start.setMinutes(start.getMinutes() + MINUTES_AHEAD);
@@ -27,6 +27,7 @@ export async function remindEvents() {
   await sendReminders(events);
   logger.info("Remind events - Reminders sent");
 }
+
 export async function remindAllEvents() {
   logger.info("Start remind all events");
   const events = await Event.find();

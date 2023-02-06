@@ -46,7 +46,7 @@ jest:
     - name: mongo
       alias: mongo-docker
   script:
-    - cp $DOTENV_DEV .env
+    - cp $DOTENV_TEST test.env
     - npm run test
   artifacts:
     when: always

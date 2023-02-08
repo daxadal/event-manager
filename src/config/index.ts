@@ -7,6 +7,7 @@ import {
   parseEnvLogLevel,
   parseOptEnvString,
   LogLevel,
+  parseEnvironment,
 } from "./types-helpers";
 
 export { LogLevel };
@@ -20,6 +21,8 @@ const { error, parsed } = dotenv.config({
 });
 
 const parsingErrors: string[] = [];
+
+export const environment = parseEnvironment("ENV", parsingErrors);
 
 export const api = {
   PORT: "3000",

@@ -1,5 +1,12 @@
 /* Enums */
 
+export enum Environment {
+  PROD = "PROD",
+  DEV = "DEV",
+  JEST = "JEST",
+  CI_JEST = "CI_JEST",
+}
+
 export enum LogLevel {
   NONE,
   ERROR,
@@ -9,6 +16,16 @@ export enum LogLevel {
 }
 
 /* Helpers */
+
+export function parseEnvironment(name: string, errors: string[]): Environment {
+  const value = process.env[name];
+
+  if (value && value in Environment) return value as Environment;
+  errors.push(
+    `${name} must be one of: ${Object.values(Environment).join(", ")}`
+  );
+  return Environment.DEV;
+}
 
 export function parseEnvString(name: string, errors: string[]): string {
   const value = process.env[name];

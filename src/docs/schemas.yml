@@ -1,5 +1,21 @@
 components:
   schemas:
+    ApiInfo:
+      type: object
+      properties:
+        environment:
+          type: string
+          enum: [PROD, DEV]
+        stats:
+          type: object
+          properties:
+            events:
+              type: integer
+            subscriptions:
+              type: integer
+            users:
+              type: integer
+
     Event:
       allOf:
         - type: object

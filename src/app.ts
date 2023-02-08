@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import { Logger } from "winston";
 
+import indexRouter from "@/routes/index";
 import eventsRouter from "@/routes/events";
 import usersRouter from "@/routes/users";
 import docsRouter from "@/routes/docs";
@@ -12,6 +13,7 @@ const app = express();
 
 app.use(cors());
 
+app.use("/", indexRouter);
 app.use("/docs", docsRouter);
 app.use("/events", eventsRouter);
 app.use("/users", usersRouter);

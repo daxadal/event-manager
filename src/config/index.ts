@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import path from "path";
 
 import {
   parseBoolean,
@@ -6,13 +7,22 @@ import {
   parseEnvLogLevel,
   parseOptEnvString,
   LogLevel,
+  parseEnvironment,
 } from "./types-helpers";
 
 export { LogLevel };
 
-const { error, parsed } = dotenv.config();
+const { error, parsed } = dotenv.config({
+  path: path.resolve(
+    __dirname,
+    "../..",
+    process.env.NODE_ENV === "test" ? "test.env" : ".env"
+  ),
+});
 
 const parsingErrors: string[] = [];
+
+export const environment = parseEnvironment("ENV", parsingErrors);
 
 export const api = {
   PORT: "3000",

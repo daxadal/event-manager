@@ -1,4 +1,5 @@
 import express from "express";
+import { Logger } from "winston";
 
 import { environment } from "@/config";
 import { Event, Subscription, User } from "@/services/db";
@@ -19,7 +20,7 @@ const router = express.Router();
  *               $ref: '#/components/schemas/ApiInfo'
  */
 router.get("/", async function (req, res) {
-  const logger = res.locals.logger || console;
+  const logger: Logger | Console = (req as any).logger || console;
   try {
     res.status(200).send({
       environment,

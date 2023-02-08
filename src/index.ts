@@ -11,6 +11,7 @@ import { remindEvents } from "./jobs/remind";
 const logger = getLogger("server-startup");
 
 logger.info("=== SERVER STARTUP ===");
+logger.debug(`process.env.NODE_ENV: ${process.env.NODE_ENV}`, { configDebug });
 
 if (configDebug.dotenv.error)
   logger.warn(`Could NOT parse .env, Error:`, configDebug.dotenv.error);

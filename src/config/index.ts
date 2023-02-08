@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import path from "path";
 
 import {
   parseBoolean,
@@ -11,7 +12,10 @@ import {
 export { LogLevel };
 
 const { error, parsed } = dotenv.config({
-  path: process.env.NODE_ENV === "test" ? "test.env" : ".env",
+  path: path.resolve(
+    process.cwd(),
+    process.env.NODE_ENV === "test" ? "test.env" : ".env"
+  ),
 });
 
 const parsingErrors: string[] = [];

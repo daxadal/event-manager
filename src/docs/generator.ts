@@ -24,8 +24,15 @@ async function generateDocsForVersion(
 }
 
 export async function generate(): Promise<object> {
-  const servers = [{ url: "http://localhost:3000", description: "Local API" }];
-
+  const servers = [
+    { url: "/", description: "Current location" },
+    { url: "http://localhost:3000", description: "Local API" },
+    { url: "https://event-api.daxadal.tk", description: "Server" },
+    {
+      url: "https://event-api.egarciadececa.tk/",
+      description: "Server Alias",
+    },
+  ];
   const options: OAS3Options = {
     definition: {
       openapi: "3.0.0",

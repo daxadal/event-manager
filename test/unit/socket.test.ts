@@ -9,7 +9,7 @@ import {
 } from "@/services/db";
 import { createToken } from "@/services/auth";
 import { closeConnection, createConnection } from "@/services/db/setup";
-import socketServer, { io, sendReminders } from "@/socket";
+import socketServer, { sendReminders } from "@/socket";
 
 import { createSocketClient } from "test/mocks/socket-client";
 import {
@@ -39,36 +39,7 @@ describe("Sockets", () => {
 
   afterAll(closeConnection);
 
-  xdescribe("Connection test", () => {
-    beforeAll(() => {
-      socketServer.listen(socketConfig.PORT);
-    });
-
-    afterAll(() => {
-      socketServer.close();
-    });
-
-    it("The server can send a message to the clients", async () => {
-      const sockets = new Array(8).fill(undefined).map(createSocketClient);
-
-      const promises = sockets.map(
-        (socket) =>
-          new Promise((resolve, reject) => {
-            socket.on("PING", () => {
-              socket.disconnect();
-              resolve(undefined);
-            });
-            sleep(100).then(() => {
-              reject(new Error("PING not recieved"));
-            });
-          })
-      );
-      io.emit("PING");
-      await Promise.all(promises);
-    });
-  });
-
-  xdescribe("Sign in & sign out", () => {
+  describe("Sign in & sign out", () => {
     let socket: Socket;
     let user: UserDocument;
     beforeAll(async () => {
@@ -88,50 +59,36 @@ describe("Sockets", () => {
     });
 
     it("If the client sends a 'sign-in' with an invalid token, server reponds a 'sign-in-error' message", (done) => {
-      socket.on("sign-in-ok", () => {
-        done(new Error("Signed in successfully instead of failing"));
+      socket.emit("sign-in", "token.not.valid", (response: unknown) => {
+        if (response === "sign-in-error") done();
+        else done(new Error("Signed in successfully instead of failing"));
       });
-      socket.on("sign-in-error", () => {
-        done();
-      });
-
-      socket.emit("sign-in", "token.not.valid");
     });
     it("If the client sends a 'sign-in' with a valid token, server reponds a 'sign-in-ok' message", (done) => {
-      socket.on("sign-in-ok", () => {
-        done();
+      socket.emit("sign-in", user.sessionToken, (response: unknown) => {
+        if (response === "sign-in-ok") done();
+        else done(new Error("Sign in error instead of success"));
       });
-      socket.on("sign-in-error", () => {
-        done(new Error("Sign in error instead of success"));
-      });
-
-      socket.emit("sign-in", user.sessionToken);
     });
     it("If the client sends a 'sign-out' with an invalid token, server reponds a 'sign-out-error' message", (done) => {
-      socket.on("sign-out-ok", () => {
-        done(new Error("Signed out successfully instead of failing"));
+      socket.emit("sign-in", user.sessionToken, () => {
+        socket.emit("sign-out", "token.not.valid", (response: unknown) => {
+          if (response === "sign-out-error") done();
+          else done(new Error("Signed out successfully instead of failing"));
+        });
       });
-      socket.on("sign-out-error", () => {
-        done();
-      });
-
-      socket.emit("sign-in", user.sessionToken);
-      sleep(100).then(() => socket.emit("sign-out", "token.not.valid"));
     });
     it("If the client sends a 'sign-out' with a valid token, server reponds a 'sign-out-ok' message", (done) => {
-      socket.on("sign-out-ok", () => {
-        done();
+      socket.emit("sign-in", user.sessionToken, () => {
+        socket.emit("sign-out", user.sessionToken, (response: unknown) => {
+          if (response === "sign-out-ok") done();
+          else done(new Error("Sign out error instead of success"));
+        });
       });
-      socket.on("sign-out-error", () => {
-        done(new Error("Sign out error instead of success"));
-      });
-
-      socket.emit("sign-in", user.sessionToken);
-      sleep(100).then(() => socket.emit("sign-out", user.sessionToken));
     });
   });
 
-  xdescribe("Reminder", () => {
+  describe("Reminder", () => {
     const AMOUNT_OF_USERS = 4;
     const AMOUNT_OF_EVENTS = AMOUNT_OF_USERS - 1;
     let events: EventDocument[];
@@ -159,11 +116,18 @@ describe("Sockets", () => {
 
       const subscribers = users.slice(0, AMOUNT_OF_USERS - 1);
 
-      sockets = subscribers.map((user) => {
-        const socket = createSocketClient();
-        socket.emit("sign-in", user.sessionToken);
-        return socket;
-      });
+      const promises = subscribers.map(
+        (user) =>
+          new Promise<Socket>((resolve, reject) => {
+            const socket = createSocketClient();
+            socket.emit("sign-in", user.sessionToken, (response: unknown) => {
+              console.info("Socket signed in. Response: ", response);
+              if (response === "sign-in-ok") resolve(socket);
+              else reject(new Error("Sign in error"));
+            });
+          })
+      );
+      sockets = await Promise.all(promises);
 
       const subscriptionPromises = subscribers.map((user, i) =>
         new Subscription({

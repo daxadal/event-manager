@@ -15,8 +15,20 @@
   ],
   "servers": [
     {
+      "url": "/",
+      "description": "Current location"
+    },
+    {
       "url": "http://localhost:3000",
       "description": "Local API"
+    },
+    {
+      "url": "https://event-api.daxadal.tk",
+      "description": "Server"
+    },
+    {
+      "url": "https://event-api.egarciadececa.tk/",
+      "description": "Server Alias"
     }
   ],
   "paths": {
@@ -338,6 +350,23 @@
         }
       }
     },
+    "/": {
+      "get": {
+        "description": "Gets general info from the API.",
+        "responses": {
+          "200": {
+            "description": "API info.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/users/sign-up": {
       "post": {
         "tags": [
@@ -522,6 +551,32 @@
       "ObjectId": {
         "type": "string",
         "pattern": "^[0-9a-fA-F]{24}$"
+      },
+      "ApiInfo": {
+        "type": "object",
+        "properties": {
+          "environment": {
+            "type": "string",
+            "enum": [
+              "PROD",
+              "DEV"
+            ]
+          },
+          "stats": {
+            "type": "object",
+            "properties": {
+              "events": {
+                "type": "integer"
+              },
+              "subscriptions": {
+                "type": "integer"
+              },
+              "users": {
+                "type": "integer"
+              }
+            }
+          }
+        }
       },
       "Event": {
         "allOf": [

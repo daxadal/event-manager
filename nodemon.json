@@ -4,10 +4,7 @@
     "js": "npm start",
     "ts": "npm start"
   },
-  "watch": ["src"],
-  "ignore": [
-    "*.openapi.json",
-    "*.postman_collection.json"
-  ],
+  "watch": ["src", ".env"],
+  "ignore": ["*.openapi.json", "*.postman_collection.json"],
   "ext": "js,json,ts"
 }

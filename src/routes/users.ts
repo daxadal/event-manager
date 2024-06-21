@@ -173,7 +173,7 @@ router.post(
       user.sessionToken = token;
       await user.save();
 
-      logger.info("Sign in - Invalid credentials");
+      logger.info("Signed in successfully");
       res.status(200).send({ message: "Signed in successfully", token });
     } catch (error) {
       logger.error(
@@ -217,7 +217,7 @@ router.post("/sign-out", addUserToRequest, ensureLoggedIn, async (req, res) => {
     user.socketId = undefined;
     await user.save();
 
-    logger.info("Sign out - Invalid credentials");
+    logger.info("Signed out successfully");
     res.status(200).send({ message: "Signed out successfully" });
   } catch (error) {
     logger.error(

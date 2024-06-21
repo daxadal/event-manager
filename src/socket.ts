@@ -30,7 +30,7 @@ io.on("connection", (socket) => {
     logger.debug("Server: user disconnected");
   });
 
-  socket.on("sign-in", async (sessionToken) => {
+  socket.on("sign-in", async (sessionToken, callback) => {
     const user = await User.findOne({
       sessionToken,
     });
@@ -38,29 +38,29 @@ io.on("connection", (socket) => {
       user.socketId = socket.id;
       await user.save();
       logger.debug(`Server: sign-in ${socket.id} ${user.name} ${user.id}`);
-      socket.emit("sign-in-ok");
+      callback("sign-in-ok");
     } else {
       logger.debug("Server: failed to sign-in", {
         socketId: socket.id,
         sessionToken,
       });
-      socket.emit("sign-in-error");
+      callback("sign-in-error");
     }
   });
-  socket.on("sign-out", async (sessionToken) => {
+  socket.on("sign-out", async (sessionToken, callback) => {
     const user = await User.findOne({
       sessionToken,
     });
     if (user && user.socketId === socket.id) {
       user.socketId = null;
       logger.debug(`Server: sign-out ${socket.id} ${user.name} ${user.id}`);
-      socket.emit("sign-out-ok");
+      callback("sign-out-ok");
     } else {
       logger.debug("Server: failed to sign-out", {
         socketId: socket.id,
         sessionToken,
       });
-      socket.emit("sign-out-error");
+      callback("sign-out-error");
     }
   });
 });

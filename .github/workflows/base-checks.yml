@@ -12,15 +12,24 @@ on:
 jobs:
   base-checks:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x, 24.x]
+        mongodb-version: ['6.0', '7.0', '8.0']
 
     steps:
       - name: "Checkout branch"
         uses: actions/checkout@v4
 
-      - name: "Setup node environment"
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
+          node-version: ${{ matrix.node-version }}
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.12.1
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
 
       - name: "Install dependencies"
         run: npm ci
@@ -29,7 +38,9 @@ jobs:
         run: npm run tsc
 
       - name: "Test"
-        run: npm test
+        run: |
+          echo $DOTENV_JEST >> test.env
+          npm test
 
       - name: Upload test results
         uses: actions/upload-artifact@v6

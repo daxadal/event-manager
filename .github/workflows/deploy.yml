@@ -27,10 +27,8 @@ jobs:
         include:
           - platform: linux/amd64
             architecture: amd64
-            tag: $IMAGE_AMD
           - platform: linux/arm64
             architecture: arm64
-            tag: $IMAGE_ARM
     steps:
       - name: "Checkout branch"
         uses: actions/checkout@v4
@@ -54,7 +52,7 @@ jobs:
           context: .
           push: true
           platforms: ${{ matrix.platform }}
-          tags: ${{ matrix.tag }}
+          tags: ghcr.io/${{ github.repository }}:${{ matrix.architecture }}
 
   publish-and-deploy:
     needs: build

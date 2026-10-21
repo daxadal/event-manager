@@ -16,6 +16,7 @@ A notification will be sent to you via socket 24 hours before the event starts, 
 # Availability
 
 _(This server is not currently being served on the Internet)_
+<!-- - https://event-manager-api.egarciadececa.dev/ -->
 
 # Previous steps
 
@@ -40,6 +41,16 @@ npm start
 ```
 
 By default, the server mounts at `http://localhost:3000`, which will be referred as `{{basePath}}` from now on.
+
+# Docker
+
+After creating the `.env` file as described above, build and start the API and its MariaDB database with:
+
+```bash
+docker compose up --build
+```
+
+The API is available at `http://localhost:3000`. Stop the containers with `Ctrl+C`, or run `docker compose down` in another terminal.
 
 # Documentation
 
@@ -66,6 +77,12 @@ npm test
 
 Tests are powered by `jest`, and a report file (compatible with Gitlab CI/CD) is generated on each execution.
 
+# CI/CD
+
+This project uses GitLab CI/CD to compile, test, and deploy the code. The following variables must be set:
+
+- **Dotenv**: `DOTENV_JEST` (file) and `DOTENV_PROD` (file) contain `.env` files adapted for jest testing and production deployment respectively
+- **Depoyment**: `DEPLOY_HOST`, `DEPLOY_USER`, and `DEPLOY_SSH_KEY` (file) contain the IP, user and SSH key respectively to connect to the remote server for
 
 # Socket events summary
 

@@ -1,7 +1,8 @@
 /* global __dirname */
-import swaggerJsdoc, { OAS3Options } from "swagger-jsdoc";
 import fs from "fs";
 import path from "path";
+
+import swaggerJsdoc, { OAS3Options } from "swagger-jsdoc";
 
 async function generateDocsForVersion(
   options: OAS3Options,

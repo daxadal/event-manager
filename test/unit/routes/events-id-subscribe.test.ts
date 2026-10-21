@@ -1,11 +1,10 @@
-import request from "supertest";
 import { mocked } from "jest-mock";
+import request from "supertest";
 
 import app from "@/app";
 import { addUserToRequest } from "@/services/auth";
 import { EventState, format, Subscription, UserDocument } from "@/services/db";
 import { closeConnection, createConnection } from "@/services/db/setup";
-
 import {
   clearDatabase,
   createMockEvent,
@@ -23,7 +22,7 @@ jest.mock("@/services/auth", () => {
   };
 });
 
-const mockedAddUserToRequest = mocked(addUserToRequest, );
+const mockedAddUserToRequest = mocked(addUserToRequest);
 
 describe("The /events API", () => {
   beforeAll(createConnection);

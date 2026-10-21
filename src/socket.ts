@@ -1,7 +1,8 @@
 import http from "http";
+
 import { Server } from "socket.io";
 
-import { getLogger } from "@/services/winston";
+import { socket } from "@/config";
 import {
   EventDocument,
   EventType,
@@ -11,7 +12,7 @@ import {
   User,
   UserDocument,
 } from "@/services/db";
-import { socket } from "@/config";
+import { getLogger } from "@/services/winston";
 
 const httpServer = http.createServer();
 export const io = new Server(httpServer, {
@@ -109,9 +110,11 @@ export async function sendReminders(events: EventDocument[]): Promise<void> {
     const event = events.find((e) => e.id === String(sub.eventId));
     const user = users.find((u) => u.id === String(sub.subscriberId));
 
-    if (!event|| !user) return
-    
-    const sockets = user?.socketId ? await io.in(user.socketId).fetchSockets(): [];
+    if (!event || !user) return;
+
+    const sockets = user?.socketId
+      ? await io.in(user.socketId).fetchSockets()
+      : [];
     sockets.map((socket) =>
       socket.emit("reminder", formatReminder(event, user, sub))
     );

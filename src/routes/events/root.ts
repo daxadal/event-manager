@@ -2,6 +2,7 @@ import { Router } from "express";
 import Joi from "joi";
 import { Logger } from "winston";
 
+import { ensureLoggedIn, addUserToRequest } from "@/services/auth";
 import {
   Event,
   EventDocument,
@@ -9,7 +10,6 @@ import {
   format,
   UserDocument,
 } from "@/services/db";
-import { ensureLoggedIn, addUserToRequest } from "@/services/auth";
 import { validateBody } from "@/services/validations";
 
 const router = Router();

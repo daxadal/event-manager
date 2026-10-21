@@ -2,6 +2,7 @@ import { Router } from "express";
 import Joi from "joi";
 import { Logger } from "winston";
 
+import { ensureLoggedIn, addUserToRequest } from "@/services/auth";
 import {
   Event,
   EventDocument,
@@ -11,7 +12,6 @@ import {
   Subscription,
   UserDocument,
 } from "@/services/db";
-import { ensureLoggedIn, addUserToRequest } from "@/services/auth";
 import {
   OBJECT_ID_REGEX,
   validateBody,

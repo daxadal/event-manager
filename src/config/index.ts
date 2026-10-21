@@ -16,7 +16,6 @@ const { error, parsed } = config({
   path: process.env.NODE_ENV === "test" ? "test.env" : ".env",
 });
 
-
 const parsingErrors: string[] = [];
 
 export const environment = parseEnvironment("ENV", parsingErrors);

@@ -1,14 +1,14 @@
-import { hash } from "bcryptjs";
-import request from "supertest";
 import crypto from "crypto";
+
+import { hash } from "bcryptjs";
 import { mocked } from "jest-mock";
+import request from "supertest";
 
 import app from "@/app";
+import { HASH_ROUNDS, USER_RPM, USER_SIZE } from "@/routes/users";
+import { addUserToRequest } from "@/services/auth";
 import { User } from "@/services/db";
 import { closeConnection, createConnection } from "@/services/db/setup";
-import { addUserToRequest } from "@/services/auth";
-import { HASH_ROUNDS, USER_RPM, USER_SIZE } from "@/routes/users";
-
 import { clearDatabase } from "test/mocks/db";
 
 jest.mock("@/services/auth", () => {
@@ -24,7 +24,7 @@ jest.mock("@/services/auth", () => {
   };
 });
 
-const mockedAddUserToRequest = mocked(addUserToRequest, );
+const mockedAddUserToRequest = mocked(addUserToRequest);
 
 describe("The /users API", () => {
   beforeAll(createConnection);

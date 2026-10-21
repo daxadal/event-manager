@@ -1,6 +1,7 @@
 import { hash } from "bcryptjs";
 import mongoose from "mongoose";
 
+import { HASH_ROUNDS } from "@/routes/users";
 import {
   Event,
   EventDocument,
@@ -10,7 +11,6 @@ import {
   UserDocument,
   UserType,
 } from "@/services/db";
-import { HASH_ROUNDS } from "@/routes/users";
 
 export async function clearDatabase(): Promise<void> {
   const collections = mongoose.connection.collections;

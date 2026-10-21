@@ -2,9 +2,9 @@ import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import { Logger } from "winston";
 
-import { closeLogger, getLoggerMiddleware } from "@/services/winston";
 import { remindEvents } from "@/jobs/remind";
 import { delayAfterResponse } from "@/services/middlewares";
+import { closeLogger, getLoggerMiddleware } from "@/services/winston";
 
 export const MAIN_RPM = 10;
 

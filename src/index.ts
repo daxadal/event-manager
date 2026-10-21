@@ -1,12 +1,14 @@
 import "module-alias/register";
 
-import { api, cron, configDebug, socket } from "@/config";
-import socketServer from "@/socket";
+import { CronJob } from "cron";
+
+import { remindEvents } from "./jobs/remind";
+
 import app from "@/app";
+import { api, cron, configDebug, socket } from "@/config";
 import { createConnection } from "@/services/db/setup";
 import { getLogger } from "@/services/winston";
-import { CronJob } from "cron";
-import { remindEvents } from "./jobs/remind";
+import socketServer from "@/socket";
 
 const logger = getLogger("server-startup");
 

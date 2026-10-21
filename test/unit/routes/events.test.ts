@@ -1,6 +1,7 @@
-import request from "supertest";
 import crypto from "crypto";
+
 import { mocked } from "jest-mock";
+import request from "supertest";
 
 import app from "@/app";
 import { EVENT_RPM, EVENT_SIZE } from "@/routes/events";
@@ -13,7 +14,6 @@ import {
   UserDocument,
 } from "@/services/db";
 import { closeConnection, createConnection } from "@/services/db/setup";
-
 import { clearDatabase, createMockEvents, createMockUser } from "test/mocks/db";
 
 jest.mock("@/services/auth", () => {
@@ -27,7 +27,7 @@ jest.mock("@/services/auth", () => {
   };
 });
 
-const mockedAddUserToRequest = mocked(addUserToRequest, );
+const mockedAddUserToRequest = mocked(addUserToRequest);
 
 const AMOUNT_OF_EVENTS = 12;
 

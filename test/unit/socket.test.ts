@@ -1,24 +1,23 @@
 import { Socket } from "socket.io-client";
 
+import { socket as socketConfig } from "@/config";
 import { MINUTES_AHEAD } from "@/jobs/remind";
+import { createToken } from "@/services/auth";
 import {
   EventDocument,
   EventState,
   Subscription,
   UserDocument,
 } from "@/services/db";
-import { createToken } from "@/services/auth";
 import { closeConnection, createConnection } from "@/services/db/setup";
 import socketServer, { io, sendReminders } from "@/socket";
-
-import { createSocketClient } from "test/mocks/socket-client";
 import {
   clearDatabase,
   createMockEvents,
   createMockUser,
   createMockUsers,
 } from "test/mocks/db";
-import { socket as socketConfig } from "@/config";
+import { createSocketClient } from "test/mocks/socket-client";
 
 jest.mock("@/services/auth", () => {
   const module =

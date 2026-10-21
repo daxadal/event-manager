@@ -1,6 +1,7 @@
-import request from "supertest";
 import crypto from "crypto";
+
 import { mocked } from "jest-mock";
+import request from "supertest";
 
 import app from "@/app";
 import { EVENT_RPM, EVENT_SIZE } from "@/routes/events";
@@ -14,7 +15,6 @@ import {
   UserDocument,
 } from "@/services/db";
 import { closeConnection, createConnection } from "@/services/db/setup";
-
 import { clearDatabase, createMockEvent, createMockUser } from "test/mocks/db";
 
 jest.mock("@/services/auth", () => {
@@ -28,7 +28,7 @@ jest.mock("@/services/auth", () => {
   };
 });
 
-const mockedAddUserToRequest = mocked(addUserToRequest, );
+const mockedAddUserToRequest = mocked(addUserToRequest);
 
 describe("The /events API", () => {
   beforeAll(createConnection);

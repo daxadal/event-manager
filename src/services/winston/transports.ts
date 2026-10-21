@@ -1,9 +1,13 @@
 import path from "path";
-import TransportStream from "winston-transport";
-import SlackHook from "winston-slack-webhook-transport";
-import { format, transports } from "winston";
 
-import { winston as config } from "@/config";
+import { format, transports } from "winston";
+import SlackHook, {
+  TransformableInfo as SlackTransformableInfo,
+} from "winston-slack-webhook-transport";
+import TransportStream from "winston-transport";
+
+import { winston as config } from "../../config/index";
+
 import { fileAndConsoleFormatter, slackFormatter } from "./formatters";
 
 export const getSlackTransport = (
@@ -15,7 +19,8 @@ export const getSlackTransport = (
   new SlackHook({
     webhookUrl,
     level,
-    formatter: (info) => slackFormatter(service, filterPriorityOut, info),
+    formatter: (info: SlackTransformableInfo) =>
+      slackFormatter(service, filterPriorityOut, info),
   });
 
 export const getConsoleTransport = (

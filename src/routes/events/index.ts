@@ -1,12 +1,12 @@
 import { json, Router, urlencoded } from "express";
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 
-import eventsRootRouter from "./root";
 import eventsIdRouter from "./id";
+import eventsRootRouter from "./root";
 import eventsSubscribeRouter from "./subscribe";
 
-import { closeLogger, getLoggerMiddleware } from "@/services/winston";
 import { delayAfterResponse } from "@/services/middlewares";
+import { closeLogger, getLoggerMiddleware } from "@/services/winston";
 
 export const EVENT_SIZE = "1kb";
 export const EVENT_RPM = 100;

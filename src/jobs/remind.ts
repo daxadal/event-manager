@@ -1,6 +1,6 @@
-import { sendReminders } from "@/socket";
 import { Event } from "@/services/db";
 import { getLogger } from "@/services/winston";
+import { sendReminders } from "@/socket";
 
 export const MINUTES_AHEAD = 1440;
 

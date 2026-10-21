@@ -1,6 +1,6 @@
-import TransportStream from "winston-transport";
-import { createLogger, format, Logger } from "winston";
 import { RequestHandler } from "express";
+import { createLogger, format, Logger } from "winston";
+import TransportStream from "winston-transport";
 
 import { winston as config, LogLevel } from "@/config";
 import { extractAxios } from "@/services/winston/formatters";
@@ -91,7 +91,7 @@ export function getLogger(service = "api"): Logger {
 
 export const getLoggerMiddleware =
   (service = "api"): RequestHandler =>
-  (req: any, res, next) => {
+  (req: any, _, next) => {
     req.logger = getLogger(service);
     req.logger.info(
       `==== Starting execution of ${req.method} ${req.originalUrl} ====`

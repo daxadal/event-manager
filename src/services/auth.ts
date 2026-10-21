@@ -11,7 +11,7 @@ export const addUserToRequest: RequestHandler = async (req, res, next) => {
   const logger: Logger | Console = (req as any).logger || console;
   try {
     const bearerHeader = req.get("Authorization");
-    const match = /^Bearer (.+)$/i.exec(bearerHeader);
+    const match = /^Bearer (.+)$/i.exec(bearerHeader ?? "");
 
     if (!match) {
       next();
@@ -30,7 +30,7 @@ export const addUserToRequest: RequestHandler = async (req, res, next) => {
         return;
       }
 
-      let user: UserDocument;
+      let user: UserDocument | null = null;
       try {
         user = await User.findById(decoded.id);
       } catch (error) {

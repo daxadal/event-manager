@@ -1,6 +1,8 @@
-import SlackHook from "winston-slack-webhook-transport";
 import { Format, FormatWrap, TransformableInfo } from "logform";
 import { format } from "winston";
+import SlackHook, {
+  TransformableInfo as SlackTransformableInfo,
+} from "winston-slack-webhook-transport";
 
 type Block = {
   type: string;
@@ -11,31 +13,33 @@ type Block = {
   };
 };
 
-export const extractAxios: FormatWrap = format((info) => {
-  if (info.meta.isAxiosError && info.meta.response) {
-    info.axios = {
-      status: info.meta.response.status,
-      data: info.meta.response.data,
-    };
-    info.meta = {};
-  } else if (info.meta.isAxiosError) {
-    info.axios = info.meta.toJSON();
-    info.meta = {};
-  } else if (info.meta.status && info.meta.headers) {
-    info.axios = {
-      status: info.meta.status,
-      data: info.meta.data,
-    };
-    info.meta = {};
+export const extractAxios: FormatWrap = format(
+  (info: TransformableInfo & Record<string, any>) => {
+    if (info.meta.isAxiosError && info.meta.response) {
+      info.axios = {
+        status: info.meta.response.status,
+        data: info.meta.response.data,
+      };
+      info.meta = {};
+    } else if (info.meta.isAxiosError) {
+      info.axios = info.meta.toJSON();
+      info.meta = {};
+    } else if (info.meta.status && info.meta.headers) {
+      info.axios = {
+        status: info.meta.status,
+        data: info.meta.data,
+      };
+      info.meta = {};
+    }
+    return info;
   }
-  return info;
-});
+);
 
 export const fileAndConsoleFormatter: Format = format.printf(
   ({ level, message, timestamp, stack, meta, axios }) => {
     let msg = message;
 
-    //Add stack trace
+    // Add stack trace
     if (stack) msg += "\n" + stack + "\n";
 
     // Add axios metadata
@@ -44,11 +48,12 @@ export const fileAndConsoleFormatter: Format = format.printf(
     if (meta && Object.keys(meta).length > 0)
       try {
         msg += "\n" + JSON.stringify(meta, null, 2) + "\n";
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         msg += "\n(meta is not stringify-able)\n";
       }
 
-    //Add label
+    // Add label
     return `${timestamp} [${level}]: ${msg}`;
   }
 );
@@ -89,7 +94,7 @@ function getLevelEmoji(level: string): string {
 export function slackFormatter(
   service: string,
   filterPriorityOut: boolean,
-  { level, message, stack, meta, axios }: TransformableInfo
+  { level, message, stack, meta, axios }: SlackTransformableInfo
 ): SlackHook.SlackMessage | false {
   if (level === "error" && filterPriorityOut) return false;
 

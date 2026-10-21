@@ -1,12 +1,12 @@
-import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
+import express, { NextFunction, Request, Response } from "express";
 import { Logger } from "winston";
 
-import indexRouter from "@/routes/index";
-import eventsRouter from "@/routes/events";
-import usersRouter from "@/routes/users";
 import docsRouter from "@/routes/docs";
+import eventsRouter from "@/routes/events";
+import indexRouter from "@/routes/index";
 import jobsRouter from "@/routes/jobs";
+import usersRouter from "@/routes/users";
 import { getLogger } from "@/services/winston";
 
 const app = express();

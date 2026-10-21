@@ -1,14 +1,14 @@
 import { hash, compare } from "bcryptjs";
 import { json, Router } from "express";
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 import Joi from "joi";
 import { Logger } from "winston";
 
-import { User, UserDocument } from "@/services/db";
 import { createToken, addUserToRequest, ensureLoggedIn } from "@/services/auth";
+import { User, UserDocument } from "@/services/db";
+import { delayAfterResponse } from "@/services/middlewares";
 import { validateBody } from "@/services/validations";
 import { closeLogger, getLoggerMiddleware } from "@/services/winston";
-import { delayAfterResponse } from "@/services/middlewares";
 
 export const USER_SIZE = "512b";
 export const USER_RPM = 30;

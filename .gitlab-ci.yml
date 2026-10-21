@@ -1,12 +1,13 @@
+# #region - Global definition
 default:
-  image: node:16-bullseye-slim
+  image: node:22-bullseye-slim
   interruptible: true
 
-# This folders are cached between builds
-cache: &cache
-  paths:
-    - node_modules/
-    - dist/
+stages:
+  - compile
+  - test
+  - docker-build
+  - deploy
 
 workflow:
   rules:
@@ -21,32 +22,62 @@ workflow:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH' # Run on branch push
       when: always
     - when: never # Otherwise -> Don't pipeline
+# #endregion - Global definition
 
-stages:
-  - build
-  - test
-  - deploy
+# #region - Reusables
+.optional-step:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - if: "$CI_OPEN_MERGE_REQUESTS"
+      when: on_success
+    - when: manual
+      allow_failure: true
 
-compile:
-  stage: build
+.node-step:
+  image: node:22-bullseye-slim
   cache:
-    <<: *cache
+    paths:
+      - node_modules/
+      - dist/
+
+.docker-step:
+  extends: .optional-step
+  stage: docker-build
+  image: quay.io/buildah/stable
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | buildah login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+# #endregion - Reusables
+
+# #region - Variables
+variables:
+  IMAGE: $CI_REGISTRY_IMAGE:latest
+  IMAGE_AMD: $CI_REGISTRY_IMAGE:amd64
+  IMAGE_ARM: $CI_REGISTRY_IMAGE:arm64
+# #endregion - Variables
+
+# #region - Steps
+compile:
+  stage: compile
+  extends: .node-step
+  cache:
     policy: push
   script:
     - npm ci
-    - npm run docs
+    - npm run tsoa
     - npm run tsc
 
 jest:
   stage: test
+  extends: .node-step
   cache:
-    <<: *cache
     policy: pull
   services:
     - name: mongo
       alias: mongo-docker
   script:
-    - cp $DOTENV_TEST test.env
+    - cp $DOTENV_JEST test.env
+    - npm run tsoa
     - npm run test
   artifacts:
     when: always
@@ -59,36 +90,50 @@ jest:
 
 lint:
   stage: test
+  extends: .node-step
   cache:
-    <<: *cache
     policy: pull
   script:
     - npm run lint
 
-deploy-to-server:
-  stage: deploy
-  image: instrumentisto/rsync-ssh:alpine
-  cache:
-    <<: *cache
-    policy: pull
-  environment:
-    name: development
+build-amd64:
+  extends: .docker-step
+  tags:
+    - saas-linux-small-amd64
   script:
-    - cp $DOTENV_DEV .env
-    - cp $SERVER_KEY server_key
-    - set -e
-    - echo "Deploy $CI_COMMIT_REF_NAME. Triggered by $CI_PIPELINE_SOURCE"
-    - chmod 400 server_key
-    - echo " === Creating directory... === "
-    - ssh -o StrictHostKeyChecking=no -i server_key $SERVER_USER@$SERVER_IP "mkdir $SERVER_LOCATION -p"
-    - echo " === Starting secure copy... === "
-    - rsync -e "ssh -o StrictHostKeyChecking=no -i server_key" -r .env node_modules dist package.json $SERVER_USER@$SERVER_IP:$SERVER_LOCATION
-    - echo " === Restarting server... === "
-    - ssh -o StrictHostKeyChecking=no -i server_key $SERVER_USER@$SERVER_IP "pm2 restart $CI_PROJECT_NAME || pm2 start $SERVER_LOCATION/dist/index.js -n $CI_PROJECT_NAME"
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      when: on_success
-    - if: "$CI_OPEN_MERGE_REQUESTS"
-      when: on_success
-    - when: manual
-      allow_failure: true
+    - buildah build --platform=linux/amd64 -t $IMAGE_AMD .
+    - buildah push $IMAGE_AMD
+
+build-arm64:
+  extends: .docker-step
+  tags:
+    - saas-linux-small-arm64
+  script:
+    - buildah build --platform=linux/arm64 -t $IMAGE_ARM .
+    - buildah push $IMAGE_ARM
+
+build-manifest:
+  extends: .docker-step
+  needs: ["build-arm64", "build-amd64"]
+  script:
+    - buildah manifest create $IMAGE
+    - buildah manifest add $IMAGE docker://$IMAGE_AMD
+    - buildah manifest add $IMAGE docker://$IMAGE_ARM
+    - buildah manifest push --all $IMAGE
+
+deploy:
+  extends: .optional-step
+  stage: deploy
+  image: alpine:3.20
+  needs: ["build-manifest"]
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval "$(ssh-agent -s)"
+    - chmod 400 "$DEPLOY_SSH_KEY"
+    - ssh-add "$DEPLOY_SSH_KEY"
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+  script:
+    - scp $DOTENV_PROD "$DEPLOY_USER@$DEPLOY_HOST:~/dax-apps/env/$CI_PROJECT_NAME.env"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "SERVICE=$CI_PROJECT_NAME ~/dax-apps/deploy.sh"
+# #endregion - Steps

@@ -1,0 +1,35 @@
+volumes:
+  db-data: # Persistent volume for MySQL data
+
+networks:
+  app_net:
+    name: dax_app_net
+    driver: bridge
+
+services:
+  server:
+    build:
+      context: .
+    env_file: ".env"
+    networks:
+      - app_net
+    ports:
+      - 3000:3000
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  mongodb:
+    image: mongo:6.0.26
+    restart: always
+    # environment:
+    #   - MONGO_INITDB_ROOT_USERNAME=user
+    #   - MONGO_INITDB_ROOT_PASSWORD=pass
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+    ports:
+      - 27017:27017
+    networks:
+      - app_net
+    volumes:
+      - db-data:/var/lib/mongodb # Volume for persistent DB storage

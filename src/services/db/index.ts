@@ -2,6 +2,7 @@
 import { RequestHandler } from "express";
 import { model } from "mongoose";
 import { Logger } from "winston";
+
 import { EventType, eventSchema, EventDocument, EventState } from "./event";
 import { SubscriptionType, subscriptionSchema } from "./subscription";
 import { UserType, userSchema, UserDocument } from "./user";

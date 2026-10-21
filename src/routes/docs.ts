@@ -2,8 +2,8 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 
 import docs from "@/docs/event-manager-api.openapi.json";
-import { closeLogger, getLoggerMiddleware } from "@/services/winston";
 import { delayAfterResponse } from "@/services/middlewares";
+import { closeLogger, getLoggerMiddleware } from "@/services/winston";
 
 const app = express();
 

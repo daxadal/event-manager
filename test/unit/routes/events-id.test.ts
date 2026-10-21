@@ -1,6 +1,7 @@
-import request from "supertest";
 import crypto from "crypto";
+
 import { mocked } from "jest-mock";
+import request from "supertest";
 
 import app from "@/app";
 import { EVENT_RPM, EVENT_SIZE } from "@/routes/events";
@@ -14,7 +15,6 @@ import {
   UserDocument,
 } from "@/services/db";
 import { closeConnection, createConnection } from "@/services/db/setup";
-
 import { clearDatabase, createMockEvent, createMockUser } from "test/mocks/db";
 
 jest.mock("@/services/auth", () => {
@@ -23,12 +23,12 @@ jest.mock("@/services/auth", () => {
 
   return {
     ...module,
-    addUserToRequest: jest.fn((req, res, next) => next()),
-    ensureLoggedIn: jest.fn((req, res, next) => next()),
+    addUserToRequest: jest.fn((_req, _res, next) => next()),
+    ensureLoggedIn: jest.fn((_req, _res, next) => next()),
   };
 });
 
-const mockedAddUserToRequest = mocked(addUserToRequest, true);
+const mockedAddUserToRequest = mocked(addUserToRequest);
 
 describe("The /events API", () => {
   beforeAll(createConnection);
@@ -53,7 +53,7 @@ describe("The /events API", () => {
     it("Returns 400 if the event does not exist", async () => {
       // given
       mockedAddUserToRequest.mockImplementationOnce(
-        async (req: any, res, next) => {
+        async (req: any, _res, next) => {
           const user = await User.findOne({ email: "creator@doe.com" });
           req.token = user ? "token" : undefined;
           req.user = user;
@@ -79,7 +79,7 @@ describe("The /events API", () => {
     `("Returns 400 if $reason", async ({ authUser, state }) => {
       // given
       mockedAddUserToRequest.mockImplementationOnce(
-        async (req: any, res, next) => {
+        async (req: any, _res, next) => {
           if (authUser) {
             const user = await User.findOne({ email: authUser });
             req.token = user ? "token" : undefined;
@@ -111,7 +111,7 @@ describe("The /events API", () => {
     `("Returns 200 and an event if $reason", async ({ authUser, state }) => {
       // given
       mockedAddUserToRequest.mockImplementationOnce(
-        async (req: any, res, next) => {
+        async (req: any, _res, next) => {
           if (authUser) {
             const user = await User.findOne({ email: authUser });
             req.token = user ? "token" : undefined;
@@ -146,7 +146,7 @@ describe("The /events API", () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
       otherUser = await createMockUser({ email: "other@doe.com" });
 
-      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, _res, next) => {
         req.token = "token";
         req.user = callerUser;
         next();
@@ -294,7 +294,7 @@ describe("The /events API", () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
       otherUser = await createMockUser({ email: "other@doe.com" });
 
-      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, _res, next) => {
         req.token = "token";
         req.user = callerUser;
         next();
@@ -371,7 +371,7 @@ describe("The /events API", () => {
     beforeEach(async () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
 
-      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, _res, next) => {
         req.token = "token";
         req.user = callerUser;
         next();

@@ -82,7 +82,11 @@ jobs:
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
-          echo ${{ secrets.DOTENV_PROD }} >> prod.env
+
+          cat > prod.env <<EOF
+          ${{ secrets.DOTENV_PROD }}
+          EOF
+
           scp prod.env "$USER@$HOST:~/dax-apps/env/$NAME.env"
 
       - name: Deploy on Oracle Linux

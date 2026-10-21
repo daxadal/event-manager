@@ -35,7 +35,9 @@ jobs:
 
       - name: "Test"
         run: |
-          echo ${{ secrets.DOTENV_JEST }} >> test.env
+          cat > test.env <<EOF
+          ${{ secrets.DOTENV_JEST }}
+          EOF
           npm test
 
       - name: Upload test results

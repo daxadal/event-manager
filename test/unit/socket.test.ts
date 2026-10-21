@@ -26,8 +26,8 @@ jest.mock("@/services/auth", () => {
 
   return {
     ...module,
-    addUserToRequest: jest.fn((req, res, next) => next()),
-    ensureLoggedIn: jest.fn((req, res, next) => next()),
+    addUserToRequest: jest.fn((_req, _res, next) => next()),
+    ensureLoggedIn: jest.fn((_req, _res, next) => next()),
   };
 });
 

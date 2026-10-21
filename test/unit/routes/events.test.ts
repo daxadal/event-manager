@@ -22,12 +22,12 @@ jest.mock("@/services/auth", () => {
 
   return {
     ...module,
-    addUserToRequest: jest.fn((req, res, next) => next()),
-    ensureLoggedIn: jest.fn((req, res, next) => next()),
+    addUserToRequest: jest.fn((_req, _res, next) => next()),
+    ensureLoggedIn: jest.fn((_req, _res, next) => next()),
   };
 });
 
-const mockedAddUserToRequest = mocked(addUserToRequest, true);
+const mockedAddUserToRequest = mocked(addUserToRequest, );
 
 const AMOUNT_OF_EVENTS = 12;
 
@@ -46,7 +46,7 @@ describe("The /events API", () => {
     beforeEach(async () => {
       user = await createMockUser();
 
-      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, _res, next) => {
         req.token = "token";
         req.user = user;
         next();
@@ -199,6 +199,7 @@ describe("The /events API", () => {
             case 1:
               return EventState.PRIVATE;
             case 2:
+            default:
               return EventState.PUBLIC;
           }
         },
@@ -207,7 +208,7 @@ describe("The /events API", () => {
 
     it("Returns 200 and all public events if the user is not authenticated", async () => {
       // given
-      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((_req, _res, next) => {
         next();
       });
 
@@ -227,7 +228,7 @@ describe("The /events API", () => {
 
     it("Returns 200 and all public and private events if the user has no events", async () => {
       // given
-      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, _res, next) => {
         req.token = "token";
         req.user = otherUser;
         next();
@@ -249,7 +250,7 @@ describe("The /events API", () => {
 
     it("Returns 200 and all public, private and owned events if the user has events", async () => {
       // given
-      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, _res, next) => {
         req.token = "token";
         req.user = creatorUser;
         next();

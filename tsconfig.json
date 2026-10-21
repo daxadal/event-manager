@@ -5,9 +5,9 @@
     "module": "commonjs",
     "rootDir": "./",
     "outDir": "./dist",
-    "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"],
+      "test/*": ["./test/*"]
     },
 
     "strict": true,

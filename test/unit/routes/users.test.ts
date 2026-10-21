@@ -19,12 +19,12 @@ jest.mock("@/services/auth", () => {
     ...module,
 
     addUserToRequest: jest.fn(),
-    ensureLoggedIn: jest.fn((req, res, next) => next()),
+    ensureLoggedIn: jest.fn((_req, _res, next) => next()),
     createToken: jest.fn(() => "token"),
   };
 });
 
-const mockedAddUserToRequest = mocked(addUserToRequest, true);
+const mockedAddUserToRequest = mocked(addUserToRequest, );
 
 describe("The /users API", () => {
   beforeAll(createConnection);
@@ -115,7 +115,7 @@ describe("The /users API", () => {
         hashedPassword: await hash("password", HASH_ROUNDS),
       }).save();
 
-      mockedAddUserToRequest.mockImplementation((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementation((req: any, _res, next) => {
         req.token = "token";
         req.user = user;
         next();
@@ -174,7 +174,7 @@ describe("The /users API", () => {
         hashedPassword: await hash("password", HASH_ROUNDS),
       }).save();
 
-      mockedAddUserToRequest.mockImplementation((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementation((req: any, _res, next) => {
         req.token = "token";
         req.user = user;
         next();

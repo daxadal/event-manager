@@ -52,7 +52,7 @@ io.on("connection", (socket) => {
       sessionToken,
     });
     if (user && user.socketId === socket.id) {
-      user.socketId = null;
+      user.socketId = undefined;
       logger.debug(`Server: sign-out ${socket.id} ${user.name} ${user.id}`);
       socket.emit("sign-out-ok");
     } else {
@@ -88,7 +88,7 @@ function formatReminder(
     event: format(event),
     subscription: {
       subscriptionDate: sub.subscriptionDate,
-      comment: sub.comment,
+      comment: sub.comment ?? "",
     },
   };
 }
@@ -108,7 +108,10 @@ export async function sendReminders(events: EventDocument[]): Promise<void> {
   subscriptions.forEach(async (sub) => {
     const event = events.find((e) => e.id === String(sub.eventId));
     const user = users.find((u) => u.id === String(sub.subscriberId));
-    const sockets = await io.in(user.socketId).fetchSockets();
+
+    if (!event|| !user) return
+    
+    const sockets = user?.socketId ? await io.in(user.socketId).fetchSockets(): [];
     sockets.map((socket) =>
       socket.emit("reminder", formatReminder(event, user, sub))
     );

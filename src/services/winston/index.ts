@@ -91,7 +91,7 @@ export function getLogger(service = "api"): Logger {
 
 export const getLoggerMiddleware =
   (service = "api"): RequestHandler =>
-  (req: any, res, next) => {
+  (req: any, _, next) => {
     req.logger = getLogger(service);
     req.logger.info(
       `==== Starting execution of ${req.method} ${req.originalUrl} ====`

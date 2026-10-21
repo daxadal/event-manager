@@ -18,12 +18,12 @@ jest.mock("@/services/auth", () => {
     jest.requireActual<typeof import("@/services/auth")>("@/services/auth");
   return {
     ...module,
-    addUserToRequest: jest.fn((req, res, next) => next()),
-    ensureLoggedIn: jest.fn((req, res, next) => next()),
+    addUserToRequest: jest.fn((_req, _res, next) => next()),
+    ensureLoggedIn: jest.fn((_req, _res, next) => next()),
   };
 });
 
-const mockedAddUserToRequest = mocked(addUserToRequest, true);
+const mockedAddUserToRequest = mocked(addUserToRequest, );
 
 describe("The /events API", () => {
   beforeAll(createConnection);
@@ -42,7 +42,7 @@ describe("The /events API", () => {
       callerUser = await createMockUser({ email: "caller@doe.com" });
       otherUser = await createMockUser({ email: "other@doe.com" });
 
-      mockedAddUserToRequest.mockImplementationOnce((req: any, res, next) => {
+      mockedAddUserToRequest.mockImplementationOnce((req: any, _res, next) => {
         req.token = "token";
         req.user = callerUser;
         next();

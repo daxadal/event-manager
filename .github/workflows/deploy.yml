@@ -14,21 +14,14 @@ permissions:
   contents: read
   packages: write
 
-env:
-  IMAGE: ghcr.io/${{ github.repository }}:latest
-  IMAGE_AMD: ghcr.io/${{ github.repository }}:amd64
-  IMAGE_ARM: ghcr.io/${{ github.repository }}:arm64
-
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-          - platform: linux/amd64
-            architecture: amd64
-          - platform: linux/arm64
-            architecture: arm64
+          - architecture: amd64
+          - architecture: arm64
     steps:
       - name: "Checkout branch"
         uses: actions/checkout@v4
@@ -51,7 +44,7 @@ jobs:
         with:
           context: .
           push: true
-          platforms: ${{ matrix.platform }}
+          platforms: linux/${{ matrix.architecture }}
           tags: ghcr.io/${{ github.repository }}:${{ matrix.architecture }}
 
   publish-and-deploy:
@@ -71,9 +64,9 @@ jobs:
       - name: "Publish multi-architecture image"
         run: |
           docker buildx imagetools create \
-            --tag "$IMAGE" \
-            "$IMAGE_AMD" \
-            "$IMAGE_ARM"
+            --tag "ghcr.io/${{ github.repository }}:latest" \
+                  "ghcr.io/${{ github.repository }}:amd64" \
+                  "ghcr.io/${{ github.repository }}:arm64"
 
       - name: "Setup SSH"
         uses: webfactory/ssh-agent@v0.9.0

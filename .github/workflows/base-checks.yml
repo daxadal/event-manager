@@ -25,7 +25,7 @@ jobs:
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.12.1
         with:
-          mongodb-version: '8.0'
+          mongodb-version: '6.0.6'
 
       - name: "Install dependencies"
         run: npm ci
@@ -35,7 +35,9 @@ jobs:
 
       - name: "Test"
         run: |
-          echo $DOTENV_JEST >> test.env
+          cat > test.env <<EOF
+          ${{ secrets.DOTENV_JEST }}
+          EOF
           npm test
 
       - name: Upload test results

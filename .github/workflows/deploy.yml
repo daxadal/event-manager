@@ -21,21 +21,39 @@ jobs:
   build-publish-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
+      - name: "Checkout branch"
+        uses: actions/checkout@v4
+
+      - name: "Docker login"
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+
+      - name: "Docker push"
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: ${{ env.IMAGE }}
+
+      - name: "Setup SSH"
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: "Copy production .env file"
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+          scp ${{ secrets.DOTENV_PROD }} "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:~/dax-apps/env/${{ github.event.repository.name }}.env"
+
       - name: Deploy on Oracle Linux
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: SERVICE=${{ github.repository_name }} ~/dax-apps/deploy.sh
+          script: SERVICE=${{ github.event.repository.name }} ~/dax-apps/deploy.sh

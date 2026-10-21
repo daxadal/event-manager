@@ -44,11 +44,17 @@ jobs:
           ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
 
       - name: "Copy production .env file"
+        env:
+          USER: ${{ secrets.DEPLOY_USER }}
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          NAME: ${{ github.event.repository.name }}
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
-          scp ${{ secrets.DOTENV_PROD }} "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:~/dax-apps/env/${{ github.event.repository.name }}.env"
+          ssh-keyscan -H "HOST" >> ~/.ssh/known_hosts
+
+          echo ${{ secrets.DOTENV_PROD }} >> prod.env
+          scp prod.env "$USER@$HOST:~/dax-apps/env/$NAME.env"
 
       - name: Deploy on Oracle Linux
         uses: appleboy/ssh-action@v1.2.2

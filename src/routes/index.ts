@@ -39,4 +39,17 @@ router.get("/", async function (req, res) {
   }
 });
 
+/**
+ * @openapi
+ * /health:
+ *   get:
+ *     description: Ensure API is up and healthy.
+ *     responses:
+ *       204:
+ *         $ref: '#/components/responses/204'
+ */
+router.get("/health", async function (_, res) {
+  res.status(204).send();
+});
+
 export default router;

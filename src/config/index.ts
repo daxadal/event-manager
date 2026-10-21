@@ -1,5 +1,4 @@
-import dotenv from "dotenv";
-import path from "path";
+import { config } from "dotenv";
 
 import {
   parseBoolean,
@@ -12,13 +11,11 @@ import {
 
 export { LogLevel };
 
-const { error, parsed } = dotenv.config({
-  path: path.resolve(
-    __dirname,
-    "../..",
-    process.env.NODE_ENV === "test" ? "test.env" : ".env"
-  ),
+const { error, parsed } = config({
+  quiet: true,
+  path: process.env.NODE_ENV === "test" ? "test.env" : ".env",
 });
+
 
 const parsingErrors: string[] = [];
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 import { Logger } from "winston";
 
 import { remindEvents } from "@/jobs/remind";

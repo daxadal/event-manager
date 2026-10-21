@@ -1,5 +1,5 @@
 import { json, Router, urlencoded } from "express";
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 
 import eventsIdRouter from "./id";
 import eventsRootRouter from "./root";

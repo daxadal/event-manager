@@ -1,6 +1,6 @@
 import { hash, compare } from "bcryptjs";
 import { json, Router } from "express";
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 import Joi from "joi";
 import { Logger } from "winston";
 

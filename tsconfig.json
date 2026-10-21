@@ -1,22 +1,41 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "incremental": false,
+    "target": "ES2021",
     "module": "commonjs",
-    "allowJs": true,
-    "checkJs": false,
+    "rootDir": "./",
     "outDir": "./dist",
-    "strict": false,
-    "noImplicitAny": false,
-    "alwaysStrict": false,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]
     },
+
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "allowJs": false,
+    "checkJs": false,
     "skipLibCheck": true,
+
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "types": ["node", "jest"],
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
     "forceConsistentCasingInFileNames": true
   },
+  "include": ["src", "test"],
   "exclude": ["node_modules"]
 }

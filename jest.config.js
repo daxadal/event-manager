@@ -20,7 +20,7 @@ module.exports = {
   roots: ["test"],
   testMatch: ["**/?(*.)+(spec|test).+(ts|js)"],
   transform: {
-    "^.+\\.(ts|js)$": "ts-jest",
+    "^.+\\.ts$": "ts-jest",
   },
   moduleNameMapper: {
     ...moduleNameMapper,

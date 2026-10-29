@@ -35,8 +35,9 @@ COPY --from=build /usr/src/app/dist ./dist
 COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/package.json .
 
-RUN mkdir -p logs/api
+RUN mkdir -p logs
 RUN chown -R node:node logs
+RUN chmod -R 777 logs
 
 USER node
 

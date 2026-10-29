@@ -4,7 +4,7 @@ import { db as dbConfig } from "@/config";
 import { getLogger } from "@/services/winston";
 
 export function createConnection(): Promise<typeof mongoose> {
-  const logger = getLogger("server-startup");
+  const logger = getLogger();
 
   logger.info(`Connecting to MongoDB at ${dbConfig.URL}...`);
 

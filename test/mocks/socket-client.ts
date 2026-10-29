@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { socket as socketConfig } from "@/config";
 import { getLogger } from "@/services/winston";
 
-const logger = getLogger("mocks/socket-client");
+const logger = getLogger();
 
 export const createSocketClient = () => {
   const socket = io(`http://localhost:${socketConfig.PORT}`);

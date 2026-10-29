@@ -10,7 +10,7 @@ import { createConnection } from "@/services/db/setup";
 import { getLogger } from "@/services/winston";
 import socketServer from "@/socket";
 
-const logger = getLogger("server-startup");
+const logger = getLogger();
 
 logger.info("=== SERVER STARTUP ===");
 

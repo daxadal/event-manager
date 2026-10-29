@@ -39,7 +39,7 @@ jobs:
           name: compiled
           path: |
             dist/
-            node-modules/
+            node_modules/
 
   test:
     needs: compile

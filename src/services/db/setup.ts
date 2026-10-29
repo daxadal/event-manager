@@ -6,7 +6,8 @@ import { getLogger } from "@/services/winston";
 export function createConnection(): Promise<typeof mongoose> {
   const logger = getLogger("server-startup");
 
-  logger.info(`Connecting to MongoDB...`);
+  logger.info(`Connecting to MongoDB at ${dbConfig.URL}...`);
+  console.info(`Connecting to MongoDB at ${dbConfig.URL}...`);
 
   mongoose.connection.on("connected", function () {
     logger.info("Mongoose default connection open to " + dbConfig.URL);

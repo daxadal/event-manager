@@ -15,8 +15,8 @@ A notification will be sent to you via socket 24 hours before the event starts, 
 
 # Availability
 
-_(This server is not currently being served on the Internet)_
-<!-- - https://event-manager-api.egarciadececa.dev/ -->
+<!-- _(This server is not currently being served on the Internet)_ -->
+- https://event-manager-api.egarciadececa.dev/
 
 # Previous steps
 
@@ -44,7 +44,7 @@ By default, the server mounts at `http://localhost:3000`, which will be referred
 
 # Docker
 
-After creating the `.env` file as described above, build and start the API and its MariaDB database with:
+After creating the `.env` file as described above, build and start the API and its MongoDB database with:
 
 ```bash
 docker compose up --build

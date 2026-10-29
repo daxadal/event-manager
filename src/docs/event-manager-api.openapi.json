@@ -15,329 +15,19 @@
   ],
   "servers": [
     {
+      "url": "/",
+      "description": "Current location"
+    },
+    {
       "url": "http://localhost:3000",
       "description": "Local API"
+    },
+    {
+      "url": "https://event-manager-api.egarciadececa.dev/",
+      "description": "Server"
     }
   ],
   "paths": {
-    "/events/{eventId}": {
-      "get": {
-        "tags": [
-          "events"
-        ],
-        "description": "Get an event by id.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/eventId"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The requested event.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "event": {
-                      "$ref": "#/components/schemas/Event"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "403": {
-            "$ref": "#/components/responses/403"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "429": {
-            "$ref": "#/components/responses/429"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "events"
-        ],
-        "description": "Updates an event",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/eventId"
-          }
-        ],
-        "requestBody": {
-          "description": "Event to create",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EventData"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The updated event.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Confirmation message"
-                    },
-                    "event": {
-                      "$ref": "#/components/schemas/Event"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "403": {
-            "$ref": "#/components/responses/403"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "429": {
-            "$ref": "#/components/responses/429"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "events"
-        ],
-        "description": "Deleted an event by id.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/eventId"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/Generic200"
-          },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "403": {
-            "$ref": "#/components/responses/403"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "429": {
-            "$ref": "#/components/responses/429"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      }
-    },
-    "/events": {
-      "post": {
-        "tags": [
-          "events"
-        ],
-        "description": "Creates an event",
-        "requestBody": {
-          "description": "Event to create",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EventData"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The created event.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Confirmation message"
-                    },
-                    "event": {
-                      "$ref": "#/components/schemas/Event"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "403": {
-            "$ref": "#/components/responses/403"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "429": {
-            "$ref": "#/components/responses/429"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "events"
-        ],
-        "description": "Get all visible events.",
-        "responses": {
-          "200": {
-            "description": "A list of all visible events (depending on credentials, if present).",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "events": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Event"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "403": {
-            "$ref": "#/components/responses/403"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "429": {
-            "$ref": "#/components/responses/429"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      }
-    },
-    "/events/{eventId}/subscribe": {
-      "post": {
-        "tags": [
-          "subscriptions"
-        ],
-        "description": "Subscribes the authenticated user to an event",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/eventId"
-          }
-        ],
-        "requestBody": {
-          "description": "Comment to attach to the subscription",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SubscriptionData"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The created subscription.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Confirmation message"
-                    },
-                    "subscription": {
-                      "$ref": "#/components/schemas/Subscription"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "More info about the error"
-                    },
-                    "subscription": {
-                      "description": "Preexisting subscription (if present)",
-                      "$ref": "#/components/schemas/Subscription"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "403": {
-            "$ref": "#/components/responses/403"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "429": {
-            "$ref": "#/components/responses/429"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      }
-    },
     "/users/sign-up": {
       "post": {
         "tags": [
@@ -515,13 +205,387 @@
           }
         }
       }
+    },
+    "/": {
+      "get": {
+        "description": "Gets general info from the API.",
+        "responses": {
+          "200": {
+            "description": "API info.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "Ensure API is up and healthy.",
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204"
+          }
+        }
+      }
+    },
+    "/events/{eventId}/subscribe": {
+      "post": {
+        "tags": [
+          "subscriptions"
+        ],
+        "description": "Subscribes the authenticated user to an event",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/eventId"
+          }
+        ],
+        "requestBody": {
+          "description": "Comment to attach to the subscription",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created subscription.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Confirmation message"
+                    },
+                    "subscription": {
+                      "$ref": "#/components/schemas/Subscription"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "More info about the error"
+                    },
+                    "subscription": {
+                      "description": "Preexisting subscription (if present)",
+                      "$ref": "#/components/schemas/Subscription"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/events": {
+      "post": {
+        "tags": [
+          "events"
+        ],
+        "description": "Creates an event",
+        "requestBody": {
+          "description": "Event to create",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created event.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Confirmation message"
+                    },
+                    "event": {
+                      "$ref": "#/components/schemas/Event"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "events"
+        ],
+        "description": "Get all visible events.",
+        "responses": {
+          "200": {
+            "description": "A list of all visible events (depending on credentials, if present).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Event"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/events/{eventId}": {
+      "get": {
+        "tags": [
+          "events"
+        ],
+        "description": "Get an event by id.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/eventId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested event.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "event": {
+                      "$ref": "#/components/schemas/Event"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "events"
+        ],
+        "description": "Updates an event",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/eventId"
+          }
+        ],
+        "requestBody": {
+          "description": "Event to create",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated event.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Confirmation message"
+                    },
+                    "event": {
+                      "$ref": "#/components/schemas/Event"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "events"
+        ],
+        "description": "Deleted an event by id.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/eventId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Generic200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
     "schemas": {
-      "ObjectId": {
-        "type": "string",
-        "pattern": "^[0-9a-fA-F]{24}$"
+      "ApiInfo": {
+        "type": "object",
+        "properties": {
+          "environment": {
+            "type": "string",
+            "enum": [
+              "PROD",
+              "DEV"
+            ]
+          },
+          "stats": {
+            "type": "object",
+            "properties": {
+              "events": {
+                "type": "integer"
+              },
+              "subscriptions": {
+                "type": "integer"
+              },
+              "users": {
+                "type": "integer"
+              }
+            }
+          }
+        }
       },
       "Event": {
         "allOf": [
@@ -655,6 +719,10 @@
           }
         }
       },
+      "ObjectId": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{24}$"
+      },
       "Location": {
         "type": "object",
         "properties": {
@@ -672,17 +740,6 @@
             "minimum": -180,
             "maximum": 180
           }
-        }
-      }
-    },
-    "parameters": {
-      "eventId": {
-        "name": "eventId",
-        "in": "path",
-        "description": "ID of the Event to get",
-        "required": true,
-        "schema": {
-          "$ref": "#/components/schemas/ObjectId"
         }
       }
     },
@@ -811,11 +868,15 @@
         }
       }
     },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+    "parameters": {
+      "eventId": {
+        "name": "eventId",
+        "in": "path",
+        "description": "ID of the Event to get",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/ObjectId"
+        }
       }
     }
   },

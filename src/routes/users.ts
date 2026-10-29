@@ -6,9 +6,7 @@ import { Logger } from "winston";
 
 import { createToken, addUserToRequest, ensureLoggedIn } from "@/services/auth";
 import { User, UserDocument } from "@/services/db";
-import { delayAfterResponse } from "@/services/middlewares";
 import { validateBody } from "@/services/validations";
-import { closeLogger, getLoggerMiddleware } from "@/services/winston";
 
 export const USER_SIZE = "512b";
 export const USER_RPM = 30;
@@ -17,9 +15,6 @@ export const HASH_ROUNDS = 10;
 
 // Register / LOGIN
 const router = Router();
-
-router.use(getLoggerMiddleware("routes/users"));
-router.use(delayAfterResponse(closeLogger));
 
 router.use(json({ limit: USER_SIZE }));
 router.use(

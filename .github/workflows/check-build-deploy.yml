@@ -1,4 +1,4 @@
-name: Base checks
+name: Check, build and deploy
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: "Build"
-        run: npm run tscç
+        run: npm run tsc
 
       - name: "Upload compiled files"
         uses: actions/upload-artifact@v6
@@ -42,6 +42,7 @@ jobs:
             node-modules/
 
   test:
+    needs: compile
     runs-on: ubuntu-latest
 
     steps:

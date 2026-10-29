@@ -10,6 +10,7 @@ export function createConnection(): Promise<typeof mongoose> {
 
   mongoose.connection.on("connected", function () {
     logger.info("Mongoose default connection open to " + dbConfig.URL);
+    console.info("Mongoose default connection open to " + dbConfig.URL);
   });
 
   mongoose.connection.on("error", function (err) {

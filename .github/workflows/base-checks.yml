@@ -25,7 +25,7 @@ jobs:
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.12.1
         with:
-          mongodb-version: '6.0.6'
+          mongodb-version: "6.0.6"
 
       - name: "Install dependencies"
         run: npm ci
@@ -39,6 +39,13 @@ jobs:
           ${{ secrets.DOTENV_JEST }}
           EOF
           npm test
+
+      - name: Upload logs
+        uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: logs
+          path: logs/
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
